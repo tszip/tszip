@@ -1,6 +1,6 @@
 {
-  "name": "tsdx",
-  "version": "0.14.1",
+  "name": "tsdx-esm",
+  "version": "0.14.4",
   "author": "Jared Palmer <jared@palmer.net>",
   "description": "Zero-config TypeScript package development",
   "license": "MIT",
@@ -19,9 +19,10 @@
     "url": "https://github.com/formium/tsdx/issues"
   },
   "bin": {
-    "tsdx": "./dist/index.js"
+    "tsdx-esm": "./dist/index.js"
   },
   "scripts": {
+    "bootstrap": "tsc && mv dist/index.js dist/index.mjs && node dist/index.mjs build",
     "prepare": "tsc -p tsconfig.json",
     "build": "tsc -p tsconfig.json",
     "lint": "yarn build && yarn lint:post-build",
@@ -92,8 +93,8 @@
     "rollup-plugin-typescript2": "^0.27.3",
     "sade": "^1.4.2",
     "semver": "^7.1.1",
-    "shelljs": "^0.8.3",
-    "tiny-glob": "^0.2.6",
+    "shelljs": "^0.8.4",
+    "tiny-glob": "^0.2.9",
     "ts-jest": "^25.3.1",
     "tslib": "^1.9.3",
     "typescript": "^3.7.3"

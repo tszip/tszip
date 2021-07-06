@@ -105,7 +105,7 @@ You can also choose to install and use [invariant](https://github.com/palmerhq/t
 
 CJS, ESModules, and UMD module formats are supported.
 
-The appropriate paths are configured in `package.json` and `dist/index.js` accordingly. Please report if any issues are found.
+The appropriate paths are configured in `package.json` and `dist/index.cjs` accordingly. Please report if any issues are found.
 
 ## Deploying the Example Playground
 

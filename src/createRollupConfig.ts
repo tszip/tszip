@@ -36,12 +36,15 @@ export async function createRollupConfig(
   const shouldMinify =
     opts.minify !== undefined ? opts.minify : opts.env === 'production';
 
+  let formatString = ['esm', 'cjs'].includes(opts.format) ? '' : opts.format;
+  let fileExtension = opts.format === 'esm' ? 'mjs' : 'cjs';
+
   const outputName = [
     `${paths.appDist}/${safePackageName(opts.name)}`,
-    opts.format,
+    formatString,
     opts.env,
     shouldMinify ? 'min' : '',
-    'js',
+    fileExtension,
   ]
     .filter(Boolean)
     .join('.');
@@ -196,23 +199,23 @@ export async function createRollupConfig(
         babelHelpers: 'bundled',
       }),
       opts.env !== undefined &&
-        replace({
-          'process.env.NODE_ENV': JSON.stringify(opts.env),
-        }),
+      replace({
+        'process.env.NODE_ENV': JSON.stringify(opts.env),
+      }),
       sourceMaps(),
       shouldMinify &&
-        terser({
-          sourcemap: true,
-          output: { comments: false },
-          compress: {
-            keep_infinity: true,
-            pure_getters: true,
-            passes: 10,
-          },
-          ecma: 5,
-          toplevel: opts.format === 'cjs',
-          warnings: true,
-        }),
+      terser({
+        sourcemap: true,
+        output: { comments: false },
+        compress: {
+          keep_infinity: true,
+          pure_getters: true,
+          passes: 10,
+        },
+        ecma: 5,
+        toplevel: opts.format === 'cjs',
+        warnings: true,
+      }),
     ],
   };
 }
