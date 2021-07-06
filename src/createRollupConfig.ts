@@ -216,6 +216,25 @@ export async function createRollupConfig(
         toplevel: opts.format === 'cjs',
         warnings: true,
       }),
+      /**
+       * Ensure there's an empty default export to prevent runtime errors.
+       * 
+       * @see https://www.npmjs.com/package/rollup-plugin-export-default
+       */
+      (() => {
+        let notESM = false;
+        return {
+          renderStart: async (outputOptions: any) => {
+            notESM = !['es', 'esm'].includes(outputOptions.format);
+            return outputOptions;
+          },
+
+          renderChunk: async (code: string, chunk: any) =>
+            chunk.exports.includes('default') || notESM
+              ? null
+              : `${code}\nexport default {};`,
+        };
+      })(),
     ],
   };
 }
