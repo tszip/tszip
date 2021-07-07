@@ -18,8 +18,11 @@ const basicTemplate = {
         main: './dist/index.cjs',
         module: './dist/index.mjs',
         exports: {
-            import: './dist/index.mjs',
-            require: './dist/index.cjs',
+            './package.json': './package.json',
+            '.': {
+                import: './dist/index.mjs',
+                require: './dist/index.cjs',
+            }
         },
         // module: `dist/${safeName}.mjs`,
         typings: `dist/index.d.ts`,
