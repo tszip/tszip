@@ -15,6 +15,7 @@ const rollup_plugin_typescript2_1 = tslib_1.__importDefault(require("rollup-plug
 const typescript_1 = tslib_1.__importDefault(require("typescript"));
 const extractErrors_1 = require("./errors/extractErrors");
 const babelPluginTsdx_1 = require("./babelPluginTsdx");
+const rollup_plugin_optimize_lodash_imports_1 = tslib_1.__importDefault(require("rollup-plugin-optimize-lodash-imports"));
 const errorCodeOpts = {
     errorMapFilePath: constants_1.paths.appErrorsJson,
 };
@@ -39,6 +40,7 @@ async function createRollupConfig(opts, outputNum) {
     const tsconfigJSON = typescript_1.default.readConfigFile(tsconfigPath, typescript_1.default.sys.readFile).config;
     // borrowed from https://github.com/ezolenko/rollup-plugin-typescript2/blob/42173460541b0c444326bf14f2c8c27269c4cb11/src/parse-tsconfig.ts#L48
     const tsCompilerOptions = typescript_1.default.parseJsonConfigFileContent(tsconfigJSON, typescript_1.default.sys, './').options;
+    const ESM = ['esm', 'es'].includes(opts.format);
     return {
         // Tell Rollup the entry point to the package
         input: opts.input,
@@ -76,7 +78,7 @@ async function createRollupConfig(opts, outputNum) {
             // Set filenames of the consumer's package
             file: outputName,
             // Pass through the file format
-            format: opts.format,
+            format: ESM ? 'es' : opts.format,
             // Do not let Rollup call Object.freeze() on namespace import objects
             // (i.e. import * as namespaceImportObject from...) that are accessed dynamically.
             freeze: false,
@@ -190,33 +192,30 @@ async function createRollupConfig(opts, outputNum) {
                      * ES5 will be emitted.
                      */
                     ecma: opts.transpile ? 5 : 2017,
-                    module: opts.format === 'esm',
+                    module: ESM,
                     toplevel: ['cjs', 'esm'].includes(opts.format),
                     warnings: true,
                 }),
+            /**
+             * Optimize lodash.
+             */
+            rollup_plugin_optimize_lodash_imports_1.default({ useLodashEs: ESM }),
             /**
              * Ensure there's an empty default export to prevent runtime errors.
              *
              * @see https://www.npmjs.com/package/rollup-plugin-export-default
              */
-            (() => {
-                let notESM = false;
-                return {
-                    renderStart: async (outputOptions) => {
-                        notESM = !['es', 'esm'].includes(outputOptions.format);
-                        return outputOptions;
-                    },
-                    renderChunk: async (code, chunk) => {
-                        if (chunk.exports.includes('default') || notESM) {
-                            return null;
-                        }
-                        return {
-                            code: `${code}\nexport default {};`,
-                            map: null,
-                        };
-                    },
-                };
-            })(),
+            {
+                renderChunk: async (code, chunk) => {
+                    if (chunk.exports.includes('default') || !ESM) {
+                        return null;
+                    }
+                    return {
+                        code: `${code}\nexport default {};`,
+                        map: null,
+                    };
+                },
+            },
         ],
     };
 }

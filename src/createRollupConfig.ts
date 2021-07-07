@@ -16,6 +16,7 @@ import ts from 'typescript';
 import { extractErrors } from './errors/extractErrors';
 import { babelPluginTsdx } from './babelPluginTsdx';
 import { TsdxOptions } from './types';
+import optimizeLodashImports from 'rollup-plugin-optimize-lodash-imports';
 
 const errorCodeOpts = {
   errorMapFilePath: paths.appErrorsJson,
@@ -59,6 +60,8 @@ export async function createRollupConfig(
     './'
   ).options;
 
+  const ESM = ['esm', 'es'].includes(opts.format);
+
   return {
     // Tell Rollup the entry point to the package
     input: opts.input,
@@ -97,7 +100,7 @@ export async function createRollupConfig(
       // Set filenames of the consumer's package
       file: outputName,
       // Pass through the file format
-      format: opts.format,
+      format: ESM ? 'es' : opts.format,
       // Do not let Rollup call Object.freeze() on namespace import objects
       // (i.e. import * as namespaceImportObject from...) that are accessed dynamically.
       freeze: false,
@@ -188,65 +191,61 @@ export async function createRollupConfig(
         useTsconfigDeclarationDir: Boolean(tsCompilerOptions?.declarationDir),
       }),
       opts.transpile &&
-        babelPluginTsdx({
-          exclude: 'node_modules/**',
-          extensions: [...DEFAULT_BABEL_EXTENSIONS, 'ts', 'tsx'],
-          passPerPreset: true,
-          custom: {
-            targets: opts.target === 'node' ? { node: '14' } : undefined,
-            extractErrors: opts.extractErrors,
-            format: opts.format,
-          },
-          babelHelpers: 'bundled',
-        }),
+      babelPluginTsdx({
+        exclude: 'node_modules/**',
+        extensions: [...DEFAULT_BABEL_EXTENSIONS, 'ts', 'tsx'],
+        passPerPreset: true,
+        custom: {
+          targets: opts.target === 'node' ? { node: '14' } : undefined,
+          extractErrors: opts.extractErrors,
+          format: opts.format,
+        },
+        babelHelpers: 'bundled',
+      }),
       opts.env !== undefined &&
-        replace({
-          preventAssignment: true,
-          'process.env.NODE_ENV': JSON.stringify(opts.env),
-        }),
+      replace({
+        preventAssignment: true,
+        'process.env.NODE_ENV': JSON.stringify(opts.env),
+      }),
       sourceMaps(),
       shouldMinify &&
-        terser({
-          output: { comments: false },
-          compress: {
-            keep_infinity: true,
-            pure_getters: true,
-            passes: 10,
-          },
-          /**
-           * Output ES2017 unless we're transpiling with Babel, in which case
-           * ES5 will be emitted.
-           */
-          ecma: opts.transpile ? 5 : 2017,
-          module: opts.format === 'esm',
-          toplevel: ['cjs', 'esm'].includes(opts.format),
-          warnings: true,
-        }),
+      terser({
+        output: { comments: false },
+        compress: {
+          keep_infinity: true,
+          pure_getters: true,
+          passes: 10,
+        },
+        /**
+         * Output ES2017 unless we're transpiling with Babel, in which case
+         * ES5 will be emitted.
+         */
+        ecma: opts.transpile ? 5 : 2017,
+        module: ESM,
+        toplevel: ['cjs', 'esm'].includes(opts.format),
+        warnings: true,
+      }),
+      /**
+       * Optimize lodash.
+       */
+      optimizeLodashImports({ useLodashEs: ESM }),
       /**
        * Ensure there's an empty default export to prevent runtime errors.
        *
        * @see https://www.npmjs.com/package/rollup-plugin-export-default
        */
-      (() => {
-        let notESM = false;
-        return {
-          renderStart: async (outputOptions: any) => {
-            notESM = !['es', 'esm'].includes(outputOptions.format);
-            return outputOptions;
-          },
+      {
+        renderChunk: async (code: string, chunk: any) => {
+          if (chunk.exports.includes('default') || !ESM) {
+            return null;
+          }
 
-          renderChunk: async (code: string, chunk: any) => {
-            if (chunk.exports.includes('default') || notESM) {
-              return null;
-            }
-
-            return {
-              code: `${code}\nexport default {};`,
-              map: null,
-            };
-          },
-        };
-      })(),
+          return {
+            code: `${code}\nexport default {};`,
+            map: null,
+          };
+        },
+      },
     ],
   };
 }
