@@ -187,38 +187,40 @@ export async function createRollupConfig(
         check: !opts.transpileOnly && outputNum === 0,
         useTsconfigDeclarationDir: Boolean(tsCompilerOptions?.declarationDir),
       }),
-      babelPluginTsdx({
-        exclude: 'node_modules/**',
-        extensions: [...DEFAULT_BABEL_EXTENSIONS, 'ts', 'tsx'],
-        passPerPreset: true,
-        custom: {
-          targets: opts.target === 'node' ? { node: '10' } : undefined,
-          extractErrors: opts.extractErrors,
-          format: opts.format,
-        },
-        babelHelpers: 'bundled',
-      }),
+      opts.transpile &&
+        babelPluginTsdx({
+          exclude: 'node_modules/**',
+          extensions: [...DEFAULT_BABEL_EXTENSIONS, 'ts', 'tsx'],
+          passPerPreset: true,
+          custom: {
+            targets: opts.target === 'node' ? { node: '14' } : undefined,
+            extractErrors: opts.extractErrors,
+            format: opts.format,
+          },
+          babelHelpers: 'bundled',
+        }),
       opts.env !== undefined &&
-      replace({
-        'process.env.NODE_ENV': JSON.stringify(opts.env),
-      }),
+        replace({
+          preventAssignment: true,
+          'process.env.NODE_ENV': JSON.stringify(opts.env),
+        }),
       sourceMaps(),
       shouldMinify &&
-      terser({
-        sourcemap: true,
-        output: { comments: false },
-        compress: {
-          keep_infinity: true,
-          pure_getters: true,
-          passes: 10,
-        },
-        ecma: 5,
-        toplevel: opts.format === 'cjs',
-        warnings: true,
-      }),
+        terser({
+          output: { comments: false },
+          compress: {
+            keep_infinity: true,
+            pure_getters: true,
+            passes: 10,
+          },
+          ecma: 2017,
+          module: opts.format === 'esm',
+          toplevel: ['cjs', 'esm'].includes(opts.format),
+          warnings: true,
+        }),
       /**
        * Ensure there's an empty default export to prevent runtime errors.
-       * 
+       *
        * @see https://www.npmjs.com/package/rollup-plugin-export-default
        */
       (() => {
@@ -229,10 +231,16 @@ export async function createRollupConfig(
             return outputOptions;
           },
 
-          renderChunk: async (code: string, chunk: any) =>
-            chunk.exports.includes('default') || notESM
-              ? null
-              : `${code}\nexport default {};`,
+          renderChunk: async (code: string, chunk: any) => {
+            if (chunk.exports.includes('default') || notESM) {
+              return null;
+            }
+
+            return {
+              code: `${code}\nexport default {};`,
+              map: null,
+            };
+          },
         };
       })(),
     ],

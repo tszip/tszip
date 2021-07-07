@@ -21,9 +21,7 @@ describe('tsdx build :: zero-config defaults', () => {
     expect(shell.test('-f', 'dist/index.cjs')).toBeTruthy();
     expect(shell.test('-f', 'dist/index.mjs')).toBeTruthy();
 
-    expect(
-      shell.test('-f', 'dist/build-default.development.cjs')
-    ).toBeTruthy();
+    expect(shell.test('-f', 'dist/build-default.development.cjs')).toBeTruthy();
     expect(
       shell.test('-f', 'dist/build-default.production.min.cjs')
     ).toBeTruthy();
@@ -49,7 +47,7 @@ describe('tsdx build :: zero-config defaults', () => {
     /**
      * Cannot test ESM import here since it is emitted as CJS. Getting tsdx to
      * compile itself will be a future goal.
-     * 
+     *
      * @todo Compile TSDX with itself so `import` statements can be tested
      */
     // const libs = [
@@ -60,9 +58,7 @@ describe('tsdx build :: zero-config defaults', () => {
      * So just test CJS import for now. The package.jsons aren't simulated using
      * the CLI, so we're resolving it ourselves here to dist/index.cjs.
      */
-    const libs = [
-      require(`../../${stageName}/dist/index.cjs`)
-    ];
+    const libs = [require(`../../${stageName}/dist/index.cjs`)];
 
     for (const lib of libs) {
       expect(lib.returnsTrue()).toBe(true);
@@ -83,7 +79,9 @@ describe('tsdx build :: zero-config defaults', () => {
     const output = execWithCache('node ../dist/index.js build');
     expect(output.code).toBe(0);
 
-    const matched = grep(/regeneratorRuntime = r/, ['dist/build-default.*.cjs']);
+    const matched = grep(/regeneratorRuntime = r/, [
+      'dist/build-default.*.cjs',
+    ]);
     expect(matched).toBeTruthy();
   });
 
@@ -123,9 +121,7 @@ describe('tsdx build :: zero-config defaults', () => {
     expect(shell.test('-f', 'dist/index.cjs')).toBeTruthy();
 
     // build-default files have been cleaned out
-    expect(
-      shell.test('-f', 'dist/build-default.development.cjs')
-    ).toBeFalsy();
+    expect(shell.test('-f', 'dist/build-default.development.cjs')).toBeFalsy();
     expect(
       shell.test('-f', 'dist/build-default.production.min.cjs')
     ).toBeFalsy();

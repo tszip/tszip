@@ -23,10 +23,8 @@ describe('tsdx build :: options', () => {
 
     expect(shell.test('-f', 'dist/index.cjs')).toBeTruthy();
     expect(shell.test('-f', 'dist/index.mjs')).toBeTruthy();
-    
-    expect(
-      shell.test('-f', 'dist/build-default.development.cjs')
-    ).toBeTruthy();
+
+    expect(shell.test('-f', 'dist/build-default.development.cjs')).toBeTruthy();
     expect(
       shell.test('-f', 'dist/build-default.production.min.cjs')
     ).toBeTruthy();
@@ -53,7 +51,9 @@ describe('tsdx build :: options', () => {
     const output = execWithCache('node ../dist/index.js build --target node');
     expect(output.code).toBe(0);
 
-    const matched = grep(/regeneratorRuntime = r/, ['dist/build-default.*.cjs']);
+    const matched = grep(/regeneratorRuntime = r/, [
+      'dist/build-default.*.cjs',
+    ]);
     expect(matched).toBeFalsy();
   });
 

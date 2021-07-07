@@ -55,7 +55,7 @@ let appPackageJson: PackageJson;
 
 try {
   appPackageJson = fs.readJSONSync(paths.appPackageJson);
-} catch (e) { }
+} catch (e) {}
 
 export const isDir = (name: string) =>
   fs
@@ -73,10 +73,10 @@ async function jsOrTs(filename: string) {
   const extension = (await isFile(resolveApp(filename + '.ts')))
     ? '.ts'
     : (await isFile(resolveApp(filename + '.tsx')))
-      ? '.tsx'
-      : (await isFile(resolveApp(filename + '.jsx')))
-        ? '.jsx'
-        : '.js';
+    ? '.tsx'
+    : (await isFile(resolveApp(filename + '.jsx')))
+    ? '.jsx'
+    : '.js';
 
   return resolveApp(`${filename}${extension}`);
 }
@@ -91,7 +91,7 @@ async function getInputs(
         entries && entries.length
           ? entries
           : (source && resolveApp(source)) ||
-          ((await isDir(resolveApp('src'))) && (await jsOrTs('src/index')))
+              ((await isDir(resolveApp('src'))) && (await jsOrTs('src/index')))
       )
       .map(file => glob(file))
   );
@@ -358,7 +358,7 @@ prog
           } else {
             successKiller = run(opts.onSuccess);
           }
-        } catch (_error) { }
+        } catch (_error) {}
       }
     });
   });
@@ -376,6 +376,8 @@ prog
   .example('build --format cjs,esm')
   .option('--tsconfig', 'Specify custom tsconfig path')
   .example('build --tsconfig ./tsconfig.foo.json')
+  .option('--transpile', 'Transpile with Babel')
+  .example('build --transpile')
   .option('--transpileOnly', 'Skip type checking')
   .example('build --transpileOnly')
   .option(

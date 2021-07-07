@@ -159,33 +159,35 @@ async function createRollupConfig(opts, outputNum) {
                 check: !opts.transpileOnly && outputNum === 0,
                 useTsconfigDeclarationDir: Boolean(tsCompilerOptions === null || tsCompilerOptions === void 0 ? void 0 : tsCompilerOptions.declarationDir),
             }),
-            babelPluginTsdx_1.babelPluginTsdx({
-                exclude: 'node_modules/**',
-                extensions: [...core_1.DEFAULT_EXTENSIONS, 'ts', 'tsx'],
-                passPerPreset: true,
-                custom: {
-                    targets: opts.target === 'node' ? { node: '10' } : undefined,
-                    extractErrors: opts.extractErrors,
-                    format: opts.format,
-                },
-                babelHelpers: 'bundled',
-            }),
+            opts.transpile &&
+                babelPluginTsdx_1.babelPluginTsdx({
+                    exclude: 'node_modules/**',
+                    extensions: [...core_1.DEFAULT_EXTENSIONS, 'ts', 'tsx'],
+                    passPerPreset: true,
+                    custom: {
+                        targets: opts.target === 'node' ? { node: '14' } : undefined,
+                        extractErrors: opts.extractErrors,
+                        format: opts.format,
+                    },
+                    babelHelpers: 'bundled',
+                }),
             opts.env !== undefined &&
                 plugin_replace_1.default({
+                    preventAssignment: true,
                     'process.env.NODE_ENV': JSON.stringify(opts.env),
                 }),
             rollup_plugin_sourcemaps_1.default(),
             shouldMinify &&
                 rollup_plugin_terser_1.terser({
-                    sourcemap: true,
                     output: { comments: false },
                     compress: {
                         keep_infinity: true,
                         pure_getters: true,
                         passes: 10,
                     },
-                    ecma: 5,
-                    toplevel: opts.format === 'cjs',
+                    ecma: 2017,
+                    module: opts.format === 'esm',
+                    toplevel: ['cjs', 'esm'].includes(opts.format),
                     warnings: true,
                 }),
             /**
@@ -200,9 +202,15 @@ async function createRollupConfig(opts, outputNum) {
                         notESM = !['es', 'esm'].includes(outputOptions.format);
                         return outputOptions;
                     },
-                    renderChunk: async (code, chunk) => chunk.exports.includes('default') || notESM
-                        ? null
-                        : `${code}\nexport default {};`,
+                    renderChunk: async (code, chunk) => {
+                        if (chunk.exports.includes('default') || notESM) {
+                            return null;
+                        }
+                        return {
+                            code: `${code}\nexport default {};`,
+                            map: null,
+                        };
+                    },
                 };
             })(),
         ],
