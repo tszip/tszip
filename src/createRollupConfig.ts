@@ -213,7 +213,11 @@ export async function createRollupConfig(
             pure_getters: true,
             passes: 10,
           },
-          ecma: 2017,
+          /**
+           * Output ES2017 unless we're transpiling with Babel, in which case
+           * ES5 will be emitted.
+           */
+          ecma: opts.transpile ? 5 : 2017,
           module: opts.format === 'esm',
           toplevel: ['cjs', 'esm'].includes(opts.format),
           warnings: true,
