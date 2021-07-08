@@ -15,7 +15,6 @@ const rollup_plugin_typescript2_1 = tslib_1.__importDefault(require("rollup-plug
 const typescript_1 = tslib_1.__importDefault(require("typescript"));
 const extractErrors_1 = require("./errors/extractErrors");
 const babelPluginTsdx_1 = require("./babelPluginTsdx");
-const rollup_plugin_optimize_lodash_imports_1 = tslib_1.__importDefault(require("rollup-plugin-optimize-lodash-imports"));
 const errorCodeOpts = {
     errorMapFilePath: constants_1.paths.appErrorsJson,
 };
@@ -86,14 +85,19 @@ async function createRollupConfig(opts, outputNum) {
             esModule: Boolean(tsCompilerOptions === null || tsCompilerOptions === void 0 ? void 0 : tsCompilerOptions.esModuleInterop),
             name: opts.name || utils_1.safeVariableName(opts.name),
             sourcemap: true,
-            globals: { react: 'React', 'react-native': 'ReactNative' },
+            globals: { react: 'React', 'react-native': 'ReactNative', 'lodash-es': 'lodashEs', 'lodash/fp': 'lodashFp' },
             exports: 'named',
         },
         plugins: [
             !!opts.extractErrors && {
-                async transform(source) {
-                    await findAndRecordErrorCodes(source);
-                    return source;
+                async transform(code) {
+                    try {
+                        await findAndRecordErrorCodes(code);
+                    }
+                    catch (e) {
+                        return null;
+                    }
+                    return { code, map: null };
                 },
             },
             plugin_node_resolve_1.default({
@@ -181,6 +185,7 @@ async function createRollupConfig(opts, outputNum) {
             rollup_plugin_sourcemaps_1.default(),
             shouldMinify &&
                 rollup_plugin_terser_1.terser({
+                    sourcemap: true,
                     output: { comments: false },
                     compress: {
                         keep_infinity: true,
@@ -199,7 +204,7 @@ async function createRollupConfig(opts, outputNum) {
             /**
              * Optimize lodash.
              */
-            rollup_plugin_optimize_lodash_imports_1.default({ useLodashEs: ESM }),
+            // optimizeLodashImports({ useLodashEs: ESM }),
             /**
              * Ensure there's an empty default export to prevent runtime errors.
              *
