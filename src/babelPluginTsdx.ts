@@ -1,3 +1,7 @@
+/**
+ * @todo Do not use require.resolve so that the package can ship as ESM.
+ */
+
 import { createConfigItem } from '@babel/core';
 import { createBabelInputPluginFactory } from '@rollup/plugin-babel';
 import merge from 'lodash.merge';

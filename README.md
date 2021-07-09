@@ -133,7 +133,7 @@ export const sum = (a: number, b: number) => {
 
 ```js
 // Entry File
-// ./dist/index.js
+// ./dist/index.cjs
 'use strict';
 
 // This determines which build to use based on the `NODE_ENV` of your end user.

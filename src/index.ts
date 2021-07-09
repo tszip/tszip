@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import sade from 'sade';
-import glob from 'tiny-glob/sync';
+import glob from 'tiny-glob/sync.js';
 import {
   rollup,
   watch,
@@ -12,8 +12,7 @@ import {
 } from 'rollup';
 import asyncro from 'asyncro';
 import chalk from 'chalk';
-import * as fs from 'fs-extra';
-import * as jest from 'jest';
+import jest from 'jest';
 import { CLIEngine } from 'eslint';
 import logError from './logError';
 import path from 'path';
@@ -35,7 +34,10 @@ import {
 import { concatAllArray } from 'jpjs';
 import getInstallCmd from './getInstallCmd';
 import getInstallArgs from './getInstallArgs';
-import { Input, Select } from 'enquirer';
+
+import Input from 'enquirer/lib/prompts/input.js';
+import Select from 'enquirer/lib/prompts/select.js';
+
 import {
   PackageJson,
   WatchOpts,
@@ -47,25 +49,28 @@ import { createProgressEstimator } from './createProgressEstimator';
 import { templates } from './templates';
 import { composePackageJson } from './templates/utils';
 import * as deprecated from './deprecated';
-const pkg = require('../package.json');
+import * as fs from 'fs-extra';
+import { readFileSync } from 'fs';
+import { stat } from 'fs/promises';
+
+export * from './errors';
 
 const prog = sade('tsdx');
 
 let appPackageJson: PackageJson;
-
 try {
-  appPackageJson = fs.readJSONSync(paths.appPackageJson);
-} catch (e) { }
+  appPackageJson = JSON.parse(readFileSync(paths.appPackageJson, 'utf-8'));
+} catch (e) {
+  throw new Error(`Couldn't read app package.json: ${e}`);
+}
 
 export const isDir = (name: string) =>
-  fs
-    .stat(name)
+  stat(name)
     .then(stats => stats.isDirectory())
     .catch(() => false);
 
 export const isFile = (name: string) =>
-  fs
-    .stat(name)
+  stat(name)
     .then(stats => stats.isFile())
     .catch(() => false);
 
@@ -73,10 +78,10 @@ async function jsOrTs(filename: string) {
   const extension = (await isFile(resolveApp(filename + '.ts')))
     ? '.ts'
     : (await isFile(resolveApp(filename + '.tsx')))
-      ? '.tsx'
-      : (await isFile(resolveApp(filename + '.jsx')))
-        ? '.jsx'
-        : '.js';
+    ? '.tsx'
+    : (await isFile(resolveApp(filename + '.jsx')))
+    ? '.jsx'
+    : '.js';
 
   return resolveApp(`${filename}${extension}`);
 }
@@ -91,14 +96,13 @@ async function getInputs(
         entries && entries.length
           ? entries
           : (source && resolveApp(source)) ||
-          ((await isDir(resolveApp('src'))) && (await jsOrTs('src/index')))
+              ((await isDir(resolveApp('src'))) && (await jsOrTs('src/index')))
       )
       .map(file => glob(file))
   );
 }
 
 prog
-  .version(pkg.version)
   .command('create <pkg>')
   .describe('Create a new package with TSDX')
   .example('create mypackage')
@@ -358,7 +362,7 @@ prog
           } else {
             successKiller = run(opts.onSuccess);
           }
-        } catch (_error) { }
+        } catch (_error) {}
       }
     });
   });
@@ -442,24 +446,42 @@ async function cleanDistFolder() {
 }
 
 function writeCjsEntryFile(name: string) {
-  const baseLine = `module.exports = require('./${safePackageName(name)}`;
-  const contents = `
-'use strict'
+  const safeName = safePackageName(name);
+  /**
+   * After an hour of tinkering, this is the *only* way to write this code that
+   * will not break Rollup (by pulling process.env.NODE_ENV out with
+   * destructuring).
+   */
+  const contents = `#!/usr/bin/env node
+'use strict';
 
-if (process.env.NODE_ENV === 'production') {
-  ${baseLine}.production.min.cjs')
-} else {
-  ${baseLine}.development.cjs')
-}
+const { NODE_ENV } = process.env;
+if (NODE_ENV === 'production')
+  module.exports = require('./${safeName}.production.min.cjs');
+else
+  module.exports = require('./${safeName}.development.cjs');
 `;
+  /**
+   * @todo Find out why this breaks Rollup's parser in insanely complicated
+   * ways.
+   */
+  //   const contents = `'use strict'
+  // if (process.env.NODE_ENV === 'production') {
+  //   module.exports = require('./${safeName}.production.min.cjs')
+  // } else {
+  //   module.exports = require('./${safeName}.development.cjs')
+  // }`;
+
   return fs.outputFile(path.join(paths.appDist, 'index.cjs'), contents);
 }
 
 function writeMjsEntryFile(name: string) {
-  const contents = `
+  const contents = `#!/usr/bin/env node
+
 export { default } from './${name}.min.mjs';
 export * from './${name}.min.mjs';
-  `;
+`;
+
   return fs.outputFile(path.join(paths.appDist, 'index.mjs'), contents);
 }
 
@@ -517,7 +539,6 @@ prog
         opts.config ? path.dirname(opts.config) : paths.appRoot
       ),
       ...appPackageJson.jest,
-      passWithNoTests: true,
     };
 
     // Allow overriding with jest.config

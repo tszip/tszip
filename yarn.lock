@@ -1217,10 +1217,9 @@
     is-module "^1.0.0"
     resolve "^1.19.0"
 
-"@rollup/plugin-replace@^2.2.1":
+"@rollup/plugin-replace@ctjlewis/replace":
   version "2.4.2"
-  resolved "https://registry.yarnpkg.com/@rollup/plugin-replace/-/plugin-replace-2.4.2.tgz#a2d539314fbc77c244858faa523012825068510a"
-  integrity sha512-IGcu+cydlUMZ5En85jxHH4qj2hta/11BHq95iHEyb2sbgiN0eCdzvUcHw5gt9pBL5lTi4JDYJ1acCoMGpTvEZg==
+  resolved "https://codeload.github.com/ctjlewis/replace/tar.gz/c6e15c8b68997faeb26c5ababedddbebd785faa8"
   dependencies:
     "@rollup/pluginutils" "^3.1.0"
     magic-string "^0.25.7"

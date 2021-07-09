@@ -36,7 +36,9 @@ export async function createRollupConfig(
   const isEsm = opts.format.includes('es') || opts.format.includes('esm');
 
   const shouldMinify =
-    opts.minify !== undefined ? opts.minify : opts.env === 'production' || isEsm;
+    opts.minify !== undefined
+      ? opts.minify
+      : opts.env === 'production' || isEsm;
 
   let formatString = ['esm', 'cjs'].includes(opts.format) ? '' : opts.format;
   let fileExtension = opts.format === 'esm' ? 'mjs' : 'cjs';
@@ -61,6 +63,8 @@ export async function createRollupConfig(
     './'
   ).options;
 
+  const { PRODUCTION } = process.env;
+
   return {
     // Tell Rollup the entry point to the package
     input: opts.input,
@@ -73,6 +77,8 @@ export async function createRollupConfig(
 
       return external(id);
     },
+    // Minimize runtime error surface as much as possible
+    shimMissingExports: true,
     // Rollup has treeshaking by default, but we can optimize it further...
     treeshake: {
       // We assume reading a property of an object never has side-effects.
@@ -107,11 +113,17 @@ export async function createRollupConfig(
       esModule: Boolean(tsCompilerOptions?.esModuleInterop),
       name: opts.name || safeVariableName(opts.name),
       sourcemap: true,
-      globals: { react: 'React', 'react-native': 'ReactNative', 'lodash-es': 'lodashEs', 'lodash/fp': 'lodashFp' },
+      globals: {
+        react: 'React',
+        'react-native': 'ReactNative',
+        'lodash-es': 'lodashEs',
+        'lodash/fp': 'lodashFp',
+      },
       exports: 'named',
     },
     plugins: [
       !!opts.extractErrors && {
+        name: 'Extract errors',
         async transform(code: string) {
           try {
             await findAndRecordErrorCodes(code);
@@ -139,6 +151,7 @@ export async function createRollupConfig(
       }),
       json(),
       {
+        name: 'Remove shebang',
         // Custom plugin that removes shebang from code because newer
         // versions of bublé bundle their own private version of `acorn`
         // and I don't know a way to patch in the option `allowHashBang`
@@ -182,6 +195,7 @@ export async function createRollupConfig(
         },
         tsconfigOverride: {
           compilerOptions: {
+            module: 'esnext',
             // TS -> esnext, then leave the rest to babel-preset-env
             target: 'esnext',
             // don't output declarations more than once
@@ -193,42 +207,51 @@ export async function createRollupConfig(
         check: !opts.transpileOnly && outputNum === 0,
         useTsconfigDeclarationDir: Boolean(tsCompilerOptions?.declarationDir),
       }),
-      babelPluginTsdx({
-        exclude: 'node_modules/**',
-        extensions: [...DEFAULT_BABEL_EXTENSIONS, 'ts', 'tsx'],
-        passPerPreset: true,
-        custom: {
-          targets: opts.target === 'node' ? { node: '14' } : undefined,
-          extractErrors: opts.extractErrors,
-          format: opts.format,
-        },
-        babelHelpers: 'bundled',
-      }),
-      opts.env !== undefined &&
-      replace({
-        preventAssignment: true,
-        'process.env.NODE_ENV': JSON.stringify(opts.env),
-      }),
+      opts.legacy &&
+        babelPluginTsdx({
+          exclude: 'node_modules/**',
+          extensions: [...DEFAULT_BABEL_EXTENSIONS, 'ts', 'tsx'],
+          passPerPreset: true,
+          custom: {
+            targets: {
+              ...(opts.target === 'node' ? { node: 14 } : {}),
+              esmodules: isEsm,
+            },
+            extractErrors: opts.extractErrors,
+            format: opts.format,
+          },
+          babelHelpers: 'bundled',
+        }),
+      opts.env &&
+        replace({
+          preventAssignment: true,
+          'process.env.NODE_ENV': JSON.stringify(
+            PRODUCTION ? 'production' : 'development'
+          ),
+        }),
       sourceMaps(),
       shouldMinify &&
-      terser({
-        output: { comments: false },
-        compress: {
-          keep_infinity: true,
-          pure_getters: true,
-          passes: 10,
-        },
-        ecma: opts.legacy ? 5 : 2020,
-        module: isEsm,
-        toplevel: opts.format === 'cjs' || isEsm,
-        warnings: true,
-      }),
+        terser({
+          format: {
+            keep_quoted_props: true,
+            comments: false,
+          },
+          compress: {
+            keep_infinity: true,
+            pure_getters: true,
+            passes: 10,
+          },
+          ecma: opts.legacy ? 5 : 2020,
+          module: isEsm,
+          toplevel: opts.format === 'cjs' || isEsm,
+        }),
       /**
        * Ensure there's an empty default export to prevent runtime errors.
        *
        * @see https://www.npmjs.com/package/rollup-plugin-export-default
        */
-       {
+      {
+        name: 'Add export default {}',
         renderChunk: async (code: string, chunk: any) => {
           if (chunk.exports.includes('default') || !isEsm) {
             return null;
