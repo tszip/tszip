@@ -1,11 +1,11 @@
 import { RollupOptions, OutputOptions } from 'rollup';
-import * as fs from 'fs-extra';
 import { concatAllArray } from 'jpjs';
 
 import { paths } from './constants';
 import { TsdxOptions, NormalizedOpts } from './types';
 
 import { createRollupConfig } from './createRollupConfig';
+import { existsSync } from 'fs';
 
 // check for custom tsdx.config.js
 let tsdxConfig = {
@@ -14,7 +14,7 @@ let tsdxConfig = {
   },
 };
 
-if (fs.existsSync(paths.appConfig)) {
+if (existsSync(paths.appConfig)) {
   tsdxConfig = require(paths.appConfig);
 }
 

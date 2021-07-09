@@ -3,6 +3,9 @@ import { Template } from './template';
 const basicTemplate: Template = {
   name: 'basic',
   dependencies: [
+    'jest',
+    'jest-watch-typeahead',
+    'babel-jest',
     'husky',
     'tsdx',
     'tslib',

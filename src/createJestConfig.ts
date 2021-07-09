@@ -1,5 +1,8 @@
-import { Config } from '@jest/types';
+/**
+ * @todo Do not use require.resolve so that the package can ship as ESM.
+ */
 
+import { Config } from '@jest/types';
 export type JestConfigOptions = Partial<Config.InitialOptions>;
 
 export function createJestConfig(

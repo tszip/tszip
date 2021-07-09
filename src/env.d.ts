@@ -1,7 +1,10 @@
 declare module 'asyncro'; // doesn't have types (unmerged 2+ year old PR: https://github.com/developit/asyncro/pull/10)
+declare module 'enquirer/lib/prompts/input.js';
+declare module 'enquirer/lib/prompts/select.js';
 declare module 'enquirer'; // doesn't have types for Input or Select
 declare module 'jpjs'; // doesn't ship types (written in TS though)
-declare module 'tiny-glob/sync'; // /sync isn't typed (but maybe we can use async?)
+
+declare module 'require-resolve';
 
 // Patch Babel
 // @see line 226 of https://unpkg.com/@babel/core@7.4.4/lib/index.js
@@ -11,7 +14,6 @@ declare module '@babel/core' {
 }
 
 // Rollup plugins
-declare module 'rollup-plugin-terser';
 declare module '@babel/traverse';
 declare module '@babel/helper-module-imports';
 
