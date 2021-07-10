@@ -8,13 +8,14 @@ import json from '@rollup/plugin-json';
 import replace from '@rollup/plugin-replace';
 import resolve from '@rollup/plugin-node-resolve';
 import sourceMaps from 'rollup-plugin-sourcemaps';
-import typescript from 'rollup-plugin-typescript2';
 import ts from 'typescript';
 
 import { extractErrors } from './errors/extractErrors';
 import { babelPluginTsdx } from './babelPluginTsdx';
 import { TsdxOptions } from './types';
 import { optimizeLodashImports } from '@optimize-lodash/rollup-plugin';
+import { removeShebang } from './plugins/remove-shebang';
+import simpleTS from './plugins/simple-ts';
 
 /**
  * These packages will not be resolved by Rollup and will be left as imports.
@@ -25,13 +26,12 @@ const errorCodeOpts = {
   errorMapFilePath: paths.appErrorsJson,
 };
 
-// shebang cache map thing because the transform only gets run once
-let shebang: any = {};
-
 export async function createRollupConfig(
   opts: TsdxOptions,
   outputNum: number
 ): Promise<RollupOptions> {
+  void outputNum;
+
   const findAndRecordErrorCodes = await extractErrors({
     ...errorCodeOpts,
     ...opts,
@@ -71,7 +71,7 @@ export async function createRollupConfig(
 
   return {
     // Tell Rollup the entry point to the package
-    input: opts.input,
+    input: 'dist/index.js',
     // Tell Rollup which packages to ignore
     external: (id: string) => {
       // bundle in polyfills as TSDX can't (yet) ensure they're installed as deps
@@ -195,68 +195,52 @@ export async function createRollupConfig(
        */
       json(),
       /**
-       * Custom plugin that removes shebang from code because newer versions of
-       * bublé bundle their own private version of `acorn` and we can't find a
-       * way to patch in the option `allowHashBang` to acorn. Taken from
-       * microbundle.
-       *
-       * @see https://github.com/Rich-Harris/buble/pull/165
+       * Remove shebangs like #!/usr/bin/env node.
        */
-      {
-        name: 'Remove shebang',
-        transform(code: string) {
-          let reg = /^#!(.*)/;
-          let match = code.match(reg);
-
-          shebang[opts.name] = match ? '#!' + match[1] : '';
-
-          code = code.replace(reg, '');
-
-          return {
-            code,
-            map: null,
-          };
-        },
-      },
+      removeShebang(),
+      /**
+       * Simply call TSC and build out dist/.
+       */
+      simpleTS(),
       /**
        * Run TSC and transpile TypeScript.
        */
-      typescript({
-        typescript: ts,
-        tsconfig: opts.tsconfig,
-        tsconfigDefaults: {
-          exclude: [
-            // all TS test files, regardless whether co-located or in test/ etc
-            '**/*.spec.ts',
-            '**/*.test.ts',
-            '**/*.spec.tsx',
-            '**/*.test.tsx',
-            // TS defaults below
-            'node_modules',
-            'bower_components',
-            'jspm_packages',
-            paths.appDist,
-          ],
-          compilerOptions: {
-            sourceMap: true,
-            declaration: true,
-            jsx: 'react',
-          },
-        },
-        tsconfigOverride: {
-          compilerOptions: {
-            // TS -> esnext, then leave the rest to babel-preset-env
-            module: 'esnext',
-            target: 'esnext',
-            // don't output declarations more than once
-            ...(outputNum > 0
-              ? { declaration: false, declarationMap: false }
-              : {}),
-          },
-        },
-        check: !opts.transpileOnly && outputNum === 0,
-        useTsconfigDeclarationDir: Boolean(tsCompilerOptions?.declarationDir),
-      }),
+      // typescript({
+      //   typescript: ts,
+      //   tsconfig: opts.tsconfig,
+      //   tsconfigDefaults: {
+      //     exclude: [
+      //       // all TS test files, regardless whether co-located or in test/ etc
+      //       '**/*.spec.ts',
+      //       '**/*.test.ts',
+      //       '**/*.spec.tsx',
+      //       '**/*.test.tsx',
+      //       // TS defaults below
+      //       'node_modules',
+      //       'bower_components',
+      //       'jspm_packages',
+      //       paths.appDist,
+      //     ],
+      //     compilerOptions: {
+      //       sourceMap: true,
+      //       declaration: true,
+      //       jsx: 'react',
+      //     },
+      //   },
+      //   tsconfigOverride: {
+      //     compilerOptions: {
+      //       // TS -> esnext, then leave the rest to babel-preset-env
+      //       module: 'esnext',
+      //       target: 'esnext',
+      //       // don't output declarations more than once
+      //       ...(outputNum > 0
+      //         ? { declaration: false, declarationMap: false }
+      //         : {}),
+      //     },
+      //   },
+      //   check: !opts.transpileOnly && outputNum === 0,
+      //   useTsconfigDeclarationDir: Boolean(tsCompilerOptions?.declarationDir),
+      // }),
       /**
        * In --legacy mode, use Babel to transpile to ES5.
        */

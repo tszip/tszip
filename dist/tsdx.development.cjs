@@ -25,7 +25,6 @@ var json = require('@rollup/plugin-json');
 var replace = require('@rollup/plugin-replace');
 var resolve = require('@rollup/plugin-node-resolve');
 var sourceMaps = require('rollup-plugin-sourcemaps');
-var typescript = require('rollup-plugin-typescript2');
 var ts = require('typescript');
 var parser = require('@babel/parser');
 var traverse = require('@babel/traverse');
@@ -33,6 +32,7 @@ var pascalCase = require('pascal-case');
 var pluginBabel = require('@rollup/plugin-babel');
 var merge = require('lodash.merge');
 var rollupPlugin = require('@optimize-lodash/rollup-plugin');
+var child_process = require('child_process');
 var fs$1 = require('fs');
 var Input = require('enquirer/lib/prompts/input.js');
 var Select = require('enquirer/lib/prompts/select.js');
@@ -43,23 +43,23 @@ require('@babel/helper-module-imports');
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
 function _interopNamespace(e) {
-  if (e && e.__esModule) return e;
-  var n = Object.create(null);
-  if (e) {
-    Object.keys(e).forEach(function (k) {
-      if (k !== 'default') {
-        var d = Object.getOwnPropertyDescriptor(e, k);
-        Object.defineProperty(n, k, d.get ? d : {
-          enumerable: true,
-          get: function () {
-            return e[k];
-          }
+    if (e && e.__esModule) return e;
+    var n = Object.create(null);
+    if (e) {
+        Object.keys(e).forEach(function (k) {
+            if (k !== 'default') {
+                var d = Object.getOwnPropertyDescriptor(e, k);
+                Object.defineProperty(n, k, d.get ? d : {
+                    enumerable: true,
+                    get: function () {
+                        return e[k];
+                    }
+                });
+            }
         });
-      }
-    });
-  }
-  n['default'] = e;
-  return n;
+    }
+    n['default'] = e;
+    return n;
 }
 
 var sade__default = /*#__PURE__*/_interopDefaultLegacy(sade);
@@ -80,7 +80,6 @@ var json__default = /*#__PURE__*/_interopDefaultLegacy(json);
 var replace__default = /*#__PURE__*/_interopDefaultLegacy(replace);
 var resolve__default = /*#__PURE__*/_interopDefaultLegacy(resolve);
 var sourceMaps__default = /*#__PURE__*/_interopDefaultLegacy(sourceMaps);
-var typescript__default = /*#__PURE__*/_interopDefaultLegacy(typescript);
 var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
 var traverse__default = /*#__PURE__*/_interopDefaultLegacy(traverse);
 var merge__default = /*#__PURE__*/_interopDefaultLegacy(merge);
@@ -467,14 +466,78 @@ const babelPluginTsdx = pluginBabel.createBabelInputPluginFactory(() => ({
 }));
 
 /**
+ * Custom plugin that removes shebang from code because newer versions of
+ * bublé bundle their own private version of `acorn` and we can't find a
+ * way to patch in the option `allowHashBang` to acorn. Taken from
+ * microbundle.
+ *
+ * @see https://github.com/Rich-Harris/buble/pull/165
+ */
+const shebangRegex = /^#!(.*)/;
+const removeShebang = () => {
+    return {
+        name: 'Remove shebang',
+        transform(code) {
+            code = code.replace(shebangRegex, '');
+            return {
+                code,
+                map: null,
+            };
+        },
+    };
+};
+
+/**
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @see https://github.com/GoogleChromeLabs/proxx/blob/master/lib/simple-ts.js
+ * @see https://twitter.com/jaffathecake/status/1145979217852678144
+ */
+function simpleTS(mainPath = '.', { noBuild = false, watch = false } = {}) {
+    const args = ['-b', mainPath];
+    let done = Promise.resolve();
+    if (!noBuild) {
+        done = new Promise((resolve) => {
+            const proc = child_process.spawn('tsc', args, {
+                stdio: 'inherit',
+            });
+            proc.on('exit', (code) => {
+                if (code !== 0) {
+                    throw Error('TypeScript build failed');
+                }
+                resolve();
+            });
+        });
+    }
+    if (!noBuild && watch) {
+        done.then(() => {
+            child_process.spawn('tsc', [...args, '--watch', '--preserveWatchOutput'], {
+                stdio: 'inherit',
+            });
+        });
+    }
+    return {
+        name: 'simple-ts',
+        buildStart: async () => await done,
+    };
+}
+
+/**
  * These packages will not be resolved by Rollup and will be left as imports.
  */
 const EXTERNAL_PACKAGES = ['react', 'react-native'];
 const errorCodeOpts = {
     errorMapFilePath: paths.appErrorsJson,
 };
-// shebang cache map thing because the transform only gets run once
-let shebang = {};
 async function createRollupConfig(opts, outputNum) {
     const findAndRecordErrorCodes = await extractErrors({
         ...errorCodeOpts,
@@ -503,7 +566,7 @@ async function createRollupConfig(opts, outputNum) {
     const { PRODUCTION } = process.env;
     return {
         // Tell Rollup the entry point to the package
-        input: opts.input,
+        input: 'dist/index.js',
         // Tell Rollup which packages to ignore
         external: (id) => {
             // bundle in polyfills as TSDX can't (yet) ensure they're installed as deps
@@ -625,65 +688,52 @@ async function createRollupConfig(opts, outputNum) {
              */
             json__default['default'](),
             /**
-             * Custom plugin that removes shebang from code because newer versions of
-             * bublé bundle their own private version of `acorn` and we can't find a
-             * way to patch in the option `allowHashBang` to acorn. Taken from
-             * microbundle.
-             *
-             * @see https://github.com/Rich-Harris/buble/pull/165
+             * Remove shebangs like #!/usr/bin/env node.
              */
-            {
-                name: 'Remove shebang',
-                transform(code) {
-                    let reg = /^#!(.*)/;
-                    let match = code.match(reg);
-                    shebang[opts.name] = match ? '#!' + match[1] : '';
-                    code = code.replace(reg, '');
-                    return {
-                        code,
-                        map: null,
-                    };
-                },
-            },
+            removeShebang(),
+            /**
+             * Simply call TSC and build out dist/.
+             */
+            simpleTS(),
             /**
              * Run TSC and transpile TypeScript.
              */
-            typescript__default['default']({
-                typescript: ts__default['default'],
-                tsconfig: opts.tsconfig,
-                tsconfigDefaults: {
-                    exclude: [
-                        // all TS test files, regardless whether co-located or in test/ etc
-                        '**/*.spec.ts',
-                        '**/*.test.ts',
-                        '**/*.spec.tsx',
-                        '**/*.test.tsx',
-                        // TS defaults below
-                        'node_modules',
-                        'bower_components',
-                        'jspm_packages',
-                        paths.appDist,
-                    ],
-                    compilerOptions: {
-                        sourceMap: true,
-                        declaration: true,
-                        jsx: 'react',
-                    },
-                },
-                tsconfigOverride: {
-                    compilerOptions: {
-                        // TS -> esnext, then leave the rest to babel-preset-env
-                        module: 'esnext',
-                        target: 'esnext',
-                        // don't output declarations more than once
-                        ...(outputNum > 0
-                            ? { declaration: false, declarationMap: false }
-                            : {}),
-                    },
-                },
-                check: !opts.transpileOnly && outputNum === 0,
-                useTsconfigDeclarationDir: Boolean(tsCompilerOptions?.declarationDir),
-            }),
+            // typescript({
+            //   typescript: ts,
+            //   tsconfig: opts.tsconfig,
+            //   tsconfigDefaults: {
+            //     exclude: [
+            //       // all TS test files, regardless whether co-located or in test/ etc
+            //       '**/*.spec.ts',
+            //       '**/*.test.ts',
+            //       '**/*.spec.tsx',
+            //       '**/*.test.tsx',
+            //       // TS defaults below
+            //       'node_modules',
+            //       'bower_components',
+            //       'jspm_packages',
+            //       paths.appDist,
+            //     ],
+            //     compilerOptions: {
+            //       sourceMap: true,
+            //       declaration: true,
+            //       jsx: 'react',
+            //     },
+            //   },
+            //   tsconfigOverride: {
+            //     compilerOptions: {
+            //       // TS -> esnext, then leave the rest to babel-preset-env
+            //       module: 'esnext',
+            //       target: 'esnext',
+            //       // don't output declarations more than once
+            //       ...(outputNum > 0
+            //         ? { declaration: false, declarationMap: false }
+            //         : {}),
+            //     },
+            //   },
+            //   check: !opts.transpileOnly && outputNum === 0,
+            //   useTsconfigDeclarationDir: Boolean(tsCompilerOptions?.declarationDir),
+            // }),
             /**
              * In --legacy mode, use Babel to transpile to ES5.
              */
@@ -781,7 +831,7 @@ async function createBuildConfigs(opts) {
     }))));
     return await Promise.all(allInputs.map(async (options, index) => {
         // pass the full rollup config to tsdx.config.js override
-        const config = await createRollupConfig(options, index);
+        const config = await createRollupConfig(options);
         return tsdxConfig.rollup(config, options);
     }));
 }

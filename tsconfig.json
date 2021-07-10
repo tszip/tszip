@@ -1,14 +1,14 @@
 {
   "include": ["src/**/*"],
-  "exclude": ["src/template/**/*"],
   "compilerOptions": {
     "module": "ESNext",
     "target": "ESNext",
-    "lib": ["dom", "ESNext"],
+    "lib": ["ESNext"],
+    "rootDir": "src/",
+    "outDir": "dist/",
     "importHelpers": true,
     "declaration": true,
     "sourceMap": true,
-    "rootDir": "./src",
     "strict": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
@@ -19,6 +19,6 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
+    "resolveJsonModule": true,
   }
 }
