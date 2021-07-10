@@ -32,6 +32,7 @@ var traverse = require('@babel/traverse');
 var pascalCase = require('pascal-case');
 var pluginBabel = require('@rollup/plugin-babel');
 var merge = require('lodash.merge');
+var rollupPlugin = require('@optimize-lodash/rollup-plugin');
 var fs$1 = require('fs');
 var Input = require('enquirer/lib/prompts/input.js');
 var Select = require('enquirer/lib/prompts/select.js');
@@ -542,7 +543,7 @@ async function createRollupConfig(opts, outputNum) {
             // Set filenames of the consumer's package
             file: outputName,
             // Pass through the file format
-            format: opts.format,
+            format: isEsm ? 'es' : opts.format,
             // Do not let Rollup call Object.freeze() on namespace import objects
             // (i.e. import * as namespaceImportObject from...) that are accessed dynamically.
             freeze: false,
@@ -559,7 +560,10 @@ async function createRollupConfig(opts, outputNum) {
             exports: 'named',
         },
         plugins: [
-            !!opts.extractErrors && {
+            /**
+             * Extract errors to `errors/` dir if --extractErrors passed.
+             */
+            opts.extractErrors && {
                 name: 'Extract errors',
                 async transform(code) {
                     try {
@@ -571,33 +575,65 @@ async function createRollupConfig(opts, outputNum) {
                     return { code, map: null };
                 },
             },
+            /**
+             * Resolve only non-JS. Leave regular imports alone, since packages will
+             * ship with dependencies.
+             */
             resolve__default['default']({
-                mainFields: [
-                    'module',
-                    'main',
-                    opts.target !== 'node' ? 'browser' : undefined,
-                ].filter(Boolean),
-                extensions: [...resolve.DEFAULTS.extensions, '.cjs', '.mjs', '.jsx'],
+                /**
+                 * Do not allow CJS imports.
+                 */
+                modulesOnly: true,
+                /**
+                 * For node output, do not resolve `browser` field.
+                 */
+                browser: opts.target !== 'node',
+                /**
+                 * Resolve JSX, JSON, and .node files.
+                 */
+                extensions: ['.jsx', '.json', '.node'],
             }),
-            // all bundled external modules need to be converted from CJS to ESM
+            /**
+             * All bundled external modules need to be converted from CJS to ESM.
+             */
             commonjs__default['default']({
+                /**
+                 * CJS/ESM interop. Support Node's .cjs and .mjs spec.
+                 */
                 extensions: ['.js', '.cjs', '.mjs'],
+                /**
+                 * Allow require('my-package') === await import('my-package').
+                 *
+                 * The `modulesOnly` option of @rollup/plugin-node-resolve ensures that
+                 * the compiler will throw if there is an issue
+                 */
                 esmExternals: true,
                 requireReturnsDefault: true,
+                /**
+                 * Turn `require` statements into `import` statements in ESM out.
+                 */
                 transformMixedEsModules: true,
-                // use a regex to make sure to include eventual hoisted packages
+                /**
+                 * Use Regex to make sure to include eventual hoisted packages.
+                 */
                 include: opts.format === 'umd' || isEsm
                     ? /\/node_modules\//
                     : /\/regenerator-runtime\//,
             }),
+            /**
+             * Convert JSON to ESM.
+             */
             json__default['default'](),
+            /**
+             * Custom plugin that removes shebang from code because newer versions of
+             * bublé bundle their own private version of `acorn` and we can't find a
+             * way to patch in the option `allowHashBang` to acorn. Taken from
+             * microbundle.
+             *
+             * @see https://github.com/Rich-Harris/buble/pull/165
+             */
             {
                 name: 'Remove shebang',
-                // Custom plugin that removes shebang from code because newer
-                // versions of bublé bundle their own private version of `acorn`
-                // and I don't know a way to patch in the option `allowHashBang`
-                // to acorn. Taken from microbundle.
-                // See: https://github.com/Rich-Harris/buble/pull/165
                 transform(code) {
                     let reg = /^#!(.*)/;
                     let match = code.match(reg);
@@ -609,6 +645,9 @@ async function createRollupConfig(opts, outputNum) {
                     };
                 },
             },
+            /**
+             * Run TSC and transpile TypeScript.
+             */
             typescript__default['default']({
                 typescript: ts__default['default'],
                 tsconfig: opts.tsconfig,
@@ -633,8 +672,8 @@ async function createRollupConfig(opts, outputNum) {
                 },
                 tsconfigOverride: {
                     compilerOptions: {
-                        module: 'esnext',
                         // TS -> esnext, then leave the rest to babel-preset-env
+                        module: 'esnext',
                         target: 'esnext',
                         // don't output declarations more than once
                         ...(outputNum > 0
@@ -645,6 +684,9 @@ async function createRollupConfig(opts, outputNum) {
                 check: !opts.transpileOnly && outputNum === 0,
                 useTsconfigDeclarationDir: Boolean(tsCompilerOptions?.declarationDir),
             }),
+            /**
+             * In --legacy mode, use Babel to transpile to ES5.
+             */
             opts.legacy &&
                 babelPluginTsdx({
                     exclude: 'node_modules/**',
@@ -660,12 +702,13 @@ async function createRollupConfig(opts, outputNum) {
                     },
                     babelHelpers: 'bundled',
                 }),
-            opts.env &&
-                replace__default['default']({
-                    preventAssignment: true,
-                    '"development"': JSON.stringify(PRODUCTION ? 'production' : 'development'),
-                }),
             sourceMaps__default['default'](),
+            /**
+             * Minify and compress with Terser for max DCE. Emit latest featureset.
+             *
+             * This is called before @rollup/replace-plugin to minimize the emitted
+             * code it would need to search.
+             */
             shouldMinify &&
                 rollupPluginTerser.terser({
                     format: {
@@ -682,12 +725,30 @@ async function createRollupConfig(opts, outputNum) {
                     toplevel: opts.format === 'cjs' || isEsm,
                 }),
             /**
-             * Ensure there's an empty default export to prevent runtime errors.
+             * Replace process.env.NODE_ENV variable.
+             */
+            opts.env &&
+                replace__default['default']({
+                    preventAssignment: true,
+                    'process.env.NODE_ENV': JSON.stringify(PRODUCTION ? 'production' : 'development'),
+                }),
+            /**
+             * If not in --legacy mode, ensure lodash imports are optimized in the
+             * final bundle.
+             */
+            !opts.legacy &&
+                rollupPlugin.optimizeLodashImports({
+                    useLodashEs: isEsm || undefined,
+                }),
+            /**
+             * Ensure there's an empty default export. This is the only way to have a
+             * dist/index.mjs with `export { default } from './package.min.mjs'` and
+             * support default exports at all.
              *
              * @see https://www.npmjs.com/package/rollup-plugin-export-default
              */
             {
-                name: 'Add export default {}',
+                name: 'Ensure default exports',
                 renderChunk: async (code, chunk) => {
                     if (chunk.exports.includes('default') || !isEsm) {
                         return null;
@@ -1304,7 +1365,7 @@ function writeCjsEntryFile(name) {
     const safeName = safePackageName(name);
     /**
      * After an hour of tinkering, this is the *only* way to write this code that
-     * will not break Rollup (by pulling "development" out with
+     * will not break Rollup (by pulling process.env.NODE_ENV out with
      * destructuring).
      */
     const contents = `#!/usr/bin/env node
@@ -1321,7 +1382,7 @@ else
      * ways.
      */
     //   const contents = `'use strict'
-    // if ("development" === 'production') {
+    // if (process.env.NODE_ENV === 'production') {
     //   module.exports = require('./${safeName}.production.min.cjs')
     // } else {
     //   module.exports = require('./${safeName}.development.cjs')
