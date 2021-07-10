@@ -664,7 +664,7 @@ async function createRollupConfig(opts, outputNum) {
             opts.env &&
                 replace__default['default']({
                     preventAssignment: true,
-                    '"development"': JSON.stringify(PRODUCTION ? 'production' : 'development'),
+                    'process.env.NODE_ENV': JSON.stringify(PRODUCTION ? 'production' : 'development'),
                 }),
             sourceMaps__default['default'](),
             shouldMinify &&
@@ -1308,7 +1308,7 @@ function writeCjsEntryFile(name) {
     const safeName = safePackageName(name);
     /**
      * After an hour of tinkering, this is the *only* way to write this code that
-     * will not break Rollup (by pulling "development" out with
+     * will not break Rollup (by pulling process.env.NODE_ENV out with
      * destructuring).
      */
     const contents = `#!/usr/bin/env node
@@ -1325,7 +1325,7 @@ else
      * ways.
      */
     //   const contents = `'use strict'
-    // if ("development" === 'production') {
+    // if (process.env.NODE_ENV === 'production') {
     //   module.exports = require('./${safeName}.production.min.cjs')
     // } else {
     //   module.exports = require('./${safeName}.development.cjs')
