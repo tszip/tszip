@@ -336,6 +336,8 @@ export interface TsdxOptions {
   env: 'development' | 'production';
   // Path to tsconfig file
   tsconfig?: string;
+  // If `true`, Babel transpile and emit ES5.
+  legacy: boolean;
   // Is error extraction running?
   extractErrors?: boolean;
   // Is minifying?
@@ -411,7 +413,7 @@ Some key differences include:
 
 ### `tsdx watch`
 
-```shell
+```none
 Description
   Rebuilds on any change
 
@@ -447,7 +449,7 @@ Examples
 
 ### `tsdx build`
 
-```shell
+```none
 Description
   Build your project once and exit
 
@@ -490,7 +492,7 @@ This runs Jest, forwarding all CLI flags to it. See [https://jestjs.io](https://
 
 ### `tsdx lint`
 
-```shell
+```none
 Description
   Run eslint with Prettier
 
