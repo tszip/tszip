@@ -32,6 +32,7 @@ var traverse = require('@babel/traverse');
 var pascalCase = require('pascal-case');
 var pluginBabel = require('@rollup/plugin-babel');
 var merge = require('lodash.merge');
+var rollupPlugin = require('@optimize-lodash/rollup-plugin');
 var fs$1 = require('fs');
 var Input = require('enquirer/lib/prompts/input.js');
 var Select = require('enquirer/lib/prompts/select.js');
@@ -542,7 +543,7 @@ async function createRollupConfig(opts, outputNum) {
             // Set filenames of the consumer's package
             file: outputName,
             // Pass through the file format
-            format: opts.format,
+            format: isEsm ? 'es' : opts.format,
             // Do not let Rollup call Object.freeze() on namespace import objects
             // (i.e. import * as namespaceImportObject from...) that are accessed dynamically.
             freeze: false,
@@ -681,6 +682,9 @@ async function createRollupConfig(opts, outputNum) {
                     module: isEsm,
                     toplevel: opts.format === 'cjs' || isEsm,
                 }),
+            rollupPlugin.optimizeLodashImports({
+                useLodashEs: isEsm || undefined,
+            }),
             /**
              * Ensure there's an empty default export to prevent runtime errors.
              *
