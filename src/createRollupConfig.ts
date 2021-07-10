@@ -16,6 +16,7 @@ import ts from 'typescript';
 import { extractErrors } from './errors/extractErrors';
 import { babelPluginTsdx } from './babelPluginTsdx';
 import { TsdxOptions } from './types';
+import { optimizeLodashImports } from "@optimize-lodash/rollup-plugin";
 
 /**
  * These packages will not be resolved by Rollup and will be left as imports.
@@ -114,7 +115,7 @@ export async function createRollupConfig(
       // Set filenames of the consumer's package
       file: outputName,
       // Pass through the file format
-      format: opts.format,
+      format: isEsm ? 'es' : opts.format,
       // Do not let Rollup call Object.freeze() on namespace import objects
       // (i.e. import * as namespaceImportObject from...) that are accessed dynamically.
       freeze: false,
@@ -258,6 +259,9 @@ export async function createRollupConfig(
           module: isEsm,
           toplevel: opts.format === 'cjs' || isEsm,
         }),
+      optimizeLodashImports({
+        useLodashEs: isEsm || undefined,
+      }),
       /**
        * Ensure there's an empty default export to prevent runtime errors.
        *
