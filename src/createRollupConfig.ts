@@ -17,6 +17,11 @@ import { extractErrors } from './errors/extractErrors';
 import { babelPluginTsdx } from './babelPluginTsdx';
 import { TsdxOptions } from './types';
 
+/**
+ * These packages will not be resolved by Rollup and will be left as imports.
+ */
+const EXTERNAL_PACKAGES = ['react', 'react-native'];
+
 const errorCodeOpts = {
   errorMapFilePath: paths.appErrorsJson,
 };
@@ -75,6 +80,10 @@ export async function createRollupConfig(
         return false;
       }
 
+      if (EXTERNAL_PACKAGES.includes(id)) {
+        return true;
+      }
+
       return external(id);
     },
     // Minimize runtime error surface as much as possible
@@ -110,7 +119,7 @@ export async function createRollupConfig(
       // (i.e. import * as namespaceImportObject from...) that are accessed dynamically.
       freeze: false,
       // Respect tsconfig esModuleInterop when setting __esModule.
-      esModule: Boolean(tsCompilerOptions?.esModuleInterop),
+      esModule: Boolean(tsCompilerOptions?.esModuleInterop) || isEsm,
       name: opts.name || safeVariableName(opts.name),
       sourcemap: true,
       globals: {
@@ -143,9 +152,13 @@ export async function createRollupConfig(
       }),
       // all bundled external modules need to be converted from CJS to ESM
       commonjs({
+        extensions: ['.js', '.cjs', '.mjs'],
+        esmExternals: true,
+        requireReturnsDefault: true,
+        transformMixedEsModules: true,
         // use a regex to make sure to include eventual hoisted packages
         include:
-          opts.format === 'umd'
+          opts.format === 'umd' || isEsm
             ? /\/node_modules\//
             : /\/regenerator-runtime\//,
       }),
