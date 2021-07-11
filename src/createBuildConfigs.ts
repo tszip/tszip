@@ -1,52 +1,75 @@
 import { RollupOptions, OutputOptions } from 'rollup';
-import { concatAllArray } from 'jpjs';
-
-import { paths } from './constants';
 import { TsdxOptions, NormalizedOpts } from './types';
 
 import { createRollupConfig } from './createRollupConfig';
-import { existsSync } from 'fs';
 
-// check for custom tsdx.config.js
-let tsdxConfig = {
-  rollup(config: RollupOptions, _options: TsdxOptions): RollupOptions {
-    return config;
-  },
-};
-
-if (existsSync(paths.appConfig)) {
-  tsdxConfig = require(paths.appConfig);
-}
+import glob from 'glob-promise';
+import { safePackageName } from './utils';
 
 export async function createBuildConfigs(
   opts: NormalizedOpts
-): Promise<Array<RollupOptions & { output: OutputOptions }>> {
-  const allInputs = concatAllArray(
-    opts.input.map((input: string) =>
-      createAllFormats(opts, input).map(
-        (options: TsdxOptions, index: number) => ({
-          ...options,
-          // We want to know if this is the first run for each entryfile
-          // for certain plugins (e.g. css)
-          writeMeta: index === 0,
-        })
-      )
-    )
-  );
-
-  return await Promise.all(
-    allInputs.map(async (options: TsdxOptions, index: number) => {
-      // pass the full rollup config to tsdx.config.js override
-      const config = await createRollupConfig(options, index);
-      return tsdxConfig.rollup(config, options);
+): Promise<(RollupOptions & { output: OutputOptions })[]> {
+  /**
+   * Generate all forms of the entry points that will be needed.
+   */
+  const entryPoints = createAllEntryPoints(opts);
+  const entryPointConfigs = await Promise.all(
+    entryPoints.map(async (entryPoint) => {
+      const packageName = safePackageName(opts.name);
+      let outputName: string;
+      switch (entryPoint.format) {
+        case 'esm':
+          outputName = `dist/${packageName}.mjs`;
+          break;
+        case 'cjs':
+          outputName = `dist/${packageName}.cjs`;
+          break;
+        default:
+          outputName = entryPoint.input;
+          break;
+      }
+      return await createRollupConfig(entryPoint, outputName);
     })
   );
+
+  const emittedFiles = await glob('dist/**/*.js');
+  const emittedFileOptions = emittedFiles.map((input) => ({
+    ...opts,
+    format: 'esm',
+    env: 'production',
+    input,
+  }));
+  const emittedFileConfigs = await Promise.all(
+    emittedFileOptions.map(async (options) => {
+      const config = await createRollupConfig(options as TsdxOptions);
+      /**
+       * Overwrite input files.
+       */
+      config.output.file = options.input;
+      return config;
+    })
+  );
+
+  console.log(JSON.stringify(emittedFileConfigs, null, 2));
+
+  const compilerPasses = [...entryPointConfigs, ...emittedFileConfigs];
+  return compilerPasses;
 }
 
-function createAllFormats(
-  opts: NormalizedOpts,
-  input: string
+/**
+ * Create all the entry points, on a per-format basis, for the library.
+ */
+function createAllEntryPoints(
+  opts: NormalizedOpts
 ): [TsdxOptions, ...TsdxOptions[]] {
+  /**
+   * The entry point emitted by TSC.
+   */
+  const input = 'dist/index.js';
+  /**
+   * Map it to all of the specified output formats (ESM, CJS, UMD, SystemJS,
+   * etc.). Only the entry point needs to be specified this way.
+   */
   return [
     opts.format.includes('cjs') && {
       ...opts,

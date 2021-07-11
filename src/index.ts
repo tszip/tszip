@@ -2,15 +2,7 @@
 
 import sade from 'sade';
 import glob from 'tiny-glob/sync.js';
-import {
-  rollup,
-  watch,
-  RollupOptions,
-  OutputOptions,
-  RollupWatchOptions,
-  WatcherOptions,
-} from 'rollup';
-import asyncro from 'asyncro';
+import { rollup, watch, RollupWatchOptions, WatcherOptions } from 'rollup';
 import chalk from 'chalk';
 import jest from 'jest';
 import { CLIEngine } from 'eslint';
@@ -52,6 +44,7 @@ import * as deprecated from './deprecated';
 import * as fs from 'fs-extra';
 import { readFileSync } from 'fs';
 import { stat } from 'fs/promises';
+import { runTsc } from './plugins/simple-ts';
 
 export * from './errors';
 
@@ -66,12 +59,12 @@ try {
 
 export const isDir = (name: string) =>
   stat(name)
-    .then(stats => stats.isDirectory())
+    .then((stats) => stats.isDirectory())
     .catch(() => false);
 
 export const isFile = (name: string) =>
   stat(name)
-    .then(stats => stats.isFile())
+    .then((stats) => stats.isFile())
     .catch(() => false);
 
 async function jsOrTs(filename: string) {
@@ -98,7 +91,7 @@ async function getInputs(
           : (source && resolveApp(source)) ||
               ((await isDir(resolveApp('src'))) && (await jsOrTs('src/index')))
       )
-      .map(file => glob(file))
+      .map((file) => glob(file))
   );
 }
 
@@ -324,7 +317,7 @@ prog
 
     const spinner = ora().start();
     watch(
-      (buildConfigs as RollupWatchOptions[]).map(inputOptions => ({
+      (buildConfigs as RollupWatchOptions[]).map((inputOptions) => ({
         watch: {
           silent: true,
           include: ['src/**'],
@@ -332,7 +325,7 @@ prog
         } as WatcherOptions,
         ...inputOptions,
       }))
-    ).on('event', async event => {
+    ).on('event', async (event) => {
       // clear previous onSuccess/onFailure hook processes so they don't pile up
       await killHooks();
 
@@ -394,7 +387,11 @@ prog
   .action(async (dirtyOpts: BuildOpts) => {
     const opts = await normalizeOpts(dirtyOpts);
     const buildConfigs = await createBuildConfigs(opts);
+
+    console.log('Cleaning dist/ and compiling TS.');
     await cleanDistFolder();
+    await runTsc();
+
     const logger = await createProgressEstimator();
     if (opts.format.includes('cjs')) {
       const promise = writeCjsEntryFile(opts.name).catch(logError);
@@ -405,22 +402,11 @@ prog
       logger(promise, 'Creating MJS entry file');
     }
     try {
-      const promise = asyncro
-        .map(
-          buildConfigs,
-          async (inputOptions: RollupOptions & { output: OutputOptions }) => {
-            let bundle = await rollup(inputOptions);
-            await bundle.write(inputOptions.output);
-          }
-        )
-        .catch((e: any) => {
-          throw e;
-        })
-        .then(async () => {
-          await deprecated.moveTypes();
-        });
-      logger(promise, 'Building modules');
-      await promise;
+      console.log('Building modules');
+      for (const buildConfig of buildConfigs) {
+        let bundle = await rollup(buildConfig);
+        await bundle.write(buildConfig.output);
+      }
     } catch (error) {
       logError(error);
       process.exit(1);
@@ -528,14 +514,14 @@ prog
     // Makes the script crash on unhandled rejections instead of silently
     // ignoring them. In the future, promise rejections that are not handled will
     // terminate the Node.js process with a non-zero exit code.
-    process.on('unhandledRejection', err => {
+    process.on('unhandledRejection', (err) => {
       throw err;
     });
 
     const argv = process.argv.slice(2);
     let jestConfig: JestConfigOptions = {
       ...createJestConfig(
-        relativePath => path.resolve(__dirname, '..', relativePath),
+        (relativePath) => path.resolve(__dirname, '..', relativePath),
         opts.config ? path.dirname(opts.config) : paths.appRoot
       ),
       ...appPackageJson.jest,
@@ -558,7 +544,7 @@ prog
       } else {
         // case of "--config=path", only one arg to delete
         const configRegex = /--config=.+/;
-        configIndex = argv.findIndex(arg => arg.match(configRegex));
+        configIndex = argv.findIndex((arg) => arg.match(configRegex));
         if (configIndex !== -1) {
           argv.splice(configIndex, 1);
         }

@@ -1,6 +1,6 @@
-import { safeVariableName, safePackageName, external } from './utils';
+import { safeVariableName, external } from './utils';
 import { paths } from './constants';
-import { RollupOptions } from 'rollup';
+import { OutputOptions, RollupOptions } from 'rollup';
 import { terser } from 'rollup-plugin-terser';
 import { DEFAULT_EXTENSIONS as DEFAULT_BABEL_EXTENSIONS } from '@babel/core';
 import commonjs from '@rollup/plugin-commonjs';
@@ -15,7 +15,6 @@ import { babelPluginTsdx } from './babelPluginTsdx';
 import { TsdxOptions } from './types';
 import { optimizeLodashImports } from '@optimize-lodash/rollup-plugin';
 import { removeShebang } from './plugins/remove-shebang';
-import simpleTS from './plugins/simple-ts';
 
 /**
  * These packages will not be resolved by Rollup and will be left as imports.
@@ -28,10 +27,8 @@ const errorCodeOpts = {
 
 export async function createRollupConfig(
   opts: TsdxOptions,
-  outputNum: number
-): Promise<RollupOptions> {
-  void outputNum;
-
+  outputName: string = opts.input
+): Promise<RollupOptions & { output: OutputOptions }> {
   const findAndRecordErrorCodes = await extractErrors({
     ...errorCodeOpts,
     ...opts,
@@ -43,19 +40,6 @@ export async function createRollupConfig(
     opts.minify !== undefined
       ? opts.minify
       : opts.env === 'production' || isEsm;
-
-  let formatString = ['esm', 'cjs'].includes(opts.format) ? '' : opts.format;
-  let fileExtension = opts.format === 'esm' ? 'mjs' : 'cjs';
-
-  const outputName = [
-    `${paths.appDist}/${safePackageName(opts.name)}`,
-    formatString,
-    opts.env,
-    shouldMinify ? 'min' : '',
-    fileExtension,
-  ]
-    .filter(Boolean)
-    .join('.');
 
   const tsconfigPath = opts.tsconfig || paths.tsconfigJson;
   // borrowed from https://github.com/facebook/create-react-app/pull/7248
@@ -71,7 +55,7 @@ export async function createRollupConfig(
 
   return {
     // Tell Rollup the entry point to the package
-    input: 'dist/index.js',
+    input: opts.input,
     // Tell Rollup which packages to ignore
     external: (id: string) => {
       // bundle in polyfills as TSDX can't (yet) ensure they're installed as deps
@@ -174,7 +158,7 @@ export async function createRollupConfig(
          * Allow require('my-package') === await import('my-package').
          *
          * The `modulesOnly` option of @rollup/plugin-node-resolve ensures that
-         * the compiler will throw if there is an issue
+         * the compiler will throw if there is an issue.
          */
         esmExternals: true,
         requireReturnsDefault: true,
@@ -198,10 +182,6 @@ export async function createRollupConfig(
        * Remove shebangs like #!/usr/bin/env node.
        */
       removeShebang(),
-      /**
-       * Simply call TSC and build out dist/.
-       */
-      simpleTS(),
       /**
        * Run TSC and transpile TypeScript.
        */

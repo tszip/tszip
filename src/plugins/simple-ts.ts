@@ -15,16 +15,55 @@
  */
 
 import { spawn } from 'child_process';
+import * as ts from 'typescript';
 
-export default function simpleTS(
-  mainPath = '.',
-  { noBuild = false, watch = false } = {}
-) {
-  const args = ['-b', mainPath];
+// const extRe = /\.tsx?$/;
 
-  let done = Promise.resolve();
+export function loadConfig() {
+  const fileName = ts.findConfigFile('.', ts.sys.fileExists);
+  if (!fileName) throw Error('tsconfig not found');
+  const text = ts.sys.readFile(fileName) ?? '';
+  const loadedConfig = ts.parseConfigFileTextToJson(fileName, text).config;
+  const parsedTsConfig = ts.parseJsonConfigFileContent(
+    loadedConfig,
+    ts.sys,
+    process.cwd(),
+    undefined,
+    fileName
+  );
+  return parsedTsConfig;
+}
+
+export function resolveId(id: string, importer = '') {
+  const config = loadConfig();
+
+  // If there isn't an importer, it's an entry point, so we don't need to resolve it relative
+  // to something.
+  if (!importer) return null;
+
+  const tsResolve = ts.resolveModuleName(id, importer, config.options, ts.sys);
+
+  if (
+    // It didn't find anything
+    !tsResolve.resolvedModule ||
+    // Or if it's linking to a definition file, it's something in node_modules,
+    // or something local like css.d.ts
+    tsResolve.resolvedModule.extension === '.d.ts'
+  ) {
+    console.log('found nothing');
+    return null;
+  }
+
+  return tsResolve.resolvedModule.resolvedFileName;
+}
+
+export async function runTsc({ noBuild = false, watch = false } = {}) {
+  const argString = '-b .';
+  const args = argString.split(' ');
+
   if (!noBuild) {
-    done = new Promise((resolve) => {
+    console.log(`Calling: tsc ${args.join(' ')}`);
+    await new Promise((resolve) => {
       const proc = spawn('tsc', args, {
         stdio: 'inherit',
       });
@@ -33,21 +72,28 @@ export default function simpleTS(
         if (code !== 0) {
           throw Error('TypeScript build failed');
         }
-        resolve();
+        resolve(void 0);
       });
     });
   }
 
   if (!noBuild && watch) {
-    done.then(() => {
-      spawn('tsc', [...args, '--watch', '--preserveWatchOutput'], {
-        stdio: 'inherit',
-      });
+    spawn('tsc', [...args, '--watch', '--preserveWatchOutput'], {
+      stdio: 'inherit',
     });
   }
+}
 
+/**
+ * This simply runs `tsc` in process.cwd(), reading the TSConfig in that
+ * directory, and forcing an emit.
+ */
+export default function simpleTS() {
   return {
     name: 'simple-ts',
-    buildStart: async () => await done,
+    /**
+     * Wait for the process to finish.
+     */
+    buildStart: async () => await runTsc(),
   };
 }
