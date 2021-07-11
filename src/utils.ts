@@ -20,13 +20,21 @@ export const safePackageName = (name: string) =>
     .toLowerCase()
     .replace(/(^@.*\/)|((^[^a-zA-Z]+)|[^\w.-])|([^a-zA-Z0-9]+$)/g, '');
 
+/**
+ * These packages will not be resolved by Rollup and will be left as imports.
+ */
+export const EXTERNAL_PACKAGES = ['react', 'react-native'];
+
+/**
+ * Mark EXTERNAL_PACKAGES and all relative imports as external.
+ */
 export const external = (id: string) =>
-  !id.startsWith('.') && !path.isAbsolute(id);
+  EXTERNAL_PACKAGES.includes(id) || (id.startsWith('.') && path.isAbsolute(id));
 
 // Make sure any symlinks in the project folder are resolved:
 // https://github.com/facebookincubator/create-react-app/issues/637
 export const appDirectory = fs.realpathSync(process.cwd());
-export const resolveApp = function(relativePath: string) {
+export const resolveApp = function (relativePath: string) {
   return path.resolve(appDirectory, relativePath);
 };
 

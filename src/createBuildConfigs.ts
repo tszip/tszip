@@ -5,6 +5,7 @@ import { createRollupConfig } from './createRollupConfig';
 
 import glob from 'glob-promise';
 import { safePackageName } from './utils';
+import { paths } from './constants';
 
 export async function createBuildConfigs(
   opts: NormalizedOpts
@@ -28,29 +29,45 @@ export async function createBuildConfigs(
           outputName = entryPoint.input;
           break;
       }
-      return await createRollupConfig(entryPoint, outputName);
+
+      const config = await createRollupConfig(entryPoint);
+      config.output.file = outputName;
+
+      return config;
     })
   );
 
   const emittedFiles = await glob('dist/**/*.js');
-  const emittedFileOptions = emittedFiles.map((input) => ({
+  /**
+   * Make ESM versions of emitted TS output.
+   */
+  const emittedFilesToESM = emittedFiles.map((input) => ({
     ...opts,
     format: 'esm',
     env: 'production',
     input,
   }));
+  /**
+   * Make CJS versions of emitted TS output.
+   */
+  const emittedFilesToCJS = emittedFiles.map((input) => ({
+    ...opts,
+    format: 'cjs',
+    env: 'production',
+    input,
+  }));
+
   const emittedFileConfigs = await Promise.all(
-    emittedFileOptions.map(async (options) => {
+    [...emittedFilesToESM, ...emittedFilesToCJS].map(async (options) => {
+      const fileExt = options.format === 'esm' ? '.mjs' : '.cjs';
       const config = await createRollupConfig(options as TsdxOptions);
       /**
        * Overwrite input files.
        */
-      config.output.file = options.input;
+      config.output.file = options.input.replace(/\.js$/, fileExt);
       return config;
     })
   );
-
-  console.log(JSON.stringify(emittedFileConfigs, null, 2));
 
   const compilerPasses = [...entryPointConfigs, ...emittedFileConfigs];
   return compilerPasses;
@@ -65,7 +82,7 @@ function createAllEntryPoints(
   /**
    * The entry point emitted by TSC.
    */
-  const input = 'dist/index.js';
+  const input = `${paths.appDist}/index.js`;
   /**
    * Map it to all of the specified output formats (ESM, CJS, UMD, SystemJS,
    * etc.). Only the entry point needs to be specified this way.

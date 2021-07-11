@@ -1,5 +1,4 @@
-import * as fs from 'fs-extra';
-
+import fs from 'fs-extra';
 import { paths } from './constants';
 
 /*

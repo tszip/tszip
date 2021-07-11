@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import sade from 'sade';
-import glob from 'tiny-glob/sync.js';
+import glob from 'glob-promise';
 import { rollup, watch, RollupWatchOptions, WatcherOptions } from 'rollup';
 import chalk from 'chalk';
 import jest from 'jest';
@@ -41,7 +41,7 @@ import { createProgressEstimator } from './createProgressEstimator';
 import { templates } from './templates';
 import { composePackageJson } from './templates/utils';
 import * as deprecated from './deprecated';
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import { readFileSync } from 'fs';
 import { stat } from 'fs/promises';
 import { runTsc } from './plugins/simple-ts';
@@ -83,16 +83,16 @@ async function getInputs(
   entries?: string | string[],
   source?: string
 ): Promise<string[]> {
-  return concatAllArray(
-    ([] as any[])
-      .concat(
-        entries && entries.length
-          ? entries
-          : (source && resolveApp(source)) ||
-              ((await isDir(resolveApp('src'))) && (await jsOrTs('src/index')))
-      )
-      .map((file) => glob(file))
-  );
+  const results = ([] as any[])
+    .concat(
+      entries && entries.length
+        ? entries
+        : (source && resolveApp(source)) ||
+            ((await isDir(resolveApp('src'))) && (await jsOrTs('src/index')))
+    )
+    .map(async (file) => await glob(file));
+
+  return concatAllArray(await Promise.all(results));
 }
 
 prog
@@ -284,12 +284,15 @@ prog
     if (!opts.noClean) {
       await cleanDistFolder();
     }
+
     if (opts.format.includes('cjs')) {
       await writeCjsEntryFile(opts.name);
     }
     if (opts.format.includes('esm')) {
       await writeMjsEntryFile(opts.name);
     }
+
+    await cleanOldJS();
 
     type Killer = execa.ExecaChildProcess | null;
 
@@ -388,25 +391,37 @@ prog
     const opts = await normalizeOpts(dirtyOpts);
     const buildConfigs = await createBuildConfigs(opts);
 
-    console.log('Cleaning dist/ and compiling TS.');
+    console.log('> Cleaning dist/ and compiling TS.');
     await cleanDistFolder();
     await runTsc();
 
-    const logger = await createProgressEstimator();
+    const progressIndicator = await createProgressEstimator();
     if (opts.format.includes('cjs')) {
-      const promise = writeCjsEntryFile(opts.name).catch(logError);
-      logger(promise, 'Creating CJS entry file');
+      await progressIndicator(
+        writeCjsEntryFile(opts.name).catch(logError),
+        'Creating CJS entry file'
+      );
     }
     if (opts.format.includes('esm')) {
-      const promise = writeMjsEntryFile(opts.name).catch(logError);
-      logger(promise, 'Creating MJS entry file');
+      await progressIndicator(
+        writeMjsEntryFile(opts.name).catch(logError),
+        'Creating MJS entry file'
+      );
     }
     try {
-      console.log('Building modules');
-      for (const buildConfig of buildConfigs) {
-        let bundle = await rollup(buildConfig);
-        await bundle.write(buildConfig.output);
-      }
+      await progressIndicator(
+        Promise.all(
+          buildConfigs.map(async (buildConfig) => {
+            const bundle = await rollup(buildConfig);
+            await bundle.write(buildConfig.output);
+          })
+        ),
+        'JS ➡ JS: Compressing and transforming emitted TypeScript output.'
+      );
+      /**
+       * Remove old index.js.
+       */
+      await cleanOldJS();
     } catch (error) {
       logError(error);
       process.exit(1);
@@ -427,6 +442,16 @@ async function normalizeOpts(opts: WatchOpts): Promise<NormalizedOpts> {
   };
 }
 
+async function cleanOldJS() {
+  const progressIndicator = await createProgressEstimator();
+  const oldJS = await glob(`${paths.appDist}/**/*.js`);
+  // console.log({ oldJS });
+  await progressIndicator(
+    Promise.all(oldJS.map(async (file) => await fs.unlink(file))),
+    'Removing original emitted TypeScript output (dist/**/*.js).'
+  );
+}
+
 async function cleanDistFolder() {
   await fs.remove(paths.appDist);
 }
@@ -439,24 +464,10 @@ function writeCjsEntryFile(name: string) {
    * destructuring).
    */
   const contents = `#!/usr/bin/env node
-'use strict';
 
-const { NODE_ENV } = process.env;
-if (NODE_ENV === 'production')
-  module.exports = require('./${safeName}.production.min.cjs');
-else
-  module.exports = require('./${safeName}.development.cjs');
+'use strict';
+require('./${safeName}.cjs');
 `;
-  /**
-   * @todo Find out why this breaks Rollup's parser in insanely complicated
-   * ways.
-   */
-  //   const contents = `'use strict'
-  // if (process.env.NODE_ENV === 'production') {
-  //   module.exports = require('./${safeName}.production.min.cjs')
-  // } else {
-  //   module.exports = require('./${safeName}.development.cjs')
-  // }`;
 
   return fs.outputFile(path.join(paths.appDist, 'index.cjs'), contents);
 }
@@ -464,8 +475,8 @@ else
 function writeMjsEntryFile(name: string) {
   const contents = `#!/usr/bin/env node
 
-export { default } from './${name}.min.mjs';
-export * from './${name}.min.mjs';
+export { default } from './${name}.mjs';
+export * from './${name}.mjs';
 `;
 
   return fs.outputFile(path.join(paths.appDist, 'index.mjs'), contents);

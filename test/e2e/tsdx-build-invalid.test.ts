@@ -28,9 +28,9 @@ describe('tsdx build :: invalid build', () => {
       shell.test('-f', 'dist/build-invalid.development.cjs')
     ).toBeTruthy();
     expect(
-      shell.test('-f', 'dist/build-invalid.production.min.cjs')
+      shell.test('-f', 'dist/build-invalid.cjs')
     ).toBeTruthy();
-    expect(shell.test('-f', 'dist/build-invalid.min.mjs')).toBeTruthy();
+    expect(shell.test('-f', 'dist/build-invalid.mjs')).toBeTruthy();
 
     expect(shell.test('-f', 'dist/index.d.ts')).toBeTruthy();
 

@@ -16,6 +16,7 @@
 
 import { spawn } from 'child_process';
 import * as ts from 'typescript';
+import { createProgressEstimator } from '../createProgressEstimator';
 
 // const extRe = /\.tsx?$/;
 
@@ -50,7 +51,6 @@ export function resolveId(id: string, importer = '') {
     // or something local like css.d.ts
     tsResolve.resolvedModule.extension === '.d.ts'
   ) {
-    console.log('found nothing');
     return null;
   }
 
@@ -58,23 +58,31 @@ export function resolveId(id: string, importer = '') {
 }
 
 export async function runTsc({ noBuild = false, watch = false } = {}) {
-  const argString = '-b .';
+  /**
+   * Force src/ rootDir, dist/ outDir, and override noEmit.
+   */
+  const argString = '--rootDir src/ --outDir dist/ --noEmit false';
   const args = argString.split(' ');
 
   if (!noBuild) {
-    console.log(`Calling: tsc ${args.join(' ')}`);
-    await new Promise((resolve) => {
-      const proc = spawn('tsc', args, {
-        stdio: 'inherit',
-      });
+    console.log(`> Command: tsc ${args.join(' ')}`);
+    const progressIndicator = await createProgressEstimator();
 
-      proc.on('exit', (code) => {
-        if (code !== 0) {
-          throw Error('TypeScript build failed');
-        }
-        resolve(void 0);
-      });
-    });
+    await progressIndicator(
+      new Promise((resolve) => {
+        const proc = spawn('tsc', args, {
+          stdio: 'inherit',
+        });
+
+        proc.on('exit', (code) => {
+          if (code !== 0) {
+            throw Error('TypeScript build failed');
+          }
+          resolve(void 0);
+        });
+      }),
+      `TS ➡ JS: Compiling with TSC`
+    );
   }
 
   if (!noBuild && watch) {

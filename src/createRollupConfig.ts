@@ -1,33 +1,28 @@
-import { safeVariableName, external } from './utils';
+import { safeVariableName } from './utils';
 import { paths } from './constants';
 import { OutputOptions, RollupOptions } from 'rollup';
 import { terser } from 'rollup-plugin-terser';
 import { DEFAULT_EXTENSIONS as DEFAULT_BABEL_EXTENSIONS } from '@babel/core';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
-import replace from '@rollup/plugin-replace';
-import resolve from '@rollup/plugin-node-resolve';
-import sourceMaps from 'rollup-plugin-sourcemaps';
+import nodeResolve from '@rollup/plugin-node-resolve';
 import ts from 'typescript';
+import estreeWalker from 'estree-walker';
 
 import { extractErrors } from './errors/extractErrors';
 import { babelPluginTsdx } from './babelPluginTsdx';
 import { TsdxOptions } from './types';
 import { optimizeLodashImports } from '@optimize-lodash/rollup-plugin';
 import { removeShebang } from './plugins/remove-shebang';
-
-/**
- * These packages will not be resolved by Rollup and will be left as imports.
- */
-const EXTERNAL_PACKAGES = ['react', 'react-native'];
+import { isAbsolute, resolve } from 'path';
 
 const errorCodeOpts = {
   errorMapFilePath: paths.appErrorsJson,
 };
 
 export async function createRollupConfig(
-  opts: TsdxOptions,
-  outputName: string = opts.input
+  opts: TsdxOptions
+  // entryPoint?: string
 ): Promise<RollupOptions & { output: OutputOptions }> {
   const findAndRecordErrorCodes = await extractErrors({
     ...errorCodeOpts,
@@ -51,51 +46,41 @@ export async function createRollupConfig(
     './'
   ).options;
 
-  const { PRODUCTION } = process.env;
-
   return {
     // Tell Rollup the entry point to the package
     input: opts.input,
     // Tell Rollup which packages to ignore
     external: (id: string) => {
-      // bundle in polyfills as TSDX can't (yet) ensure they're installed as deps
+      const resolvedId = resolve(id);
+      const resolvedEntry = resolve(opts.input);
+      /**
+       * Do not mark the entry point as external.
+       */
+      if (resolvedId === resolvedEntry) {
+        return false;
+      }
+      /**
+       * Bundle in polyfills as TSDX can't (yet) ensure they're installed as
+       * deps.
+       */
       if (id.startsWith('regenerator-runtime')) {
         return false;
       }
-
-      if (EXTERNAL_PACKAGES.includes(id)) {
-        return true;
-      }
-
-      return external(id);
+      /**
+       * Otherwise, mark external.
+       */
+      return true;
     },
     // Minimize runtime error surface as much as possible
     shimMissingExports: true,
-    // Rollup has treeshaking by default, but we can optimize it further...
+    // Customize tree-shaking options
     treeshake: {
-      // We assume reading a property of an object never has side-effects.
-      // This means tsdx WILL remove getters and setters defined directly on objects.
-      // Any getters or setters defined on classes will not be effected.
-      //
-      // @example
-      //
-      // const foo = {
-      //  get bar() {
-      //    console.log('effect');
-      //    return 'bar';
-      //  }
-      // }
-      //
-      // const result = foo.bar;
-      // const illegalAccess = foo.quux.tooDeep;
-      //
-      // Punchline....Don't use getters and setters
       propertyReadSideEffects: false,
     },
     // Establish Rollup output
     output: {
       // Set filenames of the consumer's package
-      file: outputName,
+      file: opts.input,
       // Pass through the file format
       format: isEsm ? 'es' : opts.format,
       // Do not let Rollup call Object.freeze() on namespace import objects
@@ -104,7 +89,7 @@ export async function createRollupConfig(
       // Respect tsconfig esModuleInterop when setting __esModule.
       esModule: Boolean(tsCompilerOptions?.esModuleInterop) || isEsm,
       name: opts.name || safeVariableName(opts.name),
-      sourcemap: true,
+      sourcemap: false,
       globals: {
         react: 'React',
         'react-native': 'ReactNative',
@@ -132,17 +117,17 @@ export async function createRollupConfig(
        * Resolve only non-JS. Leave regular imports alone, since packages will
        * ship with dependencies.
        */
-      resolve({
+      nodeResolve({
         /**
-         * Do not allow CJS imports.
+         * Do not allow CJS imports for ESM output.
          */
-        modulesOnly: true,
+        modulesOnly: isEsm,
         /**
          * For node output, do not resolve `browser` field.
          */
         browser: opts.target !== 'node',
         /**
-         * Resolve JSX, JSON, and .node files.
+         * Resolve only JSX, JSON, and .node files.
          */
         extensions: ['.jsx', '.json', '.node'],
       }),
@@ -160,7 +145,7 @@ export async function createRollupConfig(
          * The `modulesOnly` option of @rollup/plugin-node-resolve ensures that
          * the compiler will throw if there is an issue.
          */
-        esmExternals: true,
+        esmExternals: isEsm,
         requireReturnsDefault: true,
         /**
          * Turn `require` statements into `import` statements in ESM out.
@@ -183,45 +168,6 @@ export async function createRollupConfig(
        */
       removeShebang(),
       /**
-       * Run TSC and transpile TypeScript.
-       */
-      // typescript({
-      //   typescript: ts,
-      //   tsconfig: opts.tsconfig,
-      //   tsconfigDefaults: {
-      //     exclude: [
-      //       // all TS test files, regardless whether co-located or in test/ etc
-      //       '**/*.spec.ts',
-      //       '**/*.test.ts',
-      //       '**/*.spec.tsx',
-      //       '**/*.test.tsx',
-      //       // TS defaults below
-      //       'node_modules',
-      //       'bower_components',
-      //       'jspm_packages',
-      //       paths.appDist,
-      //     ],
-      //     compilerOptions: {
-      //       sourceMap: true,
-      //       declaration: true,
-      //       jsx: 'react',
-      //     },
-      //   },
-      //   tsconfigOverride: {
-      //     compilerOptions: {
-      //       // TS -> esnext, then leave the rest to babel-preset-env
-      //       module: 'esnext',
-      //       target: 'esnext',
-      //       // don't output declarations more than once
-      //       ...(outputNum > 0
-      //         ? { declaration: false, declarationMap: false }
-      //         : {}),
-      //     },
-      //   },
-      //   check: !opts.transpileOnly && outputNum === 0,
-      //   useTsconfigDeclarationDir: Boolean(tsCompilerOptions?.declarationDir),
-      // }),
-      /**
        * In --legacy mode, use Babel to transpile to ES5.
        */
       opts.legacy &&
@@ -239,7 +185,6 @@ export async function createRollupConfig(
           },
           babelHelpers: 'bundled',
         }),
-      sourceMaps(),
       /**
        * Minify and compress with Terser for max DCE. Emit latest featureset.
        *
@@ -262,16 +207,6 @@ export async function createRollupConfig(
           toplevel: opts.format === 'cjs' || isEsm,
         }),
       /**
-       * Replace process.env.NODE_ENV variable.
-       */
-      opts.env &&
-        replace({
-          preventAssignment: true,
-          'process.env.NODE_ENV': JSON.stringify(
-            PRODUCTION ? 'production' : 'development'
-          ),
-        }),
-      /**
        * If not in --legacy mode, ensure lodash imports are optimized in the
        * final bundle.
        */
@@ -279,6 +214,43 @@ export async function createRollupConfig(
         optimizeLodashImports({
           useLodashEs: isEsm || undefined,
         }),
+      /**
+       * In emitted output, map module specifiers like ./relative ➡
+       * ./relative.cjs in file.cjs, ./relative ➡ ./relative.mjs in file.mjs,
+       * etc.
+       */
+      {
+        name: 'Match relative filepaths',
+        async generateBundle(_, bundle) {
+          for (const [fileName, chunkInfo] of Object.entries(bundle)) {
+            if (!('code' in chunkInfo)) continue;
+            if (chunkInfo.imports || chunkInfo.dynamicImports) {
+              const { imports } = chunkInfo;
+              const fileExt = fileName.match(/\..+$/) || '';
+              const rewrittenImports = [];
+
+              const ast = this.parse(chunkInfo.code);
+              await estreeWalker.asyncWalk(ast, {
+                async enter(node, parent, prop, index) {
+                  console.log({ node, parent, prop, index });
+                },
+              });
+
+              for (const chunkImport of imports) {
+                // console.log(this.getModuleInfo(chunkImport))
+                if (isAbsolute(chunkImport)) {
+                  rewrittenImports.push(`${chunkImport}${fileExt}`);
+                } else {
+                  rewrittenImports.push(chunkImport);
+                }
+              }
+
+              chunkInfo.imports = rewrittenImports;
+              console.log(fileName, chunkInfo.imports);
+            }
+          }
+        },
+      },
       /**
        * Ensure there's an empty default export. This is the only way to have a
        * dist/index.mjs with `export { default } from './package.min.mjs'` and
@@ -289,7 +261,11 @@ export async function createRollupConfig(
       {
         name: 'Ensure default exports',
         renderChunk: async (code: string, chunk: any) => {
-          if (chunk.exports.includes('default') || !isEsm) {
+          if (
+            !chunk.exports.length ||
+            chunk.exports.includes('default') ||
+            !isEsm
+          ) {
             return null;
           }
 
