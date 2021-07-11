@@ -724,6 +724,9 @@ async function createRollupConfig(opts, outputNum) {
                     module: isEsm,
                     toplevel: opts.format === 'cjs' || isEsm,
                 }),
+            rollupPlugin.optimizeLodashImports({
+                useLodashEs: isEsm || undefined,
+            }),
             /**
              * Replace process.env.NODE_ENV variable.
              */
