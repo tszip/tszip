@@ -60,9 +60,7 @@ const prog = sade('tsdx');
 let appPackageJson: PackageJson;
 try {
   appPackageJson = JSON.parse(readFileSync(paths.appPackageJson, 'utf-8'));
-} catch (e) {
-  throw new Error(`Couldn't read app package.json: ${e}`);
-}
+} catch (e) { }
 
 export const isDir = (name: string) =>
   stat(name)

@@ -1055,9 +1055,7 @@ let appPackageJson;
 try {
     appPackageJson = JSON.parse(fs$1.readFileSync(paths.appPackageJson, 'utf-8'));
 }
-catch (e) {
-    throw new Error(`Couldn't read app package.json: ${e}`);
-}
+catch (e) { }
 const isDir = (name) => promises.stat(name)
     .then(stats => stats.isDirectory())
     .catch(() => false);
