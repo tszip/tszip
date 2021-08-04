@@ -1,5 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 const basicTemplate = {
     name: 'basic',
     dependencies: [
@@ -54,4 +52,4 @@ const basicTemplate = {
         },
     },
 };
-exports.default = basicTemplate;
+export default basicTemplate;

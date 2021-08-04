@@ -1,4 +1,3 @@
-"use strict";
 // largely borrowed from https://github.com/facebook/react/blob/2c8832075b05009bd261df02171bf9888ac76350/scripts/error-codes/transform-error-messages.js
 /**
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -6,14 +5,12 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-const tslib_1 = require("tslib");
-const fs_1 = tslib_1.__importDefault(require("fs"));
-const invertObject_1 = require("./invertObject");
-const evalToString_1 = require("./evalToString");
-const helper_module_imports_1 = require("@babel/helper-module-imports");
-const constants_1 = require("../constants");
-function transformErrorMessages(babel) {
+import fs from 'fs';
+import { invertObject } from './invertObject';
+import { evalToString } from './evalToString';
+import { addDefault } from '@babel/helper-module-imports';
+import { paths } from '../constants';
+export default function transformErrorMessages(babel) {
     const t = babel.types;
     const DEV_EXPRESSION = t.identifier('__DEV__');
     return {
@@ -40,13 +37,13 @@ function transformErrorMessages(babel) {
                     // string) that references a verbose error message. The mapping is
                     // stored in `paths.appErrorsJson`.
                     const condition = node.arguments[0];
-                    const errorMsgLiteral = evalToString_1.evalToString(node.arguments[1]);
+                    const errorMsgLiteral = evalToString(node.arguments[1]);
                     const errorMsgExpressions = Array.from(node.arguments.slice(2));
                     const errorMsgQuasis = errorMsgLiteral
                         .split('%s')
                         .map((raw) => t.templateElement({ raw, cooked: String.raw({ raw }) }));
                     // Import ReactError
-                    const reactErrorIdentfier = helper_module_imports_1.addDefault(path, constants_1.paths.appRoot + '/errors/ErrorDev.js', {
+                    const reactErrorIdentfier = addDefault(path, paths.appRoot + '/errors/ErrorDev.js', {
                         nameHint: 'InvariantError',
                     });
                     // Outputs:
@@ -65,8 +62,8 @@ function transformErrorMessages(babel) {
                         return;
                     }
                     // Avoid caching because we write it as we go.
-                    const existingErrorMap = JSON.parse(fs_1.default.readFileSync(constants_1.paths.appErrorsJson, 'utf-8'));
-                    const errorMap = invertObject_1.invertObject(existingErrorMap);
+                    const existingErrorMap = JSON.parse(fs.readFileSync(paths.appErrorsJson, 'utf-8'));
+                    const errorMap = invertObject(existingErrorMap);
                     let prodErrorId = errorMap[errorMsgLiteral];
                     if (prodErrorId === undefined) {
                         // There is no error code for this message. Add an inline comment
@@ -84,7 +81,7 @@ function transformErrorMessages(babel) {
                     }
                     prodErrorId = parseInt(prodErrorId, 10);
                     // Import ReactErrorProd
-                    const reactErrorProdIdentfier = helper_module_imports_1.addDefault(path, constants_1.paths.appRoot + '/errors/ErrorProd.js', {
+                    const reactErrorProdIdentfier = addDefault(path, paths.appRoot + '/errors/ErrorProd.js', {
                         nameHint: 'InvariantErrorProd',
                     });
                     // Outputs:
@@ -109,4 +106,3 @@ function transformErrorMessages(babel) {
         },
     };
 }
-exports.default = transformErrorMessages;

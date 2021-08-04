@@ -1,7 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.extractErrors = void 0;
-const tslib_1 = require("tslib");
 // largely borrowed from https://github.com/facebook/react/blob/8b2d3783e58d1acea53428a10d2035a8399060fe/scripts/error-codes/extract-errors.js
 /**
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -9,14 +5,14 @@ const tslib_1 = require("tslib");
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-const fs_extra_1 = tslib_1.__importDefault(require("fs-extra"));
-const parser_1 = require("@babel/parser");
-const traverse_1 = tslib_1.__importDefault(require("@babel/traverse"));
-const invertObject_1 = require("./invertObject");
-const evalToString_1 = require("./evalToString");
-const constants_1 = require("../constants");
-const utils_1 = require("../utils");
-const pascal_case_1 = require("pascal-case");
+import fs from 'fs-extra';
+import { parse } from '@babel/parser';
+import traverse from '@babel/traverse';
+import { invertObject } from './invertObject';
+import { evalToString } from './evalToString';
+import { paths } from '../constants';
+import { safeVariableName } from '../utils';
+import { pascalCase } from 'pascal-case';
 const babelParserOptions = {
     sourceType: 'module',
     // As a parser, @babel/parser has its own options and we can't directly
@@ -31,7 +27,7 @@ const babelParserOptions = {
         'objectRestSpread',
     ],
 }; // workaround for trailingFunctionCommas syntax
-async function extractErrors(opts) {
+export async function extractErrors(opts) {
     if (!opts || !opts.errorMapFilePath) {
         throw new Error('Missing options. Ensure you pass an object with `errorMapFilePath`.');
     }
@@ -46,7 +42,7 @@ async function extractErrors(opts) {
          * are cached, and the cache map is not properly invalidated after file
          * changes.
          */
-        const fileContents = await fs_extra_1.default.readFile(errorMapFilePath, 'utf-8');
+        const fileContents = await fs.readFile(errorMapFilePath, 'utf-8');
         existingErrorMap = JSON.parse(fileContents);
     }
     catch (e) {
@@ -62,17 +58,17 @@ async function extractErrors(opts) {
         currentID = Math.max.apply(null, allErrorIDs) + 1;
     }
     // Here we invert the map object in memory for faster error code lookup
-    existingErrorMap = invertObject_1.invertObject(existingErrorMap);
+    existingErrorMap = invertObject(existingErrorMap);
     function transform(source) {
-        const ast = parser_1.parse(source, babelParserOptions);
-        traverse_1.default(ast, {
+        const ast = parse(source, babelParserOptions);
+        traverse(ast, {
             CallExpression: {
                 exit(astPath) {
                     if (astPath.get('callee').isIdentifier({ name: 'invariant' })) {
                         const node = astPath.node;
                         // error messages can be concatenated (`+`) at runtime, so here's a
                         // trivial partial evaluator that interprets the literal value
-                        const errorMsgLiteral = evalToString_1.evalToString(node.arguments[1]);
+                        const errorMsgLiteral = evalToString(node.arguments[1]);
                         addToErrorMap(errorMsgLiteral);
                     }
                 },
@@ -86,13 +82,13 @@ async function extractErrors(opts) {
         existingErrorMap[errorMsgLiteral] = '' + currentID++;
     }
     async function flush() {
-        const prettyName = pascal_case_1.pascalCase(utils_1.safeVariableName(opts.name));
+        const prettyName = pascalCase(safeVariableName(opts.name));
         // Ensure that the ./src/errors directory exists or create it
-        await fs_extra_1.default.ensureDir(constants_1.paths.appErrors);
+        await fs.ensureDir(paths.appErrors);
         // Output messages to ./errors/codes.json
-        await fs_extra_1.default.writeFile(errorMapFilePath, JSON.stringify(invertObject_1.invertObject(existingErrorMap), null, 2) + '\n', 'utf-8');
+        await fs.writeFile(errorMapFilePath, JSON.stringify(invertObject(existingErrorMap), null, 2) + '\n', 'utf-8');
         // Write the error files, unless they already exist
-        await fs_extra_1.default.writeFile(constants_1.paths.appErrors + '/ErrorDev.js', `
+        await fs.writeFile(paths.appErrors + '/ErrorDev.js', `
 function ErrorDev(message) {
   const error = new Error(message);
   error.name = 'Invariant Violation';
@@ -101,7 +97,7 @@ function ErrorDev(message) {
 
 export default ErrorDev;
       `, 'utf-8');
-        await fs_extra_1.default.writeFile(constants_1.paths.appErrors + '/ErrorProd.js', `
+        await fs.writeFile(paths.appErrors + '/ErrorProd.js', `
 function ErrorProd(code) {
   // TODO: replace this URL with yours
   let url = 'https://reactjs.org/docs/error-decoder.html?invariant=' + code;
@@ -123,4 +119,3 @@ export default ErrorProd;
         await flush();
     };
 }
-exports.extractErrors = extractErrors;

@@ -7,3 +7,6 @@ tester-react
 package-lock.json
 # Local Netlify folder
 .netlify
+
+# Jest staging folders
+/stage-*

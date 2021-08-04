@@ -1,4 +1,3 @@
-"use strict";
 /**
  * Copyright 2018 Google Inc. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,14 +13,11 @@
  * @see https://github.com/GoogleChromeLabs/proxx/blob/master/lib/simple-ts.js
  * @see https://twitter.com/jaffathecake/status/1145979217852678144
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.runTsc = exports.resolveId = exports.loadConfig = void 0;
-const tslib_1 = require("tslib");
-const child_process_1 = require("child_process");
-const ts = tslib_1.__importStar(require("typescript"));
-const createProgressEstimator_1 = require("../createProgressEstimator");
+import { spawn } from 'child_process';
+import * as ts from 'typescript';
+import { createProgressEstimator } from '../createProgressEstimator';
 // const extRe = /\.tsx?$/;
-function loadConfig() {
+export function loadConfig() {
     const fileName = ts.findConfigFile('.', ts.sys.fileExists);
     if (!fileName)
         throw Error('tsconfig not found');
@@ -30,8 +26,7 @@ function loadConfig() {
     const parsedTsConfig = ts.parseJsonConfigFileContent(loadedConfig, ts.sys, process.cwd(), undefined, fileName);
     return parsedTsConfig;
 }
-exports.loadConfig = loadConfig;
-function resolveId(id, importer = '') {
+export function resolveId(id, importer = '') {
     const config = loadConfig();
     // If there isn't an importer, it's an entry point, so we don't need to resolve it relative
     // to something.
@@ -48,8 +43,7 @@ function resolveId(id, importer = '') {
     }
     return tsResolve.resolvedModule.resolvedFileName;
 }
-exports.resolveId = resolveId;
-async function runTsc({ noBuild = false, watch = false } = {}) {
+export async function runTsc({ noBuild = false, watch = false } = {}) {
     /**
      * Force src/ rootDir, dist/ outDir, and override noEmit.
      */
@@ -57,9 +51,9 @@ async function runTsc({ noBuild = false, watch = false } = {}) {
     const args = argString.split(' ');
     if (!noBuild) {
         console.log(`> Command: tsc ${args.join(' ')}`);
-        const progressIndicator = await createProgressEstimator_1.createProgressEstimator();
+        const progressIndicator = await createProgressEstimator();
         await progressIndicator(new Promise((resolve) => {
-            const proc = child_process_1.spawn('tsc', args, {
+            const proc = spawn('tsc', args, {
                 stdio: 'inherit',
             });
             proc.on('exit', (code) => {
@@ -71,17 +65,16 @@ async function runTsc({ noBuild = false, watch = false } = {}) {
         }), `TS ➡ JS: Compiling with TSC`);
     }
     if (!noBuild && watch) {
-        child_process_1.spawn('tsc', [...args, '--watch', '--preserveWatchOutput'], {
+        spawn('tsc', [...args, '--watch', '--preserveWatchOutput'], {
             stdio: 'inherit',
         });
     }
 }
-exports.runTsc = runTsc;
 /**
  * This simply runs `tsc` in process.cwd(), reading the TSConfig in that
  * directory, and forcing an emit.
  */
-function simpleTS() {
+export default function simpleTS() {
     return {
         name: 'simple-ts',
         /**
@@ -90,4 +83,3 @@ function simpleTS() {
         buildStart: async () => await runTsc(),
     };
 }
-exports.default = simpleTS;

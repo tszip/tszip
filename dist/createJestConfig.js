@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createJestConfig = void 0;
-function createJestConfig(_, rootDir) {
+export function createJestConfig(_, rootDir) {
     const config = {
         transform: {
             '.(ts|tsx)$': require.resolve('ts-jest/dist'),
@@ -20,4 +17,3 @@ function createJestConfig(_, rootDir) {
     };
     return config;
 }
-exports.createJestConfig = createJestConfig;

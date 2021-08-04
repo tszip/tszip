@@ -1,65 +1,55 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.incorrectNodeVersion = exports.start = exports.copying = exports.installError = exports.installing = exports.alreadyExists = exports.missingProjectName = exports.help = void 0;
-const tslib_1 = require("tslib");
-const chalk_1 = tslib_1.__importDefault(require("chalk"));
-const getInstallCmd_1 = tslib_1.__importDefault(require("./getInstallCmd"));
-const Output = tslib_1.__importStar(require("./output"));
+import chalk from 'chalk';
+import getInstallCmd from './getInstallCmd';
+import * as Output from './output';
 // This was copied from Razzle. Lots of unused stuff.
 const program = {
     name: 'tsdx',
 };
-const help = function () {
+export const help = function () {
     return `
-    Only ${chalk_1.default.green('<project-directory>')} is required.
+    Only ${chalk.green('<project-directory>')} is required.
     If you have any problems, do not hesitate to file an issue:
-    ${chalk_1.default.cyan('https://github.com/formium/tsdx/issues/new')}
+    ${chalk.cyan('https://github.com/formium/tsdx/issues/new')}
   `;
 };
-exports.help = help;
-const missingProjectName = function () {
+export const missingProjectName = function () {
     return `
 Please specify the project directory:
-  ${chalk_1.default.cyan(program.name)} ${chalk_1.default.green('<project-directory>')}
+  ${chalk.cyan(program.name)} ${chalk.green('<project-directory>')}
 For example:
-  ${chalk_1.default.cyan(program.name)} ${chalk_1.default.green('my-tsdx-lib')}
-Run ${chalk_1.default.cyan(`${program.name} --help`)} to see all options.
+  ${chalk.cyan(program.name)} ${chalk.green('my-tsdx-lib')}
+Run ${chalk.cyan(`${program.name} --help`)} to see all options.
 `;
 };
-exports.missingProjectName = missingProjectName;
-const alreadyExists = function (projectName) {
+export const alreadyExists = function (projectName) {
     return `
-Uh oh! Looks like there's already a directory called ${chalk_1.default.red(projectName)}. Please try a different name or delete that folder.`;
+Uh oh! Looks like there's already a directory called ${chalk.red(projectName)}. Please try a different name or delete that folder.`;
 };
-exports.alreadyExists = alreadyExists;
-const installing = function (packages) {
+export const installing = function (packages) {
     const pkgText = packages
         .map(function (pkg) {
-        return `    ${chalk_1.default.cyan(chalk_1.default.bold(pkg))}`;
+        return `    ${chalk.cyan(chalk.bold(pkg))}`;
     })
         .join('\n');
     return `Installing npm modules:
 ${pkgText}
 `;
 };
-exports.installing = installing;
-const installError = function (packages) {
+export const installError = function (packages) {
     const pkgText = packages
         .map(function (pkg) {
-        return `${chalk_1.default.cyan(chalk_1.default.bold(pkg))}`;
+        return `${chalk.cyan(chalk.bold(pkg))}`;
     })
         .join(', ');
     Output.error(`Failed to install ${pkgText}, try again.`);
 };
-exports.installError = installError;
-const copying = function (projectName) {
+export const copying = function (projectName) {
     return `
-Creating ${chalk_1.default.bold(chalk_1.default.green(projectName))}...
+Creating ${chalk.bold(chalk.green(projectName))}...
 `;
 };
-exports.copying = copying;
-const start = async function (projectName) {
-    const cmd = await getInstallCmd_1.default();
+export const start = async function (projectName) {
+    const cmd = await getInstallCmd();
     const commands = {
         install: cmd === 'npm' ? 'npm install' : 'yarn install',
         build: cmd === 'npm' ? 'npm run build' : 'yarn build',
@@ -67,7 +57,7 @@ const start = async function (projectName) {
         test: cmd === 'npm' ? 'npm test' : 'yarn test',
     };
     return `
-  ${chalk_1.default.green('Awesome!')} You're now ready to start coding.
+  ${chalk.green('Awesome!')} You're now ready to start coding.
   
   I already ran ${Output.cmd(commands.install)} for you, so your next steps are:
     ${Output.cmd(`cd ${projectName}`)}
@@ -82,11 +72,9 @@ const start = async function (projectName) {
     ${Output.cmd(commands.test)}
     
   Questions? Feedback? Please let me know!
-  ${chalk_1.default.green('https://github.com/formium/tsdx/issues')}
+  ${chalk.green('https://github.com/formium/tsdx/issues')}
 `;
 };
-exports.start = start;
-const incorrectNodeVersion = function (requiredVersion) {
-    return `Unsupported Node version! Your current Node version (${chalk_1.default.red(process.version)}) does not satisfy the requirement of Node ${chalk_1.default.cyan(requiredVersion)}.`;
+export const incorrectNodeVersion = function (requiredVersion) {
+    return `Unsupported Node version! Your current Node version (${chalk.red(process.version)}) does not satisfy the requirement of Node ${chalk.cyan(requiredVersion)}.`;
 };
-exports.incorrectNodeVersion = incorrectNodeVersion;

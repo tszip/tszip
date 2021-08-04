@@ -1,18 +1,14 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createBuildConfigs = void 0;
-const tslib_1 = require("tslib");
-const createRollupConfig_1 = require("./createRollupConfig");
-const glob_promise_1 = tslib_1.__importDefault(require("glob-promise"));
-const utils_1 = require("./utils");
-const constants_1 = require("./constants");
-async function createBuildConfigs(opts) {
+import { createRollupConfig } from './createRollupConfig';
+import glob from 'glob-promise';
+import { safePackageName } from './utils';
+import { paths } from './constants';
+export async function createBuildConfigs(opts) {
     /**
      * Generate all forms of the entry points that will be needed.
      */
     const entryPoints = createAllEntryPoints(opts);
     const entryPointConfigs = await Promise.all(entryPoints.map(async (entryPoint) => {
-        const packageName = utils_1.safePackageName(opts.name);
+        const packageName = safePackageName(opts.name);
         let outputName;
         switch (entryPoint.format) {
             case 'esm':
@@ -25,11 +21,11 @@ async function createBuildConfigs(opts) {
                 outputName = entryPoint.input;
                 break;
         }
-        const config = await createRollupConfig_1.createRollupConfig(entryPoint);
+        const config = await createRollupConfig(entryPoint);
         config.output.file = outputName;
         return config;
     }));
-    const emittedFiles = await glob_promise_1.default('dist/**/*.js');
+    const emittedFiles = await glob('dist/**/*.js');
     /**
      * Make ESM versions of emitted TS output.
      */
@@ -50,7 +46,7 @@ async function createBuildConfigs(opts) {
     }));
     const emittedFileConfigs = await Promise.all([...emittedFilesToESM, ...emittedFilesToCJS].map(async (options) => {
         const fileExt = options.format === 'esm' ? '.mjs' : '.cjs';
-        const config = await createRollupConfig_1.createRollupConfig(options);
+        const config = await createRollupConfig(options);
         /**
          * Overwrite input files.
          */
@@ -60,7 +56,6 @@ async function createBuildConfigs(opts) {
     const compilerPasses = [...entryPointConfigs, ...emittedFileConfigs];
     return compilerPasses;
 }
-exports.createBuildConfigs = createBuildConfigs;
 /**
  * Create all the entry points, on a per-format basis, for the library.
  */
@@ -68,7 +63,7 @@ function createAllEntryPoints(opts) {
     /**
      * The entry point emitted by TSC.
      */
-    const input = `${constants_1.paths.appDist}/index.js`;
+    const input = `${paths.appDist}/index.js`;
     /**
      * Map it to all of the specified output formats (ESM, CJS, UMD, SystemJS,
      * etc.). Only the entry point needs to be specified this way.

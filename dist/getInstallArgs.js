@@ -1,6 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-function getInstallArgs(cmd, packages) {
+export default function getInstallArgs(cmd, packages) {
     switch (cmd) {
         case 'npm':
             return ['install', ...packages, '--save-dev'];
@@ -8,4 +6,3 @@ function getInstallArgs(cmd, packages) {
             return ['add', ...packages, '--dev'];
     }
 }
-exports.default = getInstallArgs;

@@ -1,12 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createEslintConfig = void 0;
-const tslib_1 = require("tslib");
-const fs_extra_1 = tslib_1.__importDefault(require("fs-extra"));
-const path_1 = tslib_1.__importDefault(require("path"));
-const utils_1 = require("./utils");
-async function createEslintConfig({ pkg, rootDir, writeFile, }) {
-    const isReactLibrary = Boolean(utils_1.getReactVersion(pkg));
+import fs from 'fs-extra';
+import path from 'path';
+import { getReactVersion } from './utils';
+export async function createEslintConfig({ pkg, rootDir, writeFile, }) {
+    const isReactLibrary = Boolean(getReactVersion(pkg));
     const config = {
         extends: [
             'react-app',
@@ -23,9 +19,9 @@ async function createEslintConfig({ pkg, rootDir, writeFile, }) {
     if (!writeFile) {
         return config;
     }
-    const file = path_1.default.join(rootDir, '.eslintrc.js');
+    const file = path.join(rootDir, '.eslintrc.js');
     try {
-        await fs_extra_1.default.writeFile(file, `module.exports = ${JSON.stringify(config, null, 2)}`, { flag: 'wx' });
+        await fs.writeFile(file, `module.exports = ${JSON.stringify(config, null, 2)}`, { flag: 'wx' });
     }
     catch (e) {
         if (e.code === 'EEXIST') {
@@ -37,4 +33,3 @@ async function createEslintConfig({ pkg, rootDir, writeFile, }) {
         return config;
     }
 }
-exports.createEslintConfig = createEslintConfig;

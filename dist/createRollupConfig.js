@@ -1,28 +1,24 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createRollupConfig = void 0;
-const tslib_1 = require("tslib");
-const utils_1 = require("./utils");
-const constants_1 = require("./constants");
-const rollup_plugin_terser_1 = require("rollup-plugin-terser");
-const core_1 = require("@babel/core");
-const plugin_commonjs_1 = tslib_1.__importDefault(require("@rollup/plugin-commonjs"));
-const plugin_json_1 = tslib_1.__importDefault(require("@rollup/plugin-json"));
-const plugin_node_resolve_1 = tslib_1.__importDefault(require("@rollup/plugin-node-resolve"));
-const typescript_1 = tslib_1.__importDefault(require("typescript"));
-const estree_walker_1 = tslib_1.__importDefault(require("estree-walker"));
-const extractErrors_1 = require("./errors/extractErrors");
-const babelPluginTsdx_1 = require("./babelPluginTsdx");
-const rollup_plugin_1 = require("@optimize-lodash/rollup-plugin");
-const remove_shebang_1 = require("./plugins/remove-shebang");
-const path_1 = require("path");
+import { safeVariableName } from './utils';
+import { paths } from './constants';
+import { terser } from 'rollup-plugin-terser';
+import { DEFAULT_EXTENSIONS as DEFAULT_BABEL_EXTENSIONS } from '@babel/core';
+import commonjs from '@rollup/plugin-commonjs';
+import json from '@rollup/plugin-json';
+import nodeResolve from '@rollup/plugin-node-resolve';
+import ts from 'typescript';
+import estreeWalker from 'estree-walker';
+import { extractErrors } from './errors/extractErrors';
+import { babelPluginTsdx } from './babelPluginTsdx';
+import { optimizeLodashImports } from '@optimize-lodash/rollup-plugin';
+import { removeShebang } from './plugins/remove-shebang';
+import { isAbsolute, resolve } from 'path';
 const errorCodeOpts = {
-    errorMapFilePath: constants_1.paths.appErrorsJson,
+    errorMapFilePath: paths.appErrorsJson,
 };
-async function createRollupConfig(opts
+export async function createRollupConfig(opts
 // entryPoint?: string
 ) {
-    const findAndRecordErrorCodes = await extractErrors_1.extractErrors({
+    const findAndRecordErrorCodes = await extractErrors({
         ...errorCodeOpts,
         ...opts,
     });
@@ -30,18 +26,18 @@ async function createRollupConfig(opts
     const shouldMinify = opts.minify !== undefined
         ? opts.minify
         : opts.env === 'production' || isEsm;
-    const tsconfigPath = opts.tsconfig || constants_1.paths.tsconfigJson;
+    const tsconfigPath = opts.tsconfig || paths.tsconfigJson;
     // borrowed from https://github.com/facebook/create-react-app/pull/7248
-    const tsconfigJSON = typescript_1.default.readConfigFile(tsconfigPath, typescript_1.default.sys.readFile).config;
+    const tsconfigJSON = ts.readConfigFile(tsconfigPath, ts.sys.readFile).config;
     // borrowed from https://github.com/ezolenko/rollup-plugin-typescript2/blob/42173460541b0c444326bf14f2c8c27269c4cb11/src/parse-tsconfig.ts#L48
-    const tsCompilerOptions = typescript_1.default.parseJsonConfigFileContent(tsconfigJSON, typescript_1.default.sys, './').options;
+    const tsCompilerOptions = ts.parseJsonConfigFileContent(tsconfigJSON, ts.sys, './').options;
     return {
         // Tell Rollup the entry point to the package
         input: opts.input,
         // Tell Rollup which packages to ignore
         external: (id) => {
-            const resolvedId = path_1.resolve(id);
-            const resolvedEntry = path_1.resolve(opts.input);
+            const resolvedId = resolve(id);
+            const resolvedEntry = resolve(opts.input);
             /**
              * Do not mark the entry point as external.
              */
@@ -77,7 +73,7 @@ async function createRollupConfig(opts
             freeze: false,
             // Respect tsconfig esModuleInterop when setting __esModule.
             esModule: Boolean(tsCompilerOptions?.esModuleInterop) || isEsm,
-            name: opts.name || utils_1.safeVariableName(opts.name),
+            name: opts.name || safeVariableName(opts.name),
             sourcemap: false,
             globals: {
                 react: 'React',
@@ -107,7 +103,7 @@ async function createRollupConfig(opts
              * Resolve only non-JS. Leave regular imports alone, since packages will
              * ship with dependencies.
              */
-            plugin_node_resolve_1.default({
+            nodeResolve({
                 /**
                  * Do not allow CJS imports for ESM output.
                  */
@@ -124,7 +120,7 @@ async function createRollupConfig(opts
             /**
              * All bundled external modules need to be converted from CJS to ESM.
              */
-            plugin_commonjs_1.default({
+            commonjs({
                 /**
                  * CJS/ESM interop. Support Node's .cjs and .mjs spec.
                  */
@@ -151,18 +147,18 @@ async function createRollupConfig(opts
             /**
              * Convert JSON to ESM.
              */
-            plugin_json_1.default(),
+            json(),
             /**
              * Remove shebangs like #!/usr/bin/env node.
              */
-            remove_shebang_1.removeShebang(),
+            removeShebang(),
             /**
              * In --legacy mode, use Babel to transpile to ES5.
              */
             opts.legacy &&
-                babelPluginTsdx_1.babelPluginTsdx({
+                babelPluginTsdx({
                     exclude: 'node_modules/**',
-                    extensions: [...core_1.DEFAULT_EXTENSIONS, 'ts', 'tsx'],
+                    extensions: [...DEFAULT_BABEL_EXTENSIONS, 'ts', 'tsx'],
                     passPerPreset: true,
                     custom: {
                         targets: {
@@ -181,7 +177,7 @@ async function createRollupConfig(opts
              * code it would need to search.
              */
             shouldMinify &&
-                rollup_plugin_terser_1.terser({
+                terser({
                     format: {
                         keep_quoted_props: true,
                         comments: false,
@@ -195,12 +191,15 @@ async function createRollupConfig(opts
                     module: isEsm,
                     toplevel: opts.format === 'cjs' || isEsm,
                 }),
+            optimizeLodashImports({
+                useLodashEs: isEsm || undefined,
+            }),
             /**
              * If not in --legacy mode, ensure lodash imports are optimized in the
              * final bundle.
              */
             !opts.legacy &&
-                rollup_plugin_1.optimizeLodashImports({
+                optimizeLodashImports({
                     useLodashEs: isEsm || undefined,
                 }),
             /**
@@ -219,14 +218,14 @@ async function createRollupConfig(opts
                             const fileExt = fileName.match(/\..+$/) || '';
                             const rewrittenImports = [];
                             const ast = this.parse(chunkInfo.code);
-                            await estree_walker_1.default.asyncWalk(ast, {
+                            await estreeWalker.asyncWalk(ast, {
                                 async enter(node, parent, prop, index) {
                                     console.log({ node, parent, prop, index });
                                 },
                             });
                             for (const chunkImport of imports) {
                                 // console.log(this.getModuleInfo(chunkImport))
-                                if (path_1.isAbsolute(chunkImport)) {
+                                if (isAbsolute(chunkImport)) {
                                     rewrittenImports.push(`${chunkImport}${fileExt}`);
                                 }
                                 else {
@@ -263,4 +262,3 @@ async function createRollupConfig(opts
         ],
     };
 }
-exports.createRollupConfig = createRollupConfig;

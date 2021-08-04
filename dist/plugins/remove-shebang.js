@@ -1,6 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeShebang = void 0;
 /**
  * Custom plugin that removes shebang from code because newer versions of
  * bublé bundle their own private version of `acorn` and we can't find a
@@ -10,7 +7,7 @@ exports.removeShebang = void 0;
  * @see https://github.com/Rich-Harris/buble/pull/165
  */
 const shebangRegex = /^#!(.*)/;
-const removeShebang = () => {
+export const removeShebang = () => {
     return {
         name: 'Remove shebang',
         transform(code) {
@@ -22,4 +19,3 @@ const removeShebang = () => {
         },
     };
 };
-exports.removeShebang = removeShebang;

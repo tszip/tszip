@@ -1,9 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.moveTypes = void 0;
-const tslib_1 = require("tslib");
-const fs_extra_1 = tslib_1.__importDefault(require("fs-extra"));
-const constants_1 = require("./constants");
+import fs from 'fs-extra';
+import { paths } from './constants';
 /*
   This was originally needed because the default
   tsconfig.compilerOptions.rootDir was set to './' instead of './src'.
@@ -12,9 +8,9 @@ const constants_1 = require("./constants");
   6 months - 1 year, then change it to an error in a breaking bump and leave
   that in for some time too.
 */
-async function moveTypes() {
-    const appDistSrc = constants_1.paths.appDist + '/src';
-    const pathExists = await fs_extra_1.default.pathExists(appDistSrc);
+export async function moveTypes() {
+    const appDistSrc = paths.appDist + '/src';
+    const pathExists = await fs.pathExists(appDistSrc);
     if (!pathExists)
         return;
     // see note above about deprecation window
@@ -25,9 +21,8 @@ async function moveTypes() {
         'You may also need to change your include to remove "test", which also ' +
         'caused declarations to be unnecessarily created for test files.');
     // Move the type declarations to the base of the ./dist folder
-    await fs_extra_1.default.copy(appDistSrc, constants_1.paths.appDist, {
+    await fs.copy(appDistSrc, paths.appDist, {
         overwrite: true,
     });
-    await fs_extra_1.default.remove(appDistSrc);
+    await fs.remove(appDistSrc);
 }
-exports.moveTypes = moveTypes;

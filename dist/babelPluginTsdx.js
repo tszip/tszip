@@ -1,23 +1,18 @@
-"use strict";
 /**
  * @todo Do not use require.resolve so that the package can ship as ESM.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.babelPluginTsdx = exports.createConfigItems = exports.mergeConfigItems = exports.isTruthy = void 0;
-const tslib_1 = require("tslib");
-const core_1 = require("@babel/core");
-const plugin_babel_1 = require("@rollup/plugin-babel");
-const lodash_merge_1 = tslib_1.__importDefault(require("lodash.merge"));
-const isTruthy = (obj) => {
+import { createConfigItem } from '@babel/core';
+import { createBabelInputPluginFactory } from '@rollup/plugin-babel';
+import merge from 'lodash.merge';
+export const isTruthy = (obj) => {
     if (!obj) {
         return false;
     }
     return obj.constructor !== Object || Object.keys(obj).length > 0;
 };
-exports.isTruthy = isTruthy;
 // replace lodash with lodash-es, but not lodash/fp
 const replacements = [{ original: 'lodash(?!/fp)', replacement: 'lodash-es' }];
-const mergeConfigItems = (type, ...configItemsToMerge) => {
+export const mergeConfigItems = (type, ...configItemsToMerge) => {
     const mergedItems = [];
     configItemsToMerge.forEach(configItemToMerge => {
         configItemToMerge.forEach((item) => {
@@ -26,9 +21,9 @@ const mergeConfigItems = (type, ...configItemsToMerge) => {
                 mergedItems.push(item);
                 return;
             }
-            mergedItems[itemToMergeWithIndex] = core_1.createConfigItem([
+            mergedItems[itemToMergeWithIndex] = createConfigItem([
                 mergedItems[itemToMergeWithIndex].file.resolved,
-                lodash_merge_1.default(mergedItems[itemToMergeWithIndex].options, item.options),
+                merge(mergedItems[itemToMergeWithIndex].options, item.options),
             ], {
                 type,
             });
@@ -36,14 +31,12 @@ const mergeConfigItems = (type, ...configItemsToMerge) => {
     });
     return mergedItems;
 };
-exports.mergeConfigItems = mergeConfigItems;
-const createConfigItems = (type, items) => {
+export const createConfigItems = (type, items) => {
     return items.map(({ name, ...options }) => {
-        return core_1.createConfigItem([require.resolve(name), options], { type });
+        return createConfigItem([require.resolve(name), options], { type });
     });
 };
-exports.createConfigItems = createConfigItems;
-exports.babelPluginTsdx = plugin_babel_1.createBabelInputPluginFactory(() => ({
+export const babelPluginTsdx = createBabelInputPluginFactory(() => ({
     // Passed the plugin options.
     options({ custom: customOptions, ...pluginOptions }) {
         return {
@@ -54,7 +47,7 @@ exports.babelPluginTsdx = plugin_babel_1.createBabelInputPluginFactory(() => ({
         };
     },
     config(config, { customOptions }) {
-        const defaultPlugins = exports.createConfigItems('plugin', [
+        const defaultPlugins = createConfigItems('plugin', [
             // {
             //   name: '@babel/plugin-transform-react-jsx',
             //   pragma: customOptions.jsx || 'h',
@@ -76,7 +69,7 @@ exports.babelPluginTsdx = plugin_babel_1.createBabelInputPluginFactory(() => ({
                 name: '@babel/plugin-proposal-class-properties',
                 loose: true,
             },
-            exports.isTruthy(customOptions.extractErrors) && {
+            isTruthy(customOptions.extractErrors) && {
                 name: './errors/transformErrorMessages',
             },
         ].filter(Boolean));
@@ -86,9 +79,9 @@ exports.babelPluginTsdx = plugin_babel_1.createBabelInputPluginFactory(() => ({
         // if they use preset-env, merge their options with ours
         if (presetEnvIdx !== -1) {
             const presetEnv = babelOptions.presets[presetEnvIdx];
-            babelOptions.presets[presetEnvIdx] = core_1.createConfigItem([
+            babelOptions.presets[presetEnvIdx] = createConfigItem([
                 presetEnv.file.resolved,
-                lodash_merge_1.default({
+                merge({
                     loose: true,
                     targets: customOptions.targets,
                 }, presetEnv.options, {
@@ -100,7 +93,7 @@ exports.babelPluginTsdx = plugin_babel_1.createBabelInputPluginFactory(() => ({
         }
         else {
             // if no preset-env, add it & merge with their presets
-            const defaultPresets = exports.createConfigItems('preset', [
+            const defaultPresets = createConfigItems('preset', [
                 {
                     name: '@babel/preset-env',
                     targets: customOptions.targets,
@@ -108,10 +101,10 @@ exports.babelPluginTsdx = plugin_babel_1.createBabelInputPluginFactory(() => ({
                     loose: true,
                 },
             ]);
-            babelOptions.presets = exports.mergeConfigItems('preset', defaultPresets, babelOptions.presets);
+            babelOptions.presets = mergeConfigItems('preset', defaultPresets, babelOptions.presets);
         }
         // Merge babelrc & our plugins together
-        babelOptions.plugins = exports.mergeConfigItems('plugin', defaultPlugins, babelOptions.plugins || []);
+        babelOptions.plugins = mergeConfigItems('plugin', defaultPlugins, babelOptions.plugins || []);
         return babelOptions;
     },
 }));

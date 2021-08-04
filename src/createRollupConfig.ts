@@ -206,6 +206,9 @@ export async function createRollupConfig(
           module: isEsm,
           toplevel: opts.format === 'cjs' || isEsm,
         }),
+      optimizeLodashImports({
+        useLodashEs: isEsm || undefined,
+      }),
       /**
        * If not in --legacy mode, ensure lodash imports are optimized in the
        * final bundle.

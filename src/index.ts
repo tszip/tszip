@@ -53,9 +53,7 @@ const prog = sade('tsdx');
 let appPackageJson: PackageJson;
 try {
   appPackageJson = JSON.parse(readFileSync(paths.appPackageJson, 'utf-8'));
-} catch (e) {
-  throw new Error(`Couldn't read app package.json: ${e}`);
-}
+} catch (e) {}
 
 export const isDir = (name: string) =>
   stat(name)
@@ -83,16 +81,16 @@ async function getInputs(
   entries?: string | string[],
   source?: string
 ): Promise<string[]> {
-  const results = ([] as any[])
-    .concat(
-      entries && entries.length
-        ? entries
-        : (source && resolveApp(source)) ||
-            ((await isDir(resolveApp('src'))) && (await jsOrTs('src/index')))
-    )
-    .map(async (file) => await glob(file));
-
-  return concatAllArray(await Promise.all(results));
+  return concatAllArray(
+    ([] as any[])
+      .concat(
+        entries && entries.length
+          ? entries
+          : (source && resolveApp(source)) ||
+              ((await isDir(resolveApp('src'))) && (await jsOrTs('src/index')))
+      )
+      .map((file) => glob(file))
+  );
 }
 
 prog
@@ -447,7 +445,7 @@ async function cleanOldJS() {
   const oldJS = await glob(`${paths.appDist}/**/*.js`);
   // console.log({ oldJS });
   await progressIndicator(
-    Promise.all(oldJS.map(async (file) => await fs.unlink(file))),
+    Promise.all(oldJS.map(async (file: string) => await fs.unlink(file))),
     'Removing original emitted TypeScript output (dist/**/*.js).'
   );
 }

@@ -41,7 +41,7 @@ export async function createBuildConfigs(
   /**
    * Make ESM versions of emitted TS output.
    */
-  const emittedFilesToESM = emittedFiles.map((input) => ({
+  const emittedFilesToESM = emittedFiles.map((input: string) => ({
     ...opts,
     format: 'esm',
     env: 'production',
@@ -50,7 +50,7 @@ export async function createBuildConfigs(
   /**
    * Make CJS versions of emitted TS output.
    */
-  const emittedFilesToCJS = emittedFiles.map((input) => ({
+  const emittedFilesToCJS = emittedFiles.map((input: string) => ({
     ...opts,
     format: 'cjs',
     env: 'production',
