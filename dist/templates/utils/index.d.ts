@@ -3,7 +3,7 @@ interface ProjectArgs {
     name: string;
     author: string;
 }
-export declare const composePackageJson: (template: Template) => ({ name, author, }: ProjectArgs) => {
+export declare const composePackageJson: (template: Template) => ({ name, author }: ProjectArgs) => {
     name: string;
     author: string;
     'size-limit': {

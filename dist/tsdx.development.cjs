@@ -1005,7 +1005,7 @@ const templates = {
     'react-with-storybook': storybookTemplate,
 };
 
-const composePackageJson = (template) => ({ name, author, }) => {
+const composePackageJson = (template) => ({ name, author }) => {
     return {
         ...template.packageJson,
         name,
