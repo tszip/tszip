@@ -2,43 +2,44 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-var sade = require('sade');
+var sade = require('sade/lib/index.js');
 var glob = require('tiny-glob/sync.js');
 var rollup = require('rollup');
-var asyncro = require('asyncro');
-var chalk = require('chalk');
+var asyncro = require('asyncro/dist/asyncro.js');
+var chalk = require('chalk/source/index.js');
 var jest = require('jest');
-var eslint = require('eslint');
+var eslint = require('eslint/lib/api.js');
 var path = require('path');
-var execa = require('execa');
-var shell = require('shelljs');
-var ora = require('ora');
-var semver = require('semver');
-var fs = require('fs-extra');
-var camelCase = require('camelcase');
-require('ansi-escapes');
-var jpjs = require('jpjs');
+var execa = require('execa/index.js');
+var shell = require('shelljs/shell.js');
+var ora = require('ora/index.js');
+var semver = require('semver/index.js');
+var fs = require('fs-extra/lib/index.js');
+var camelCase = require('camelcase/index.js');
+require('ansi-escapes/index.js');
+var jpjs = require('jpjs/dist/jpjs.js');
+var resolveExports = require('resolve.exports');
 var rollupPluginTerser = require('rollup-plugin-terser');
-var core = require('@babel/core');
-var commonjs = require('@rollup/plugin-commonjs');
-var json = require('@rollup/plugin-json');
-var replace = require('@rollup/plugin-replace');
-var resolve = require('@rollup/plugin-node-resolve');
+var core = require('@babel/core/lib/index.js');
+var commonjs = require('@rollup/plugin-commonjs/dist/index.js');
+var json = require('@rollup/plugin-json/dist/index.js');
+var replace = require('@rollup/plugin-replace/dist/rollup-plugin-replace.cjs.js');
+var resolvePlugin = require('@rollup/plugin-node-resolve');
 var sourceMaps = require('rollup-plugin-sourcemaps');
-var typescript = require('rollup-plugin-typescript2');
-var ts = require('typescript');
-var parser = require('@babel/parser');
-var traverse = require('@babel/traverse');
-var pascalCase = require('pascal-case');
-var pluginBabel = require('@rollup/plugin-babel');
+var typescript = require('rollup-plugin-typescript2/dist/rollup-plugin-typescript2.cjs.js');
+var ts = require('typescript/lib/typescript.js');
+var parser = require('@babel/parser/lib/index.js');
+var traverse = require('@babel/traverse/lib/index.js');
+var pascalCase = require('pascal-case/dist/index.js');
+var pluginBabel = require('@rollup/plugin-babel/dist/index.js');
 var merge = require('lodash.merge');
-var rollupPlugin = require('@optimize-lodash/rollup-plugin');
+var rollupPlugin = require('@optimize-lodash/rollup-plugin/dist/index.js');
 var fs$1 = require('fs');
 var Input = require('enquirer/lib/prompts/input.js');
 var Select = require('enquirer/lib/prompts/select.js');
-var progressEstimator = require('progress-estimator');
+var progressEstimator = require('progress-estimator/src/index.js');
 var promises = require('fs/promises');
-require('@babel/helper-module-imports');
+require('@babel/helper-module-imports/lib/index.js');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -75,10 +76,11 @@ var semver__default = /*#__PURE__*/_interopDefaultLegacy(semver);
 var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 var fs__namespace = /*#__PURE__*/_interopNamespace(fs);
 var camelCase__default = /*#__PURE__*/_interopDefaultLegacy(camelCase);
+var resolveExports__default = /*#__PURE__*/_interopDefaultLegacy(resolveExports);
 var commonjs__default = /*#__PURE__*/_interopDefaultLegacy(commonjs);
 var json__default = /*#__PURE__*/_interopDefaultLegacy(json);
 var replace__default = /*#__PURE__*/_interopDefaultLegacy(replace);
-var resolve__default = /*#__PURE__*/_interopDefaultLegacy(resolve);
+var resolvePlugin__default = /*#__PURE__*/_interopDefaultLegacy(resolvePlugin);
 var sourceMaps__default = /*#__PURE__*/_interopDefaultLegacy(sourceMaps);
 var typescript__default = /*#__PURE__*/_interopDefaultLegacy(typescript);
 var ts__default = /*#__PURE__*/_interopDefaultLegacy(ts);
@@ -371,9 +373,9 @@ const isTruthy = (obj) => {
 const replacements = [{ original: 'lodash(?!/fp)', replacement: 'lodash-es' }];
 const mergeConfigItems = (type, ...configItemsToMerge) => {
     const mergedItems = [];
-    configItemsToMerge.forEach(configItemToMerge => {
+    configItemsToMerge.forEach((configItemToMerge) => {
         configItemToMerge.forEach((item) => {
-            const itemToMergeWithIndex = mergedItems.findIndex(mergedItem => mergedItem.file.resolved === item.file.resolved);
+            const itemToMergeWithIndex = mergedItems.findIndex((mergedItem) => mergedItem.file.resolved === item.file.resolved);
             if (itemToMergeWithIndex === -1) {
                 mergedItems.push(item);
                 return;
@@ -467,6 +469,29 @@ const babelPluginTsdx = pluginBabel.createBabelInputPluginFactory(() => ({
 }));
 
 /**
+ * A crude RegExp to match the `from 'import-source'` part of import statements,
+ * or a require(...) call.
+ */
+const generateImportPattern = (importSource) => new RegExp(`(from|require\\()\\s*['"]${importSource.replace('.', '\\.')}['"]`, 'g');
+/**
+ * Get the package.json for a given absolute entry point.
+ */
+function getPackageJson(absPath) {
+    const parts = absPath.split('node_modules');
+    const rootPath = parts[0];
+    if (parts.length < 2)
+        return null;
+    const moduleParts = parts[1].split(path.sep);
+    /**
+     * node_modules/name => name
+     * node_modules/@test/test => @test/test
+     */
+    const moduleName = moduleParts[1].startsWith('@')
+        ? moduleParts.slice(1, 3).join(path.sep)
+        : moduleParts[1];
+    return path.resolve(rootPath, 'node_modules', moduleName, 'package.json');
+}
+/**
  * These packages will not be resolved by Rollup and will be left as imports.
  */
 const EXTERNAL_PACKAGES = ['react', 'react-native'];
@@ -501,6 +526,11 @@ async function createRollupConfig(opts, outputNum) {
     // borrowed from https://github.com/ezolenko/rollup-plugin-typescript2/blob/42173460541b0c444326bf14f2c8c27269c4cb11/src/parse-tsconfig.ts#L48
     const tsCompilerOptions = ts__default['default'].parseJsonConfigFileContent(tsconfigJSON, ts__default['default'].sys, './').options;
     const { PRODUCTION } = process.env;
+    const fileExtensions = [
+        opts.format === 'esm' ? '.mjs' : null,
+        opts.format === 'cjs' ? '.cjs' : null,
+        '.js',
+    ].filter(Boolean);
     return {
         // Tell Rollup the entry point to the package
         input: opts.input,
@@ -579,7 +609,7 @@ async function createRollupConfig(opts, outputNum) {
              * Resolve only non-JS. Leave regular imports alone, since packages will
              * ship with dependencies.
              */
-            resolve__default['default']({
+            resolvePlugin__default['default']({
                 /**
                  * Do not allow CJS imports.
                  */
@@ -743,6 +773,84 @@ async function createRollupConfig(opts, outputNum) {
                 rollupPlugin.optimizeLodashImports({
                     useLodashEs: isEsm || undefined,
                 }),
+            /**
+             * Resolve every relative import in output to their entry points.
+             *
+             * TypeScript loves to leave things like `import { jsx } from
+             * 'react/jsx-runtime` when react/jsx-runtime isn't a valid import
+             * source:  react/jsx-runtime.js *is*.
+             */
+            {
+                name: 'Resolve final runtime imports to files',
+                renderChunk: async (code, chunk) => {
+                    /**
+                     * Iterate over imports and rewrite all import sources to entry
+                     * points.
+                     */
+                    for (const chunkImport of chunk.imports) {
+                        /**
+                         * If the import already has a file extension, do not touch.
+                         */
+                        if (path.extname(chunkImport))
+                            continue;
+                        /**
+                         * The absolute location of the module entry point.
+                         * `require.resolve` logic can be used to resolve the "vanilla"
+                         * entry point as the output will be ES, and then module-specific
+                         * extensions (.mjs, .cjs) will be tried.
+                         */
+                        let absEntryPoint = require.resolve(chunkImport);
+                        const originalFileExt = path.extname(absEntryPoint);
+                        const absEntryWithoutExtension = absEntryPoint.replace(originalFileExt, '');
+                        /**
+                         * Try to resolve ESM/CJS-specific extensions over .js when bundling
+                         * for those formats.
+                         */
+                        if (opts.format === 'esm' || opts.format === 'cjs') {
+                            for (const fileExtension of fileExtensions) {
+                                const withExtension = absEntryWithoutExtension + fileExtension;
+                                if (fs$1.existsSync(withExtension)) {
+                                    absEntryPoint = withExtension;
+                                    break;
+                                }
+                            }
+                        }
+                        const packageJsonPath = getPackageJson(absEntryPoint);
+                        if (!packageJsonPath || !fs$1.existsSync(packageJsonPath))
+                            continue;
+                        /**
+                         * Check if there's `exports` package.json logic. if there is, it
+                         * controls the flow.
+                         */
+                        const packageJsonContent = fs$1.readFileSync(packageJsonPath, 'utf-8');
+                        const packageJson = JSON.parse(packageJsonContent);
+                        const exportsFieldResolution = resolveExports__default['default'].resolve(packageJson, chunkImport);
+                        if (exportsFieldResolution)
+                            continue;
+                        /**
+                         * Remove unnecessary absolute specification.
+                         */
+                        const relativeEntryPoint = absEntryPoint.slice(absEntryPoint.indexOf(chunkImport));
+                        /**
+                         * The pattern matching the "from ..." import statement for this
+                         * import.
+                         */
+                        const importPattern = generateImportPattern(chunkImport);
+                        /**
+                         * Read the matched import/require statements and replace them.
+                         */
+                        const matches = code.match(importPattern) ?? [];
+                        for (const match of matches) {
+                            const rewritten = match.replace(chunkImport, relativeEntryPoint);
+                            code = code.replace(match, rewritten);
+                        }
+                    }
+                    return {
+                        code,
+                        map: null,
+                    };
+                },
+            },
             /**
              * Ensure there's an empty default export. This is the only way to have a
              * dist/index.mjs with `export { default } from './package.min.mjs'` and

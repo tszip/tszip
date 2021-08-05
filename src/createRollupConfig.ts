@@ -1,3 +1,5 @@
+import resolveExports from 'resolve.exports';
+
 import { safeVariableName, safePackageName, external } from './utils';
 import { paths } from './constants';
 import { RollupOptions } from 'rollup';
@@ -6,7 +8,7 @@ import { DEFAULT_EXTENSIONS as DEFAULT_BABEL_EXTENSIONS } from '@babel/core';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import replace from '@rollup/plugin-replace';
-import resolve from '@rollup/plugin-node-resolve';
+import resolvePlugin from '@rollup/plugin-node-resolve';
 import sourceMaps from 'rollup-plugin-sourcemaps';
 import typescript from 'rollup-plugin-typescript2';
 import ts from 'typescript';
@@ -15,6 +17,39 @@ import { extractErrors } from './errors/extractErrors';
 import { babelPluginTsdx } from './babelPluginTsdx';
 import { TsdxOptions } from './types';
 import { optimizeLodashImports } from '@optimize-lodash/rollup-plugin';
+import { extname, resolve, sep } from 'path';
+import { existsSync, readFileSync } from 'fs';
+
+/**
+ * A crude RegExp to match the `from 'import-source'` part of import statements,
+ * or a require(...) call.
+ */
+const generateImportPattern = (importSource: string) =>
+  new RegExp(
+    `(from|require\\()\\s*['"]${importSource.replace('.', '\\.')}['"]`,
+    'g'
+  );
+
+/**
+ * Get the package.json for a given absolute entry point.
+ */
+function getPackageJson(absPath: string) {
+  const parts = absPath.split('node_modules');
+  const rootPath = parts[0];
+
+  if (parts.length < 2) return null;
+  const moduleParts = parts[1].split(sep);
+
+  /**
+   * node_modules/name => name
+   * node_modules/@test/test => @test/test
+   */
+  const moduleName = moduleParts[1].startsWith('@')
+    ? moduleParts.slice(1, 3).join(sep)
+    : moduleParts[1];
+
+  return resolve(rootPath, 'node_modules', moduleName, 'package.json');
+}
 
 /**
  * These packages will not be resolved by Rollup and will be left as imports.
@@ -68,6 +103,12 @@ export async function createRollupConfig(
   ).options;
 
   const { PRODUCTION } = process.env;
+
+  const fileExtensions = [
+    opts.format === 'esm' ? '.mjs' : null,
+    opts.format === 'cjs' ? '.cjs' : null,
+    '.js',
+  ].filter(Boolean);
 
   return {
     // Tell Rollup the entry point to the package
@@ -148,7 +189,7 @@ export async function createRollupConfig(
        * Resolve only non-JS. Leave regular imports alone, since packages will
        * ship with dependencies.
        */
-      resolve({
+      resolvePlugin({
         /**
          * Do not allow CJS imports.
          */
@@ -318,6 +359,98 @@ export async function createRollupConfig(
         optimizeLodashImports({
           useLodashEs: isEsm || undefined,
         }),
+      /**
+       * Resolve every relative import in output to their entry points.
+       *
+       * TypeScript loves to leave things like `import { jsx } from
+       * 'react/jsx-runtime` when react/jsx-runtime isn't a valid import
+       * source:  react/jsx-runtime.js *is*.
+       */
+      {
+        name: 'Resolve final runtime imports to files',
+        renderChunk: async (code: string, chunk: any) => {
+          /**
+           * Iterate over imports and rewrite all import sources to entry
+           * points.
+           */
+          for (const chunkImport of chunk.imports) {
+            /**
+             * If the import already has a file extension, do not touch.
+             */
+            if (extname(chunkImport)) continue;
+            /**
+             * The absolute location of the module entry point.
+             * `require.resolve` logic can be used to resolve the "vanilla"
+             * entry point as the output will be ES, and then module-specific
+             * extensions (.mjs, .cjs) will be tried.
+             */
+            let absEntryPoint = require.resolve(chunkImport);
+            const originalFileExt = extname(absEntryPoint);
+            const absEntryWithoutExtension = absEntryPoint.replace(
+              originalFileExt,
+              ''
+            );
+            /**
+             * Try to resolve ESM/CJS-specific extensions over .js when bundling
+             * for those formats.
+             */
+            if (opts.format === 'esm' || opts.format === 'cjs') {
+              for (const fileExtension of fileExtensions) {
+                const withExtension = absEntryWithoutExtension + fileExtension;
+                if (existsSync(withExtension)) {
+                  absEntryPoint = withExtension;
+                  break;
+                }
+              }
+            }
+
+            const packageJsonPath = getPackageJson(absEntryPoint);
+            if (!packageJsonPath || !existsSync(packageJsonPath)) continue;
+
+            /**
+             * Check if there's `exports` package.json logic. if there is, it
+             * controls the flow.
+             */
+            const packageJsonContent = readFileSync(packageJsonPath, 'utf-8');
+            const packageJson = JSON.parse(packageJsonContent);
+            const exportsFieldResolution = resolveExports.resolve(
+              packageJson,
+              chunkImport
+            );
+
+            /**
+             * If there is `exports` logic that resolves this import, do not
+             * rewrite it.
+             */
+            if (exportsFieldResolution) continue;
+
+            /**
+             * Remove unnecessary absolute specification.
+             */
+            const relativeEntryPoint = absEntryPoint.slice(
+              absEntryPoint.indexOf(chunkImport)
+            );
+            /**
+             * The pattern matching the "from ..." import statement for this
+             * import.
+             */
+            const importPattern = generateImportPattern(chunkImport);
+            /**
+             * Read the matched import/require statements and replace them.
+             */
+            const matches = code.match(importPattern) ?? [];
+            for (const match of matches) {
+              const rewritten = match.replace(chunkImport, relativeEntryPoint);
+              code = code.replace(match, rewritten);
+            }
+          }
+
+          return {
+            code,
+            map: null,
+          };
+        },
+      },
       /**
        * Ensure there's an empty default export. This is the only way to have a
        * dist/index.mjs with `export { default } from './package.min.mjs'` and
