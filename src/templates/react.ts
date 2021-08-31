@@ -19,7 +19,7 @@ const reactTemplate: Template = {
     },
     scripts: {
       ...basicTemplate.packageJson.scripts,
-      test: 'tsdx test',
+      test: 'export-ts test',
     } as PackageJson['scripts'],
   },
 };

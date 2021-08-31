@@ -22,7 +22,7 @@ export interface NormalizedOpts extends Omit<WatchOpts, 'name' | 'input' | 'form
     input: string[];
     format: [ModuleFormat, ...ModuleFormat[]];
 }
-export interface TsdxOptions extends SharedOpts {
+export interface ExportTsOptions extends SharedOpts {
     name: string;
     input: string;
     env: 'development' | 'production';

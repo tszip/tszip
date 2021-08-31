@@ -4,7 +4,7 @@ const basicTemplate: Template = {
   name: 'basic',
   dependencies: [
     'husky',
-    'tsdx',
+    'export-ts',
     'tslib',
     'typescript',
     'size-limit',
@@ -31,19 +31,19 @@ const basicTemplate: Template = {
       node: '>=14',
     },
     scripts: {
-      start: 'tsdx watch',
-      build: 'tsdx build',
-      test: 'tsdx test',
+      start: 'export-ts watch',
+      build: 'export-ts build',
+      test: 'export-ts test',
       posttest: 'node test/import.mjs && node test/require.cjs',
-      lint: 'tsdx lint',
-      prepare: 'tsdx build',
+      lint: 'export-ts lint',
+      prepare: 'export-ts build',
       size: 'size-limit',
       analyze: 'size-limit --why',
     },
     peerDependencies: {},
     husky: {
       hooks: {
-        'pre-commit': 'tsdx lint',
+        'pre-commit': 'export-ts lint',
       },
     },
     prettier: {

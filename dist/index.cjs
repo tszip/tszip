@@ -3,6 +3,6 @@
 
 const { NODE_ENV } = process.env;
 if (NODE_ENV === 'production')
-  module.exports = require('./tsdx.production.min.cjs');
+  module.exports = require('./export-ts.production.min.cjs');
 else
-  module.exports = require('./tsdx.development.cjs');
+  module.exports = require('./export-ts.development.cjs');

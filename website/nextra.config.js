@@ -2,7 +2,7 @@ import React from 'react';
 import { Logo } from 'components/logo';
 
 export default {
-  github: 'https://github.com/formium/tsdx',
+  github: 'https://github.com/ctjlewis/export-ts',
   titleSuffix: ' – TSDX',
   logo: (
     <>

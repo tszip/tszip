@@ -37,7 +37,9 @@ export async function extractErrors(opts: any) {
   }
 
   if (!opts.name || !opts.name) {
-    throw new Error('Missing options. Ensure you pass --name flag to tsdx');
+    throw new Error(
+      'Missing options. Ensure you pass --name flag to export-ts'
+    );
   }
 
   const errorMapFilePath = opts.errorMapFilePath;

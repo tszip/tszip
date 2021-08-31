@@ -14,8 +14,8 @@ import typescript from 'rollup-plugin-typescript2';
 import ts from 'typescript';
 
 import { extractErrors } from './errors/extractErrors';
-import { babelPluginTsdx } from './babelPluginTsdx';
-import { TsdxOptions } from './types';
+import { babelPluginExportTs } from './babelPluginExportTs';
+import { ExportTsOptions } from './types';
 import { optimizeLodashImports } from '@optimize-lodash/rollup-plugin';
 import { extname, resolve, sep } from 'path';
 import { existsSync, readFileSync } from 'fs';
@@ -61,7 +61,7 @@ const errorCodeOpts = {
 };
 
 export async function createRollupConfig(
-  opts: TsdxOptions,
+  opts: ExportTsOptions,
   outputNum: number
 ): Promise<RollupOptions> {
   const findAndRecordErrorCodes = await extractErrors({
@@ -295,7 +295,7 @@ export async function createRollupConfig(
        * In --legacy mode, use Babel to transpile to ES5.
        */
       opts.legacy &&
-        babelPluginTsdx({
+        babelPluginExportTs({
           exclude: 'node_modules/**',
           extensions: [...DEFAULT_BABEL_EXTENSIONS, 'ts', 'tsx'],
           passPerPreset: true,

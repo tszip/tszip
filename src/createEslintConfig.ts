@@ -41,7 +41,7 @@ export async function createEslintConfig({
       `module.exports = ${JSON.stringify(config, null, 2)}`,
       { flag: 'wx' }
     );
-  } catch (e) {
+  } catch (e: any) {
     if (e.code === 'EEXIST') {
       console.error(
         'Error trying to save the Eslint configuration file:',

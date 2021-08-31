@@ -1,6 +1,6 @@
 {
-  "name": "TSDX",
-  "short_name": "TSDX",
+  "name": "export-ts",
+  "short_name": "export-ts",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",

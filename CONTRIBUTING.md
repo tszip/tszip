@@ -13,7 +13,7 @@ Thanks for your interest in TSDX! You are very welcome to contribute. If you are
 1. Fork this repository to your own GitHub account and clone it to your local device:
 
    ```
-   git clone https://github.com/your-name/tsdx.git
+   git clone https://github.com/ctjlewis/export-ts.git
    cd tsdx
    ```
 

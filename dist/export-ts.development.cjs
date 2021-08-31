@@ -152,7 +152,7 @@ const paths = {
     appErrorsJson: resolveApp('errors/codes.json'),
     appErrors: resolveApp('errors'),
     appDist: resolveApp('dist'),
-    appConfig: resolveApp('tsdx.config.js'),
+    appConfig: resolveApp('export-ts.config.js'),
     jestConfig: resolveApp('jest.config.js'),
     progressEstimatorCache: resolveApp('node_modules/.cache/.progress-estimator'),
 };
@@ -210,7 +210,7 @@ const start = async function (projectName) {
     ${cmd(commands.test)}
     
   Questions? Feedback? Please let me know!
-  ${chalk__default['default'].green('https://github.com/formium/tsdx/issues')}
+  ${chalk__default['default'].green('https://github.com/ctjlewis/export-ts/issues')}
 `;
 };
 const incorrectNodeVersion = function (requiredVersion) {
@@ -270,7 +270,7 @@ async function extractErrors(opts) {
         throw new Error('Missing options. Ensure you pass an object with `errorMapFilePath`.');
     }
     if (!opts.name || !opts.name) {
-        throw new Error('Missing options. Ensure you pass --name flag to tsdx');
+        throw new Error('Missing options. Ensure you pass --name flag to export-ts');
     }
     const errorMapFilePath = opts.errorMapFilePath;
     let existingErrorMap;
@@ -393,7 +393,7 @@ const createConfigItems = (type, items) => {
         return core.createConfigItem([require.resolve(name), options], { type });
     });
 };
-const babelPluginTsdx = pluginBabel.createBabelInputPluginFactory(() => ({
+const babelPluginExportTs = pluginBabel.createBabelInputPluginFactory(() => ({
     // Passed the plugin options.
     options({ custom: customOptions, ...pluginOptions }) {
         return {
@@ -712,7 +712,7 @@ async function createRollupConfig(opts, outputNum) {
              * In --legacy mode, use Babel to transpile to ES5.
              */
             opts.legacy &&
-                babelPluginTsdx({
+                babelPluginExportTs({
                     exclude: 'node_modules/**',
                     extensions: [...core.DEFAULT_EXTENSIONS, 'ts', 'tsx'],
                     passPerPreset: true,
@@ -884,13 +884,13 @@ async function createRollupConfig(opts, outputNum) {
 }
 
 // check for custom tsdx.config.js
-let tsdxConfig = {
+let exportTsConfig = {
     rollup(config, _options) {
         return config;
     },
 };
 if (fs$1.existsSync(paths.appConfig)) {
-    tsdxConfig = require(paths.appConfig);
+    exportTsConfig = require(paths.appConfig);
 }
 async function createBuildConfigs(opts) {
     const allInputs = jpjs.concatAllArray(opts.input.map((input) => createAllFormats(opts, input).map((options, index) => ({
@@ -900,9 +900,9 @@ async function createBuildConfigs(opts) {
         writeMeta: index === 0,
     }))));
     return await Promise.all(allInputs.map(async (options, index) => {
-        // pass the full rollup config to tsdx.config.js override
+        // pass the full rollup config to export-ts.config.js override
         const config = await createRollupConfig(options, index);
-        return tsdxConfig.rollup(config, options);
+        return exportTsConfig.rollup(config, options);
     }));
 }
 function createAllFormats(opts, input) {
@@ -1021,7 +1021,7 @@ const basicTemplate = {
     name: 'basic',
     dependencies: [
         'husky',
-        'tsdx',
+        'export-ts',
         'tslib',
         'typescript',
         'size-limit',
@@ -1048,19 +1048,19 @@ const basicTemplate = {
             node: '>=14',
         },
         scripts: {
-            start: 'tsdx watch',
-            build: 'tsdx build',
-            test: 'tsdx test',
+            start: 'export-ts watch',
+            build: 'export-ts build',
+            test: 'export-ts test',
             posttest: 'node test/import.mjs && node test/require.cjs',
-            lint: 'tsdx lint',
-            prepare: 'tsdx build',
+            lint: 'export-ts lint',
+            prepare: 'export-ts build',
             size: 'size-limit',
             analyze: 'size-limit --why',
         },
         peerDependencies: {},
         husky: {
             hooks: {
-                'pre-commit': 'tsdx lint',
+                'pre-commit': 'export-ts lint',
             },
         },
         prettier: {
@@ -1088,7 +1088,7 @@ const reactTemplate = {
         },
         scripts: {
             ...basicTemplate.packageJson.scripts,
-            test: 'tsdx test',
+            test: 'export-ts test',
         },
     },
 };
@@ -1154,9 +1154,9 @@ async function moveTypes() {
     if (!pathExists)
         return;
     // see note above about deprecation window
-    console.warn('[tsdx]: Your rootDir is currently set to "./". Please change your ' +
+    console.warn('[export-ts]: Your rootDir is currently set to "./". Please change your ' +
         'rootDir to "./src".\n' +
-        'TSDX has deprecated setting tsconfig.compilerOptions.rootDir to ' +
+        'export-ts has deprecated setting tsconfig.compilerOptions.rootDir to ' +
         '"./" as it caused buggy output for declarationMaps and more.\n' +
         'You may also need to change your include to remove "test", which also ' +
         'caused declarations to be unnecessarily created for test files.');
@@ -1167,7 +1167,7 @@ async function moveTypes() {
     await fs__namespace.remove(appDistSrc);
 }
 
-const prog = sade__default['default']('tsdx');
+const prog = sade__default['default']('export-ts');
 let appPackageJson;
 try {
     appPackageJson = JSON.parse(fs$1.readFileSync(paths.appPackageJson, 'utf-8'));
@@ -1199,7 +1199,7 @@ async function getInputs(entries, source) {
 }
 prog
     .command('create <pkg>')
-    .describe('Create a new package with TSDX')
+    .describe('Create a new package with export-ts')
     .example('create mypackage')
     .option('--template', `Specify a template. Allowed choices: [${Object.keys(templates).join(', ')}]`)
     .example('create --template react mypackage')
@@ -1612,7 +1612,7 @@ prog
     if (opts['_'].length === 0 && !opts['write-file']) {
         const defaultInputs = ['src', 'test'].filter(fs__namespace.existsSync);
         opts['_'] = defaultInputs;
-        console.log(chalk__default['default'].yellow(`Defaulting to "tsdx lint ${defaultInputs.join(' ')}"`, '\nYou can override this in the package.json scripts, like "lint": "tsdx lint src otherDir"'));
+        console.log(chalk__default['default'].yellow(`Defaulting to "export-ts lint ${defaultInputs.join(' ')}"`, '\nYou can override this in the package.json scripts, like "lint": "export-ts lint src otherDir"'));
     }
     const config = await createEslintConfig({
         pkg: appPackageJson,
@@ -1647,4 +1647,4 @@ prog.parse(process.argv);
 
 exports.isDir = isDir;
 exports.isFile = isFile;
-//# sourceMappingURL=tsdx.development.cjs.map
+//# sourceMappingURL=export-ts.development.cjs.map

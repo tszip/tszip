@@ -55,7 +55,7 @@ import { stat } from 'fs/promises';
 
 export * from './errors';
 
-const prog = sade('tsdx');
+const prog = sade('export-ts');
 
 let appPackageJson: PackageJson;
 try {
@@ -102,7 +102,7 @@ async function getInputs(
 
 prog
   .command('create <pkg>')
-  .describe('Create a new package with TSDX')
+  .describe('Create a new package with export-ts')
   .example('create mypackage')
   .option(
     '--template',
@@ -612,8 +612,8 @@ prog
         opts['_'] = defaultInputs;
         console.log(
           chalk.yellow(
-            `Defaulting to "tsdx lint ${defaultInputs.join(' ')}"`,
-            '\nYou can override this in the package.json scripts, like "lint": "tsdx lint src otherDir"'
+            `Defaulting to "export-ts lint ${defaultInputs.join(' ')}"`,
+            '\nYou can override this in the package.json scripts, like "lint": "export-ts lint src otherDir"'
           )
         );
       }

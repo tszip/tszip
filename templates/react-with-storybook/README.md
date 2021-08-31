@@ -108,7 +108,7 @@ Two actions are added by default:
 
 ## Optimizations
 
-Please see the main `tsdx` [optimizations docs](https://github.com/palmerhq/tsdx#optimizations). In particular, know that you can take advantage of development-only optimizations:
+Please see the main `tsdx` [optimizations docs](https://github.com/ctjlewis/export-ts#optimizations). In particular, know that you can take advantage of development-only optimizations:
 
 ```js
 // ./types/index.d.ts
@@ -120,7 +120,7 @@ if (__DEV__) {
 }
 ```
 
-You can also choose to install and use [invariant](https://github.com/palmerhq/tsdx#invariant) and [warning](https://github.com/palmerhq/tsdx#warning) functions.
+You can also choose to install and use [invariant](https://github.com/ctjlewis/export-ts#warning) functions.
 
 ## Module Formats
 
