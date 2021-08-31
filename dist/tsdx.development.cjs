@@ -23,7 +23,6 @@ var rollupPluginTerser = require('rollup-plugin-terser');
 var core = require('@babel/core/lib/index.js');
 var commonjs = require('@rollup/plugin-commonjs/dist/index.js');
 var json = require('@rollup/plugin-json/dist/index.js');
-var replace = require('@rollup/plugin-replace/dist/rollup-plugin-replace.cjs.js');
 var resolvePlugin = require('@rollup/plugin-node-resolve');
 var sourceMaps = require('rollup-plugin-sourcemaps');
 var typescript = require('rollup-plugin-typescript2/dist/rollup-plugin-typescript2.cjs.js');
@@ -79,7 +78,6 @@ var camelCase__default = /*#__PURE__*/_interopDefaultLegacy(camelCase);
 var resolveExports__default = /*#__PURE__*/_interopDefaultLegacy(resolveExports);
 var commonjs__default = /*#__PURE__*/_interopDefaultLegacy(commonjs);
 var json__default = /*#__PURE__*/_interopDefaultLegacy(json);
-var replace__default = /*#__PURE__*/_interopDefaultLegacy(replace);
 var resolvePlugin__default = /*#__PURE__*/_interopDefaultLegacy(resolvePlugin);
 var sourceMaps__default = /*#__PURE__*/_interopDefaultLegacy(sourceMaps);
 var typescript__default = /*#__PURE__*/_interopDefaultLegacy(typescript);
@@ -178,15 +176,15 @@ const cmd = (cmd) => {
     return chalk__default['default'].bold(chalk__default['default'].cyan(cmd));
 };
 
+const indentString = (msg, indent = 1) => {
+    return `${' '.repeat(indent * 2)}${msg}`;
+};
+
 const installing = function (packages) {
     const pkgText = packages
-        .map(function (pkg) {
-        return `    ${chalk__default['default'].cyan(chalk__default['default'].bold(pkg))}`;
-    })
+        .map((pkg) => indentString(`${chalk__default['default'].cyan(chalk__default['default'].bold(pkg))}`, 2))
         .join('\n');
-    return `Installing npm modules:
-${pkgText}
-`;
+    return `Installing dependencies:\n\n${pkgText}\n\n`;
 };
 const start = async function (projectName) {
     const cmd$1 = await getInstallCmd();
@@ -498,8 +496,6 @@ const EXTERNAL_PACKAGES = ['react', 'react-native'];
 const errorCodeOpts = {
     errorMapFilePath: paths.appErrorsJson,
 };
-// shebang cache map thing because the transform only gets run once
-let shebang = {};
 async function createRollupConfig(opts, outputNum) {
     const findAndRecordErrorCodes = await extractErrors({
         ...errorCodeOpts,
@@ -525,7 +521,7 @@ async function createRollupConfig(opts, outputNum) {
     const tsconfigJSON = ts__default['default'].readConfigFile(tsconfigPath, ts__default['default'].sys.readFile).config;
     // borrowed from https://github.com/ezolenko/rollup-plugin-typescript2/blob/42173460541b0c444326bf14f2c8c27269c4cb11/src/parse-tsconfig.ts#L48
     const tsCompilerOptions = ts__default['default'].parseJsonConfigFileContent(tsconfigJSON, ts__default['default'].sys, './').options;
-    const { PRODUCTION } = process.env;
+    const PRODUCTION = process.env.NODE_ENV === 'production';
     const fileExtensions = [
         opts.format === 'esm' ? '.mjs' : null,
         opts.format === 'cjs' ? '.cjs' : null,
@@ -666,8 +662,6 @@ async function createRollupConfig(opts, outputNum) {
                 name: 'Remove shebang',
                 transform(code) {
                     let reg = /^#!(.*)/;
-                    let match = code.match(reg);
-                    shebang[opts.name] = match ? '#!' + match[1] : '';
                     code = code.replace(reg, '');
                     return {
                         code,
@@ -758,13 +752,24 @@ async function createRollupConfig(opts, outputNum) {
                 useLodashEs: isEsm || undefined,
             }),
             /**
-             * Replace process.env.NODE_ENV variable.
+             * Replace "development" variable, preventing assignment.
              */
-            opts.env &&
-                replace__default['default']({
-                    preventAssignment: true,
-                    'process.env.NODE_ENV': JSON.stringify(PRODUCTION ? 'production' : 'development'),
-                }),
+            opts.env && {
+                name: 'Ensure default exports',
+                renderChunk: async (code, _) => {
+                    return {
+                        code: code.replace(/process\.env\.NODE_ENV(?!\s*=)/g, JSON.stringify(PRODUCTION ? 'production' : 'development')),
+                        map: null,
+                    };
+                },
+            },
+            // opts.env &&
+            //   replace({
+            //     preventAssignment: true,
+            //     '"development"': JSON.stringify(
+            //       PRODUCTION ? 'production' : 'development'
+            //     ),
+            //   }),
             /**
              * If not in --legacy mode, ensure lodash imports are optimized in the
              * final bundle.
@@ -825,6 +830,10 @@ async function createRollupConfig(opts, outputNum) {
                         const packageJsonContent = fs$1.readFileSync(packageJsonPath, 'utf-8');
                         const packageJson = JSON.parse(packageJsonContent);
                         const exportsFieldResolution = resolveExports__default['default'].resolve(packageJson, chunkImport);
+                        /**
+                         * If there is `exports` logic that resolves this import, do not
+                         * rewrite it.
+                         */
                         if (exportsFieldResolution)
                             continue;
                         /**
@@ -1291,11 +1300,14 @@ prog
     }
     const templateConfig = templates[template];
     const { dependencies: deps } = templateConfig;
+    const cmd = await getInstallCmd();
+    console.log(chalk__default['default'].bold(`\n  Using ${cmd === 'yarn' ? 'yarn' : 'npm'}.\n`));
     const installSpinner = ora__default['default'](installing(deps.sort())).start();
     try {
-        const cmd = await getInstallCmd();
         await execa__default['default'](cmd, getInstallArgs(cmd, deps));
-        installSpinner.succeed('Installed dependencies');
+        installSpinner.succeed('Dependencies installed successfully!');
+        console.log(chalk__default['default'].bold('\n  Initializing git repo.'));
+        await execa__default['default']('git', ['init']);
         console.log(await start(pkg));
     }
     catch (error) {
@@ -1474,7 +1486,7 @@ function writeCjsEntryFile(name) {
     const safeName = safePackageName(name);
     /**
      * After an hour of tinkering, this is the *only* way to write this code that
-     * will not break Rollup (by pulling process.env.NODE_ENV out with
+     * will not break Rollup (by pulling "development" out with
      * destructuring).
      */
     const contents = `#!/usr/bin/env node

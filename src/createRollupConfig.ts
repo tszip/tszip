@@ -7,7 +7,7 @@ import { terser } from 'rollup-plugin-terser';
 import { DEFAULT_EXTENSIONS as DEFAULT_BABEL_EXTENSIONS } from '@babel/core';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
-import replace from '@rollup/plugin-replace';
+// import replace from '@rollup/plugin-replace';
 import resolvePlugin from '@rollup/plugin-node-resolve';
 import sourceMaps from 'rollup-plugin-sourcemaps';
 import typescript from 'rollup-plugin-typescript2';
@@ -60,9 +60,6 @@ const errorCodeOpts = {
   errorMapFilePath: paths.appErrorsJson,
 };
 
-// shebang cache map thing because the transform only gets run once
-let shebang: any = {};
-
 export async function createRollupConfig(
   opts: TsdxOptions,
   outputNum: number
@@ -102,7 +99,7 @@ export async function createRollupConfig(
     './'
   ).options;
 
-  const { PRODUCTION } = process.env;
+  const PRODUCTION = process.env.NODE_ENV === 'production';
 
   const fileExtensions = [
     opts.format === 'esm' ? '.mjs' : null,
@@ -247,10 +244,6 @@ export async function createRollupConfig(
         name: 'Remove shebang',
         transform(code: string) {
           let reg = /^#!(.*)/;
-          let match = code.match(reg);
-
-          shebang[opts.name] = match ? '#!' + match[1] : '';
-
           code = code.replace(reg, '');
 
           return {
@@ -342,15 +335,27 @@ export async function createRollupConfig(
         useLodashEs: isEsm || undefined,
       }),
       /**
-       * Replace process.env.NODE_ENV variable.
+       * Replace process.env.NODE_ENV variable, preventing assignment.
        */
-      opts.env &&
-        replace({
-          preventAssignment: true,
-          'process.env.NODE_ENV': JSON.stringify(
-            PRODUCTION ? 'production' : 'development'
-          ),
-        }),
+      opts.env && {
+        name: 'Ensure default exports',
+        renderChunk: async (code: string, _: any) => {
+          return {
+            code: code.replace(
+              /process\.env\.NODE_ENV(?!\s*=)/g,
+              JSON.stringify(PRODUCTION ? 'production' : 'development')
+            ),
+            map: null,
+          };
+        },
+      },
+      // opts.env &&
+      //   replace({
+      //     preventAssignment: true,
+      //     'process.env.NODE_ENV': JSON.stringify(
+      //       PRODUCTION ? 'production' : 'development'
+      //     ),
+      //   }),
       /**
        * If not in --legacy mode, ensure lodash imports are optimized in the
        * final bundle.
