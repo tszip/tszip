@@ -7,7 +7,7 @@ import { ExportTsOptions, NormalizedOpts } from './types';
 import { createRollupConfig } from './createRollupConfig';
 import { existsSync } from 'fs';
 
-// check for custom tsdx.config.js
+// check for custom example-ts.config.js
 let exportTsConfig = {
   rollup(config: RollupOptions, _options: ExportTsOptions): RollupOptions {
     return config;

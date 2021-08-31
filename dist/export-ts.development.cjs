@@ -882,7 +882,7 @@ async function createRollupConfig(opts, outputNum) {
     };
 }
 
-// check for custom tsdx.config.js
+// check for custom example-ts.config.js
 let exportTsConfig = {
     rollup(config, _options) {
         return config;
