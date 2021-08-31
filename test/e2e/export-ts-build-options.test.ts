@@ -51,9 +51,7 @@ describe('tsdx build :: options', () => {
     );
     expect(output.code).toBe(0);
 
-    const matched = grep(/regeneratorRuntime=r/, [
-      'dist/build-default.*.cjs',
-    ]);
+    const matched = grep(/regeneratorRuntime=r/, ['dist/build-default.*.cjs']);
     expect(matched).toBeFalsy();
   });
 

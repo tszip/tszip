@@ -91,8 +91,7 @@ var progressEstimator__default = /*#__PURE__*/_interopDefaultLegacy(progressEsti
 const stderr = console.error.bind(console);
 function logError(err) {
     const error = err.error || err;
-    const description = `${error.name ? error.name + ': ' : ''}${error.message ||
-        error}`;
+    const description = `${error.name ? error.name + ': ' : ''}${error.message || error}`;
     const message = error.plugin
         ? error.plugin === 'rpt2'
             ? `(typescript) ${description}`
