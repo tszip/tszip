@@ -37,7 +37,11 @@ jobs:
     strategy:
       matrix:
         node: ['14.x']
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [
+          ubuntu-latest,
+          macOS-latest,
+          # windows-latest,
+        ]
 
     steps:
       - name: Checkout repo
@@ -51,4 +55,4 @@ jobs:
         uses: bahmutov/npm-install@v1
 
       - name: Test package
-        run: yarn test:post-build
+        run: yarn test
