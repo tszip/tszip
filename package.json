@@ -1,6 +1,6 @@
 {
   "name": "export-ts",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "author": "C. Lewis <ctj.lewis@icloud.com>",
   "description": "Backwards-compatible compiler for TypeScript libraries.",
   "license": "MIT",
@@ -23,7 +23,7 @@
   },
   "scripts": {
     "bootstrap": "tsc -p tsconfig.bootstrap.json && node dist/index.js build",
-    "prepare": "yarn bootstrap",
+    "prepare": "yarn build",
     "dev": "yarn bootstrap && node dist/index.cjs watch",
     "build": "yarn bootstrap && node dist/index.cjs build",
     "postbuild": "chmod +x dist/index.*js",
