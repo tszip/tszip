@@ -305,7 +305,7 @@ prog
       await writeMjsEntryFile(opts.name);
     }
 
-    // await cleanOldJS();
+    await cleanOldJS();
 
     type Killer = execa.ExecaChildProcess | null;
 
@@ -443,7 +443,7 @@ prog
       /**
        * Remove old index.js.
        */
-      // await cleanOldJS();
+      await cleanOldJS();
     } catch (error) {
       logError(error);
       process.exit(1);
@@ -464,15 +464,15 @@ async function normalizeOpts(opts: WatchOpts): Promise<NormalizedOpts> {
   };
 }
 
-// async function cleanOldJS() {
-//   const progressIndicator = await createProgressEstimator();
-//   const oldJS = await glob(`${paths.appDist}/**/*.js`);
-//   // console.log({ oldJS });
-//   await progressIndicator(
-//     Promise.all(oldJS.map(async (file: string) => await fs.unlink(file))),
-//     'Removing original emitted TypeScript output (dist/**/*.js).'
-//   );
-// }
+async function cleanOldJS() {
+  const progressIndicator = await createProgressEstimator();
+  const oldJS = await glob(`${paths.appDist}/**/*.js`);
+  // console.log({ oldJS });
+  await progressIndicator(
+    Promise.all(oldJS.map(async (file: string) => await fs.unlink(file))),
+    'Removing original emitted TypeScript output (dist/**/*.js).'
+  );
+}
 
 async function cleanDistFolder() {
   await fs.remove(paths.appDist);

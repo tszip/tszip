@@ -40,7 +40,7 @@ jobs:
         os: [
           ubuntu-latest,
           macOS-latest,
-          # windows-latest,
+          windows-latest,
         ]
 
     steps:
