@@ -1,7 +1,7 @@
 {
   "include": ["src", "types"],
   "compilerOptions": {
-    "strict": true,
+    "strict": false,
     "moduleResolution": "node",
     "module": "esnext",
     "target": "esnext",
@@ -12,13 +12,14 @@
     "declaration": true,
     "sourceMap": false,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUnusedLocals": true,
+    // "noFallthroughCasesInSwitch": true,
+    // "noUnusedLocals": true,
     "noUnusedParameters": true,
     "jsx": "react",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
+    "noEmit": true
   }
 }

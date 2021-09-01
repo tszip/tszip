@@ -13,5 +13,5 @@ export declare const external: (id: string) => boolean;
 export declare const appDirectory: string;
 export declare const resolveApp: (relativePath: string) => string;
 export declare function clearConsole(): void;
-export declare function getReactVersion({ dependencies, devDependencies, }: PackageJson): string | undefined;
-export declare function getNodeEngineRequirement({ engines }: PackageJson): string | undefined;
+export declare function getReactVersion({ dependencies, devDependencies, }: PackageJson): string;
+export declare function getNodeEngineRequirement({ engines }: PackageJson): string;

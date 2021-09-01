@@ -82,14 +82,17 @@ async function getInputs(
   source?: string
 ): Promise<string[]> {
   return concatAllArray(
-    ([] as any[])
-      .concat(
-        entries && entries.length
-          ? entries
-          : (source && resolveApp(source)) ||
-              ((await isDir(resolveApp('src'))) && (await jsOrTs('src/index')))
-      )
-      .map((file) => glob(file))
+    await Promise.all(
+      ([] as any[])
+        .concat(
+          entries && entries.length
+            ? entries
+            : (source && resolveApp(source)) ||
+                ((await isDir(resolveApp('src'))) &&
+                  (await jsOrTs('src/index')))
+        )
+        .map((file) => glob(file))
+    )
   );
 }
 
@@ -233,11 +236,17 @@ prog
     const templateConfig = templates[template as keyof typeof templates];
     const { dependencies: deps } = templateConfig;
 
+    const cmd = await getInstallCmd();
+    console.log(chalk.bold(`\n  Using ${cmd === 'yarn' ? 'yarn' : 'npm'}.\n`));
+
     const installSpinner = ora(Messages.installing(deps.sort())).start();
     try {
-      const cmd = await getInstallCmd();
       await execa(cmd, getInstallArgs(cmd, deps));
-      installSpinner.succeed('Installed dependencies');
+      installSpinner.succeed('Dependencies installed successfully!');
+
+      console.log(chalk.bold('\n  Initializing git repo.'));
+      await execa('git', ['init']);
+
       console.log(await Messages.start(pkg));
     } catch (error) {
       installSpinner.fail('Failed to install dependencies');
@@ -465,6 +474,7 @@ function writeCjsEntryFile(name: string) {
 
 'use strict';
 require('./${safeName}.cjs');
+module.exports = require('./${safeName}.cjs');
 `;
 
   return fs.outputFile(path.join(paths.appDist, 'index.cjs'), contents);

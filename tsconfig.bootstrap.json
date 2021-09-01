@@ -1,9 +1,9 @@
 {
   "include": ["src", "types"],
   "compilerOptions": {
-    "strict": true,
+    "strict": false,
     "moduleResolution": "node",
-    "module": "commonjs",
+    "module": "esnext",
     "target": "esnext",
     "lib": ["esnext"],
     "rootDir": "src",
@@ -13,12 +13,13 @@
     "sourceMap": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    // "noUnusedLocals": true,
+    // "noUnusedParameters": true,
     "jsx": "react",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
+    "incremental": false
   }
 }

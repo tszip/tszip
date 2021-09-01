@@ -14,9 +14,9 @@ export const isTruthy = (obj) => {
 const replacements = [{ original: 'lodash(?!/fp)', replacement: 'lodash-es' }];
 export const mergeConfigItems = (type, ...configItemsToMerge) => {
     const mergedItems = [];
-    configItemsToMerge.forEach(configItemToMerge => {
+    configItemsToMerge.forEach((configItemToMerge) => {
         configItemToMerge.forEach((item) => {
-            const itemToMergeWithIndex = mergedItems.findIndex(mergedItem => mergedItem.file.resolved === item.file.resolved);
+            const itemToMergeWithIndex = mergedItems.findIndex((mergedItem) => mergedItem.file.resolved === item.file.resolved);
             if (itemToMergeWithIndex === -1) {
                 mergedItems.push(item);
                 return;

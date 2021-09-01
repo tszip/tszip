@@ -1,4 +1,4 @@
-import { eraseLine } from 'ansi-escapes';
+import escapes from 'ansi-escapes';
 import chalk from 'chalk';
 import ora from 'ora';
 // This was copied from Razzle. Lots of unused stuff.
@@ -20,7 +20,7 @@ export const wait = (msg) => {
     spinner.start();
     return () => {
         spinner.stop();
-        process.stdout.write(eraseLine);
+        process.stdout.write(escapes.eraseLine);
     };
 };
 export const cmd = (cmd) => {
