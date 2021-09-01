@@ -6,6 +6,20 @@
   "commit": false,
   "contributors": [
     {
+      "login": "ctjlewis",
+      "name": "C. Lewis",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1657236?v=4",
+      "profile": "https://github.com/ctjlewis",
+      "contributions": [
+        "code",
+        "doc",
+        "design",
+        "review",
+        "tool",
+        "test"
+      ]
+    },
+    {
       "login": "jaredpalmer",
       "name": "Jared Palmer",
       "avatar_url": "https://avatars2.githubusercontent.com/u/4060187?v=4",
@@ -983,12 +997,49 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "damassi",
+      "name": "Christopher Pappas",
+      "avatar_url": "https://avatars.githubusercontent.com/u/236943?v=4",
+      "profile": "https://github.com/damassi",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "pete-redmond-cko",
+      "name": "Pete Redmond",
+      "avatar_url": "https://avatars.githubusercontent.com/u/48683566?v=4",
+      "profile": "https://github.com/pete-redmond-cko",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "samdenty",
+      "name": "Sam Denty",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13242392?v=4",
+      "profile": "https://samdenty.com/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "xiaoxiaojx",
+      "name": "Shaw",
+      "avatar_url": "https://avatars.githubusercontent.com/u/23253540?v=4",
+      "profile": "https://github.com/xiaoxiaojx",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
-  "projectName": "ctjlewis",
+  "projectName": "tszip",
   "projectOwner": "tszip",
   "repoType": "github",
   "repoHost": "https://github.com",
-  "skipCi": true
+  "skipCi": true,
+  "commitConvention": "angular"
 }
