@@ -6,6 +6,7 @@ import { ExportTsOptions, NormalizedOpts } from './types';
 
 import { createRollupConfig } from './createRollupConfig';
 import { existsSync } from 'fs';
+import { extname, relative, resolve } from 'path';
 
 // check for custom tszip.config.js
 let exportTsConfig = {
@@ -22,16 +23,19 @@ export async function createBuildConfigs(
   opts: NormalizedOpts
 ): Promise<Array<RollupOptions & { output: OutputOptions }>> {
   const allInputs = concatAllArray(
-    opts.input.map((input: string) =>
-      createAllFormats(opts, input).map(
+    opts.input.map((input: string) => {
+      const withoutExt = input.replace(extname(input), '');
+      const relativeDistOutput = relative(paths.appSrc, withoutExt) + '.js';
+      const absDistOutput = resolve(paths.appDist, relativeDistOutput);
+      return createAllFormats(opts, absDistOutput).map(
         (options: ExportTsOptions, index: number) => ({
           ...options,
           // We want to know if this is the first run for each entryfile
           // for certain plugins (e.g. css)
           writeMeta: index === 0,
         })
-      )
-    )
+      );
+    })
   );
 
   return await Promise.all(
