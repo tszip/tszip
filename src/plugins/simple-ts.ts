@@ -15,8 +15,7 @@
  */
 
 import { spawn } from 'child_process';
-import execa from 'execa';
-import { copy, move } from 'fs-extra';
+import { copy } from 'fs-extra';
 import { basename, extname, join } from 'path';
 import glob from 'tiny-glob';
 import * as ts from 'typescript';

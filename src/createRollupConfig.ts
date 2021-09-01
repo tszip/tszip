@@ -7,10 +7,6 @@ import { terser } from 'rollup-plugin-terser';
 import { DEFAULT_EXTENSIONS as DEFAULT_BABEL_EXTENSIONS } from '@babel/core';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
-// import replace from '@rollup/plugin-replace';
-import resolvePlugin from '@rollup/plugin-node-resolve';
-import sourceMaps from 'rollup-plugin-sourcemaps';
-import typescript from 'rollup-plugin-typescript2';
 import ts from 'typescript';
 
 import { extractErrors } from './errors/extractErrors';
@@ -61,8 +57,7 @@ const errorCodeOpts = {
 };
 
 export async function createRollupConfig(
-  opts: TszipOptions,
-  outputNum: number
+  opts: TszipOptions
 ): Promise<RollupOptions> {
   const findAndRecordErrorCodes = await extractErrors({
     ...errorCodeOpts,

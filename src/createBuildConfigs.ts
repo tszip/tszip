@@ -35,9 +35,9 @@ export async function createBuildConfigs(
   );
 
   return await Promise.all(
-    allInputs.map(async (options: TszipOptions, index: number) => {
+    allInputs.map(async (options: TszipOptions) => {
       // pass the full rollup config to tszip.config.js override
-      const config = await createRollupConfig(options, index);
+      const config = await createRollupConfig(options);
       return exportTsConfig.rollup(config, options);
     })
   );
