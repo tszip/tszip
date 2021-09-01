@@ -37,7 +37,6 @@ var Input = require('enquirer/lib/prompts/input.js');
 var Select = require('enquirer/lib/prompts/select.js');
 var progressEstimator = require('progress-estimator/src/index.js');
 var promises = require('fs/promises');
-var child_process = require('child_process');
 require('@babel/helper-module-imports/lib/index.js');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -1165,47 +1164,6 @@ async function moveTypes() {
     await fs__namespace.remove(appDistSrc);
 }
 
-/**
- * Copyright 2018 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *     http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @see https://github.com/GoogleChromeLabs/proxx/blob/master/lib/simple-ts.js
- * @see https://twitter.com/jaffathecake/status/1145979217852678144
- */
-async function runTsc({ transpileOnly = false, watch = false } = {}) {
-    /**
-     * Force src/ rootDir, dist/ outDir, and override noEmit.
-     */
-    const argString = `--rootDir src/ --outDir dist/ --noEmit false --strict ${transpileOnly}`;
-    const args = argString.split(' ');
-    console.log(`> Command: tsc ${args.join(' ')}`);
-    const progressIndicator = await createProgressEstimator();
-    await progressIndicator(new Promise((resolve) => {
-        const proc = child_process.spawn('tsc', args, {
-            stdio: 'inherit',
-        });
-        proc.on('exit', (code) => {
-            if (code !== 0) {
-                throw Error('TypeScript build failed');
-            }
-            resolve(void 0);
-        });
-    }), `TS ➡ JS: Compiling with TSC`);
-    if (watch) {
-        child_process.spawn('tsc', [...args, '--watch', '--preserveWatchOutput'], {
-            stdio: 'inherit',
-        });
-    }
-}
-
 const prog = sade__default['default']('export-ts');
 let appPackageJson;
 try {
@@ -1492,9 +1450,9 @@ prog
     .action(async (dirtyOpts) => {
     const opts = await normalizeOpts(dirtyOpts);
     const buildConfigs = await createBuildConfigs(opts);
-    console.log('> Cleaning dist/ and compiling TS.');
+    console.log('> Cleaning dist/.');
     await cleanDistFolder();
-    await runTsc();
+    // await runTsc();
     const progressIndicator = await createProgressEstimator();
     if (opts.format.includes('cjs')) {
         await progressIndicator(writeCjsEntryFile(opts.name).catch(logError), 'Creating CJS entry file');

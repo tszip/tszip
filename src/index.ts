@@ -44,7 +44,7 @@ import * as deprecated from './deprecated';
 import fs from 'fs-extra';
 import { readFileSync } from 'fs';
 import { stat } from 'fs/promises';
-import { runTsc } from './plugins/simple-ts';
+// import { runTsc } from './plugins/simple-ts';
 
 export * from './errors';
 
@@ -402,9 +402,9 @@ prog
     const opts = await normalizeOpts(dirtyOpts);
     const buildConfigs = await createBuildConfigs(opts);
 
-    console.log('> Cleaning dist/ and compiling TS.');
+    console.log('> Cleaning dist/.');
     await cleanDistFolder();
-    await runTsc();
+    // await runTsc();
 
     const progressIndicator = await createProgressEstimator();
     if (opts.format.includes('cjs')) {
