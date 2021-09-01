@@ -3,9 +3,8 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var sade = require('sade/lib/index.js');
-var glob = require('tiny-glob/sync.js');
+var glob = require('glob-promise/lib/index.js');
 var rollup = require('rollup');
-var asyncro = require('asyncro/dist/asyncro.js');
 var chalk = require('chalk/source/index.js');
 var jest = require('jest');
 var eslint = require('eslint/lib/api.js');
@@ -38,6 +37,7 @@ var Input = require('enquirer/lib/prompts/input.js');
 var Select = require('enquirer/lib/prompts/select.js');
 var progressEstimator = require('progress-estimator/src/index.js');
 var promises = require('fs/promises');
+var child_process = require('child_process');
 require('@babel/helper-module-imports/lib/index.js');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -64,7 +64,6 @@ function _interopNamespace(e) {
 
 var sade__default = /*#__PURE__*/_interopDefaultLegacy(sade);
 var glob__default = /*#__PURE__*/_interopDefaultLegacy(glob);
-var asyncro__default = /*#__PURE__*/_interopDefaultLegacy(asyncro);
 var chalk__default = /*#__PURE__*/_interopDefaultLegacy(chalk);
 var jest__default = /*#__PURE__*/_interopDefaultLegacy(jest);
 var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
@@ -1166,6 +1165,47 @@ async function moveTypes() {
     await fs__namespace.remove(appDistSrc);
 }
 
+/**
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @see https://github.com/GoogleChromeLabs/proxx/blob/master/lib/simple-ts.js
+ * @see https://twitter.com/jaffathecake/status/1145979217852678144
+ */
+async function runTsc({ transpileOnly = false, watch = false } = {}) {
+    /**
+     * Force src/ rootDir, dist/ outDir, and override noEmit.
+     */
+    const argString = `--rootDir src/ --outDir dist/ --noEmit false --strict ${transpileOnly}`;
+    const args = argString.split(' ');
+    console.log(`> Command: tsc ${args.join(' ')}`);
+    const progressIndicator = await createProgressEstimator();
+    await progressIndicator(new Promise((resolve) => {
+        const proc = child_process.spawn('tsc', args, {
+            stdio: 'inherit',
+        });
+        proc.on('exit', (code) => {
+            if (code !== 0) {
+                throw Error('TypeScript build failed');
+            }
+            resolve(void 0);
+        });
+    }), `TS ➡ JS: Compiling with TSC`);
+    if (watch) {
+        child_process.spawn('tsc', [...args, '--watch', '--preserveWatchOutput'], {
+            stdio: 'inherit',
+        });
+    }
+}
+
 const prog = sade__default['default']('export-ts');
 let appPackageJson;
 try {
@@ -1189,16 +1229,35 @@ async function jsOrTs(filename) {
     return resolveApp(`${filename}${extension}`);
 }
 async function getInputs(entries, source) {
-    return jpjs.concatAllArray([]
-        .concat(entries && entries.length
-        ? entries
-        : (source && resolveApp(source)) ||
-            ((await isDir(resolveApp('src'))) && (await jsOrTs('src/index'))))
-        .map((file) => glob__default['default'](file)));
+    let entryList = [];
+    if (entries) {
+        if (!Array.isArray(entries)) {
+            entryList.push(entries);
+        }
+        else {
+            entryList.push(...entries);
+        }
+    }
+    else {
+        if (source) {
+            const appDir = resolveApp(source);
+            entryList.push(appDir);
+        }
+        else {
+            const srcExists = await isDir(resolveApp('src'));
+            if (srcExists) {
+                const entryPoint = await jsOrTs('src/index');
+                entryList.push(entryPoint);
+            }
+        }
+    }
+    const inputPromises = entryList.map(async (file) => await glob__default['default'](file));
+    const inputs = await Promise.all(inputPromises);
+    return inputs.flat();
 }
 prog
     .command('create <pkg>')
-    .describe('Create a new package with export-ts')
+    .describe('Create a new package with ')
     .example('create mypackage')
     .option('--template', `Specify a template. Allowed choices: [${Object.keys(templates).join(', ')}]`)
     .example('create --template react mypackage')
@@ -1217,7 +1276,7 @@ prog
     // Helper fn to prompt the user for a different
     // folder name if one already exists
     async function getProjectPath(projectPath) {
-        const exists = await fs__namespace.pathExists(projectPath);
+        const exists = await fs__default['default'].pathExists(projectPath);
         if (!exists) {
             return projectPath;
         }
@@ -1228,13 +1287,13 @@ prog
             result: (v) => v.trim(),
         });
         pkg = await prompt.run();
-        projectPath = (await fs__namespace.realpath(process.cwd())) + '/' + pkg;
+        projectPath = (await fs__default['default'].realpath(process.cwd())) + '/' + pkg;
         bootSpinner.start(`Creating ${chalk__default['default'].bold.green(pkg)}...`);
         return await getProjectPath(projectPath); // recursion!
     }
     try {
         // get the project path
-        const realPath = await fs__namespace.realpath(process.cwd());
+        const realPath = await fs__default['default'].realpath(process.cwd());
         let projectPath = await getProjectPath(realPath + '/' + pkg);
         const prompt = new Select__default['default']({
             message: 'Choose a template',
@@ -1252,13 +1311,13 @@ prog
         }
         bootSpinner.start();
         // copy the template
-        await fs__namespace.copy(path__default['default'].resolve(__dirname, `../templates/${template}`), projectPath, {
+        await fs__default['default'].copy(path__default['default'].resolve(__dirname, `../templates/${template}`), projectPath, {
             overwrite: true,
         });
         // fix gitignore
-        await fs__namespace.move(path__default['default'].resolve(projectPath, './gitignore'), path__default['default'].resolve(projectPath, './.gitignore'));
+        await fs__default['default'].move(path__default['default'].resolve(projectPath, './gitignore'), path__default['default'].resolve(projectPath, './.gitignore'));
         // update license year and author
-        let license = await fs__namespace.readFile(path__default['default'].resolve(projectPath, 'LICENSE'), { encoding: 'utf-8' });
+        let license = await fs__default['default'].readFile(path__default['default'].resolve(projectPath, 'LICENSE'), { encoding: 'utf-8' });
         license = license.replace(/<year>/, `${new Date().getFullYear()}`);
         // attempt to automatically derive author name
         let author = getAuthorName();
@@ -1273,7 +1332,7 @@ prog
             bootSpinner.start();
         }
         license = license.replace(/<author>/, author.trim());
-        await fs__namespace.writeFile(path__default['default'].resolve(projectPath, 'LICENSE'), license, {
+        await fs__default['default'].writeFile(path__default['default'].resolve(projectPath, 'LICENSE'), license, {
             encoding: 'utf-8',
         });
         const templateConfig = templates[template];
@@ -1288,7 +1347,7 @@ prog
             bootSpinner.fail(incorrectNodeVersion(nodeVersionReq));
             process.exit(1);
         }
-        await fs__namespace.outputJSON(path__default['default'].resolve(projectPath, 'package.json'), pkgJson);
+        await fs__default['default'].outputJSON(path__default['default'].resolve(projectPath, 'package.json'), pkgJson);
         bootSpinner.succeed(`Created ${chalk__default['default'].bold.green(pkg)}`);
         await start(pkg);
     }
@@ -1299,14 +1358,11 @@ prog
     }
     const templateConfig = templates[template];
     const { dependencies: deps } = templateConfig;
-    const cmd = await getInstallCmd();
-    console.log(chalk__default['default'].bold(`\n  Using ${cmd === 'yarn' ? 'yarn' : 'npm'}.\n`));
     const installSpinner = ora__default['default'](installing(deps.sort())).start();
     try {
+        const cmd = await getInstallCmd();
         await execa__default['default'](cmd, getInstallArgs(cmd, deps));
-        installSpinner.succeed('Dependencies installed successfully!');
-        console.log(chalk__default['default'].bold('\n  Initializing git repo.'));
-        await execa__default['default']('git', ['init']);
+        installSpinner.succeed('Installed dependencies');
         console.log(await start(pkg));
     }
     catch (error) {
@@ -1354,6 +1410,7 @@ prog
     if (opts.format.includes('esm')) {
         await writeMjsEntryFile(opts.name);
     }
+    await cleanOldJS();
     let firstTime = true;
     let successKiller = null;
     let failureKiller = null;
@@ -1435,30 +1492,25 @@ prog
     .action(async (dirtyOpts) => {
     const opts = await normalizeOpts(dirtyOpts);
     const buildConfigs = await createBuildConfigs(opts);
+    console.log('> Cleaning dist/ and compiling TS.');
     await cleanDistFolder();
-    const logger = await createProgressEstimator();
+    await runTsc();
+    const progressIndicator = await createProgressEstimator();
     if (opts.format.includes('cjs')) {
-        const promise = writeCjsEntryFile(opts.name).catch(logError);
-        logger(promise, 'Creating CJS entry file');
+        await progressIndicator(writeCjsEntryFile(opts.name).catch(logError), 'Creating CJS entry file');
     }
     if (opts.format.includes('esm')) {
-        const promise = writeMjsEntryFile(opts.name).catch(logError);
-        logger(promise, 'Creating MJS entry file');
+        await progressIndicator(writeMjsEntryFile(opts.name).catch(logError), 'Creating MJS entry file');
     }
     try {
-        const promise = asyncro__default['default']
-            .map(buildConfigs, async (inputOptions) => {
-            let bundle = await rollup.rollup(inputOptions);
-            await bundle.write(inputOptions.output);
-        })
-            .catch((e) => {
-            throw e;
-        })
-            .then(async () => {
-            await moveTypes();
-        });
-        logger(promise, 'Building modules');
-        await promise;
+        await progressIndicator(Promise.all(buildConfigs.map(async (buildConfig) => {
+            const bundle = await rollup.rollup(buildConfig);
+            await bundle.write(buildConfig.output);
+        })), 'JS ➡ JS: Compressing and transforming emitted TypeScript output.');
+        /**
+         * Remove old index.js.
+         */
+        await cleanOldJS();
     }
     catch (error) {
         logError(error);
@@ -1478,8 +1530,14 @@ async function normalizeOpts(opts) {
         }),
     };
 }
+async function cleanOldJS() {
+    const progressIndicator = await createProgressEstimator();
+    const oldJS = await glob__default['default'](`${paths.appDist}/**/*.js`);
+    // console.log({ oldJS });
+    await progressIndicator(Promise.all(oldJS.map(async (file) => await fs__default['default'].unlink(file))), 'Removing original emitted TypeScript output (dist/**/*.js).');
+}
 async function cleanDistFolder() {
-    await fs__namespace.remove(paths.appDist);
+    await fs__default['default'].remove(paths.appDist);
 }
 function writeCjsEntryFile(name) {
     const safeName = safePackageName(name);
@@ -1489,25 +1547,11 @@ function writeCjsEntryFile(name) {
      * destructuring).
      */
     const contents = `#!/usr/bin/env node
-'use strict';
 
-const { NODE_ENV } = process.env;
-if (NODE_ENV === 'production')
-  module.exports = require('./${safeName}.production.min.cjs');
-else
-  module.exports = require('./${safeName}.development.cjs');
+'use strict';
+module.exports = require('./${safeName}.production.min.cjs');
 `;
-    /**
-     * @todo Find out why this breaks Rollup's parser in insanely complicated
-     * ways.
-     */
-    //   const contents = `'use strict'
-    // if (process.env.NODE_ENV === 'production') {
-    //   module.exports = require('./${safeName}.production.min.cjs')
-    // } else {
-    //   module.exports = require('./${safeName}.development.cjs')
-    // }`;
-    return fs__namespace.outputFile(path__default['default'].join(paths.appDist, 'index.cjs'), contents);
+    return fs__default['default'].outputFile(path__default['default'].join(paths.appDist, 'index.cjs'), contents);
 }
 function writeMjsEntryFile(name) {
     const contents = `#!/usr/bin/env node
@@ -1515,7 +1559,7 @@ function writeMjsEntryFile(name) {
 export { default } from './${name}.min.mjs';
 export * from './${name}.min.mjs';
 `;
-    return fs__namespace.outputFile(path__default['default'].join(paths.appDist, 'index.mjs'), contents);
+    return fs__default['default'].outputFile(path__default['default'].join(paths.appDist, 'index.mjs'), contents);
 }
 function getAuthorName() {
     let author = '';
@@ -1565,7 +1609,7 @@ prog
         ...appPackageJson.jest,
     };
     // Allow overriding with jest.config
-    const defaultPathExists = await fs__namespace.pathExists(paths.jestConfig);
+    const defaultPathExists = await fs__default['default'].pathExists(paths.jestConfig);
     if (opts.config || defaultPathExists) {
         const jestConfigPath = resolveApp(opts.config || paths.jestConfig);
         const jestConfigContents = require(jestConfigPath);
@@ -1609,7 +1653,7 @@ prog
     .example('lint --report-file eslint-report.json')
     .action(async (opts) => {
     if (opts['_'].length === 0 && !opts['write-file']) {
-        const defaultInputs = ['src', 'test'].filter(fs__namespace.existsSync);
+        const defaultInputs = ['src', 'test'].filter(fs__default['default'].existsSync);
         opts['_'] = defaultInputs;
         console.log(chalk__default['default'].yellow(`Defaulting to "export-ts lint ${defaultInputs.join(' ')}"`, '\nYou can override this in the package.json scripts, like "lint": "export-ts lint src otherDir"'));
     }
@@ -1633,7 +1677,7 @@ prog
     }
     console.log(cli.getFormatter()(report.results));
     if (opts['report-file']) {
-        await fs__namespace.outputFile(opts['report-file'], cli.getFormatter('json')(report.results));
+        await fs__default['default'].outputFile(opts['report-file'], cli.getFormatter('json')(report.results));
     }
     if (report.errorCount) {
         process.exit(1);
