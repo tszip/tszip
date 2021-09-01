@@ -176,6 +176,9 @@ const cmd = (cmd) => {
 const indentString = (msg, indent = 1) => {
     return `${' '.repeat(indent * 2)}${msg}`;
 };
+const indentLog = (msg, indent = 1) => {
+    console.log(indentString(msg, indent));
+};
 
 const installing = function (packages) {
     const pkgText = packages
@@ -1213,15 +1216,9 @@ prog
     .option('--template', `Specify a template. Allowed choices: [${Object.keys(templates).join(', ')}]`)
     .example('create --template react mypackage')
     .action(async (pkg, opts) => {
-    console.log(chalk__default['default'].blue(`
-::::::::::: ::::::::  :::::::::  :::    :::
-    :+:    :+:    :+: :+:    :+: :+:    :+:
-    +:+    +:+        +:+    +:+  +:+  +:+
-    +#+    +#++:++#++ +#+    +:+   +#++:+
-    +#+           +#+ +#+    +#+  +#+  +#+
-    #+#    #+#    #+# #+#    #+# #+#    #+#
-    ###     ########  #########  ###    ###
-`));
+    console.log();
+    indentLog(chalk__default['default'].bgBlue(`export-ts`), 2);
+    console.log();
     const bootSpinner = ora__default['default'](`Creating ${chalk__default['default'].bold.green(pkg)}...`);
     let template;
     // Helper fn to prompt the user for a different
@@ -1315,6 +1312,8 @@ prog
         const cmd = await getInstallCmd();
         await execa__default['default'](cmd, getInstallArgs(cmd, deps));
         installSpinner.succeed('Installed dependencies');
+        indentLog('Initializing git repo.');
+        await execa__default['default']('git', ['init']);
         console.log(await start(pkg));
     }
     catch (error) {
@@ -1457,7 +1456,9 @@ prog
         await progressIndicator(Promise.all(buildConfigs.map(async (buildConfig) => {
             const bundle = await rollup.rollup(buildConfig);
             await bundle.write(buildConfig.output);
-        })), 'JS ➡ JS: Compressing and transforming emitted TypeScript output.');
+        })), 'TS ➡ JS: Transpiling TS to JS'
+        // 'JS ➡ JS: Compressing and transforming emitted TypeScript output.'
+        );
         /**
          * Remove old index.js.
          */

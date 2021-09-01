@@ -44,6 +44,7 @@ import * as deprecated from './deprecated';
 import fs from 'fs-extra';
 import { readFileSync } from 'fs';
 import { stat } from 'fs/promises';
+import { indentLog } from './utils/log';
 // import { runTsc } from './plugins/simple-ts';
 
 export * from './errors';
@@ -118,17 +119,10 @@ prog
   )
   .example('create --template react mypackage')
   .action(async (pkg: string, opts: any) => {
-    console.log(
-      chalk.blue(`
-::::::::::: ::::::::  :::::::::  :::    :::
-    :+:    :+:    :+: :+:    :+: :+:    :+:
-    +:+    +:+        +:+    +:+  +:+  +:+
-    +#+    +#++:++#++ +#+    +:+   +#++:+
-    +#+           +#+ +#+    +#+  +#+  +#+
-    #+#    #+#    #+# #+#    #+# #+#    #+#
-    ###     ########  #########  ###    ###
-`)
-    );
+    console.log();
+    indentLog(chalk.bgBlue(`export-ts`), 2);
+    console.log();
+
     const bootSpinner = ora(`Creating ${chalk.bold.green(pkg)}...`);
     let template;
     // Helper fn to prompt the user for a different
@@ -254,6 +248,10 @@ prog
       const cmd = await getInstallCmd();
       await execa(cmd, getInstallArgs(cmd, deps));
       installSpinner.succeed('Installed dependencies');
+
+      indentLog('Initializing git repo.');
+      await execa('git', ['init']);
+
       console.log(await Messages.start(pkg));
     } catch (error) {
       installSpinner.fail('Failed to install dependencies');
@@ -431,7 +429,8 @@ prog
             await bundle.write(buildConfig.output);
           })
         ),
-        'JS ➡ JS: Compressing and transforming emitted TypeScript output.'
+        'TS ➡ JS: Transpiling TS to JS'
+        // 'JS ➡ JS: Compressing and transforming emitted TypeScript output.'
       );
       /**
        * Remove old index.js.
