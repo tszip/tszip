@@ -8,7 +8,7 @@ const Feature = ({ text, icon }) => (
   </div>
 );
 
-export default () => (
+const Features = () => (
   <div>
     <p className="text-lg mb-2 text-gray-600 md:text-xl">
       Zero-config CLI for TypeScript package development
@@ -817,3 +817,5 @@ export default () => (
     </div>
   </div>
 );
+
+export default Features;

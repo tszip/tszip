@@ -1,7 +1,7 @@
 import React from 'react';
 import { Logo } from 'components/logo';
 
-export default {
+const config = {
   github: 'https://github.com/tszip/tszip',
   titleSuffix: ' – TSDX',
   logo: (
@@ -89,3 +89,5 @@ export default {
     </>
   ),
 };
+
+export default config;
