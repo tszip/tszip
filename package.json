@@ -22,6 +22,8 @@
     "export-ts": "./dist/index.cjs"
   },
   "scripts": {
+    "clean": "rm -rf dist",
+    "prebootstrap": "yarn clean",
     "bootstrap": "tsc -p tsconfig.bootstrap.json && node dist/index.js build",
     "prepare": "yarn build",
     "dev": "yarn bootstrap && node dist/index.cjs watch",
