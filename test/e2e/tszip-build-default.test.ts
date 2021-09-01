@@ -77,7 +77,9 @@ describe('tsdx build :: zero-config defaults', () => {
     const output = execWithCache('node ../dist/index.cjs build --legacy');
     expect(output.code).toBe(0);
 
-    const matched = grep(/regeneratorRuntime=r/, ['dist/build-default.*.cjs']);
+    const matched = grep(/regeneratorRuntime\s*=\s*require/, [
+      'dist/build-default.*.cjs',
+    ]);
     expect(matched).toBeTruthy();
   });
 

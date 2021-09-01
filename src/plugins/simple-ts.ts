@@ -15,6 +15,10 @@
  */
 
 import { spawn } from 'child_process';
+import execa from 'execa';
+import { copy, move } from 'fs-extra';
+import { basename, extname, join } from 'path';
+import glob from 'tiny-glob';
 import * as ts from 'typescript';
 import { createProgressEstimator } from '../createProgressEstimator';
 
@@ -57,27 +61,63 @@ export function resolveId(id: string, importer = '') {
   return tsResolve.resolvedModule.resolvedFileName;
 }
 
-export async function runTsc({ transpileOnly = false, watch = false } = {}) {
+const parseArgs = (options: { [key: string]: any }) => {
+  const args: string[] = [];
+  for (const [key, val] of Object.entries(options)) {
+    args.push(`--${key}`, val.toString());
+  }
+
+  return args;
+};
+
+interface TscArgs {
+  tsconfig?: string | null;
+  transpileOnly?: boolean;
+  watch?: boolean;
+}
+
+export async function runTsc({
+  tsconfig = null,
+  transpileOnly = false,
+  watch = false,
+}: TscArgs = {}) {
   /**
    * Force src/ rootDir, dist/ outDir, and override noEmit.
    *
    * @todo Leave sourceMaps and declarations in when splitting per-file.
    */
-  const argString = `--rootDir src/ --outDir dist/ --noEmit false --strict ${!transpileOnly}`;
-  const args = argString.split(' ');
+  const args: Record<string, any> = {
+    rootDir: 'src/',
+    outDir: 'dist/',
+    jsx: 'react-jsx',
+    module: 'esnext',
+    target: 'esnext',
+    noEmit: false,
+    allowJs: true,
+    declaration: true,
+    sourceMap: true,
+    esModuleInterop: true,
+    resolveJsonModule: true,
+  };
 
-  console.log(`> Command: tsc ${args.join(' ')}`);
+  const parsedArgs = parseArgs(args);
+  if (tsconfig) {
+    parsedArgs.push('-p', tsconfig);
+  }
+
   const progressIndicator = await createProgressEstimator();
 
   await progressIndicator(
     new Promise((resolve) => {
-      const proc = spawn('tsc', args, {
+      const proc = spawn('tsc', parsedArgs, {
         stdio: 'inherit',
       });
 
       proc.on('exit', (code) => {
         if (code !== 0) {
-          throw Error('TypeScript build failed');
+          if (!transpileOnly) {
+            throw Error('TypeScript build failed');
+          }
         }
         resolve(void 0);
       });
@@ -85,8 +125,18 @@ export async function runTsc({ transpileOnly = false, watch = false } = {}) {
     `TS ➡ JS: Compiling with TSC`
   );
 
+  const srcFiles = await glob('src/**/*', { filesOnly: true });
+  await progressIndicator(
+    Promise.all(
+      srcFiles
+        .filter((file) => !/^\.(ts|tsx|js|jsx|json)$/.test(extname(file)))
+        .map(async (file) => await copy(file, join('dist', basename(file))))
+    ),
+    'Copying all non-TS and non-JS src/ files to dist/.'
+  );
+
   if (watch) {
-    spawn('tsc', [...args, '--watch', '--preserveWatchOutput'], {
+    spawn('tsc', [...parsedArgs, '--watch', '--preserveWatchOutput'], {
       stdio: 'inherit',
     });
   }
@@ -96,12 +146,12 @@ export async function runTsc({ transpileOnly = false, watch = false } = {}) {
  * This simply runs `tsc` in process.cwd(), reading the TSConfig in that
  * directory, and forcing an emit.
  */
-export default function simpleTS() {
+export default function simpleTS(...args: any[]) {
   return {
     name: 'simple-ts',
     /**
      * Wait for the process to finish.
      */
-    buildStart: async () => await runTsc(),
+    buildStart: async () => await runTsc(...args),
   };
 }

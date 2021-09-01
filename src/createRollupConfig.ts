@@ -109,7 +109,7 @@ export async function createRollupConfig(
 
   return {
     // Tell Rollup the entry point to the package
-    input: opts.input,
+    input: './dist/index.js',
     // Tell Rollup which packages to ignore
     external: (id: string) => {
       // bundle in polyfills as tszip can't (yet) ensure they're installed as deps
@@ -186,20 +186,20 @@ export async function createRollupConfig(
        * Resolve only non-JS. Leave regular imports alone, since packages will
        * ship with dependencies.
        */
-      resolvePlugin({
-        /**
-         * Do not allow CJS imports.
-         */
-        modulesOnly: true,
-        /**
-         * For node output, do not resolve `browser` field.
-         */
-        browser: opts.target !== 'node',
-        /**
-         * Resolve JSX, JSON, and .node files.
-         */
-        extensions: ['.jsx', '.json', '.node'],
-      }),
+      // resolvePlugin({
+      //   /**
+      //    * Do not allow CJS imports.
+      //    */
+      //   modulesOnly: true,
+      //   /**
+      //    * For node output, do not resolve `browser` field.
+      //    */
+      //   browser: opts.target !== 'node',
+      //   /**
+      //    * Resolve JSX, JSON, and .node files.
+      //    */
+      //   extensions: ['.jsx', '.json', '.node'],
+      // }),
       /**
        * All bundled external modules need to be converted from CJS to ESM.
        */
@@ -255,42 +255,42 @@ export async function createRollupConfig(
       /**
        * Run TSC and transpile TypeScript.
        */
-      typescript({
-        typescript: ts,
-        tsconfig: opts.tsconfig,
-        tsconfigDefaults: {
-          exclude: [
-            // all TS test files, regardless whether co-located or in test/ etc
-            '**/*.spec.ts',
-            '**/*.test.ts',
-            '**/*.spec.tsx',
-            '**/*.test.tsx',
-            // TS defaults below
-            'node_modules',
-            'bower_components',
-            'jspm_packages',
-            paths.appDist,
-          ],
-          compilerOptions: {
-            sourceMap: true,
-            declaration: true,
-            jsx: 'react-jsx',
-          },
-        },
-        tsconfigOverride: {
-          compilerOptions: {
-            // TS -> esnext, then leave the rest to babel-preset-env
-            module: 'esnext',
-            target: 'esnext',
-            // don't output declarations more than once
-            ...(outputNum > 0
-              ? { declaration: false, declarationMap: false }
-              : {}),
-          },
-        },
-        check: !opts.transpileOnly && outputNum === 0,
-        useTsconfigDeclarationDir: Boolean(tsCompilerOptions?.declarationDir),
-      }),
+      // typescript({
+      //   typescript: ts,
+      //   tsconfig: opts.tsconfig,
+      //   tsconfigDefaults: {
+      //     exclude: [
+      //       // all TS test files, regardless whether co-located or in test/ etc
+      //       '**/*.spec.ts',
+      //       '**/*.test.ts',
+      //       '**/*.spec.tsx',
+      //       '**/*.test.tsx',
+      //       // TS defaults below
+      //       'node_modules',
+      //       'bower_components',
+      //       'jspm_packages',
+      //       paths.appDist,
+      //     ],
+      //     compilerOptions: {
+      //       sourceMap: true,
+      //       declaration: true,
+      //       jsx: 'react-jsx',
+      //     },
+      //   },
+      //   tsconfigOverride: {
+      //     compilerOptions: {
+      //       // TS -> esnext, then leave the rest to babel-preset-env
+      //       module: 'esnext',
+      //       target: 'esnext',
+      //       // don't output declarations more than once
+      //       ...(outputNum > 0
+      //         ? { declaration: false, declarationMap: false }
+      //         : {}),
+      //     },
+      //   },
+      //   check: !opts.transpileOnly && outputNum === 0,
+      //   useTsconfigDeclarationDir: Boolean(tsCompilerOptions?.declarationDir),
+      // }),
       /**
        * In --legacy mode, use Babel to transpile to ES5.
        */
@@ -309,7 +309,7 @@ export async function createRollupConfig(
           },
           babelHelpers: 'bundled',
         }),
-      sourceMaps(),
+      // sourceMaps(),
       /**
        * Minify and compress with Terser for max DCE. Emit latest featureset.
        *

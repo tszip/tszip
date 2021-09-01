@@ -14,6 +14,7 @@ export interface BuildOpts extends SharedOpts {
   entry?: string | string[];
   format: 'cjs,esm';
   target: 'browser';
+  transpileOnly?: boolean;
 }
 
 export interface WatchOpts extends BuildOpts {
@@ -49,6 +50,8 @@ export interface TszipOptions extends SharedOpts {
   writeMeta?: boolean;
   // Only transpile, do not type check (makes compilation faster)
   transpileOnly?: boolean;
+  // Template to use
+  template?: string;
 }
 
 export interface PackageJson {
