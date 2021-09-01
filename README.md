@@ -85,30 +85,30 @@ or other plumbing. Just start editing `src/index.ts` and go!
 
 Below is a list of commands you will probably find useful:
 
-### `npm start` or `yarn start`
+### `yarn start`
 
 Runs the project in development/watch mode. Your project will be rebuilt upon
 changes. tszip has a special logger for your convenience. Error messages are
 pretty printed and formatted for compatibility VS Code's Problems tab.
 
-<img
+<!-- <img
 src="https://user-images.githubusercontent.com/4060187/52168303-574d3a00-26f6-11e9-9f3b-71dbec9ebfcb.gif"
-width="600" />
+width="600" /> -->
 
 Your library will be rebuilt if you make edits.
 
-### `npm run build` or `yarn build`
+### `yarn build`
 
 Bundles the package to the `dist` folder. The package is optimized and bundled
 with Rollup into multiple formats (CommonJS, UMD, and ES Module).
 
 <!-- <img src="https://user-images.githubusercontent.com/4060187/52168322-a98e5b00-26f6-11e9-8cf6-222d716b75ef.gif" width="600" /> -->
 
-### `npm test` or `yarn test`
+### `yarn test`
 
 Runs your tests using Jest.
 
-### `npm run lint` or `yarn lint`
+### `yarn lint`
 
 Runs Eslint with Prettier on .ts and .tsx files. If you want to customize eslint
 you can add an `eslint` block to your package.json, or you can run `yarn lint
@@ -117,7 +117,7 @@ you can add an `eslint` block to your package.json, or you can run `yarn lint
 ### `prepare` script
 
 Bundles and packages to the `dist` folder. Runs automatically when you run
-either `npm publish` or `yarn publish`. The `prepare` script will run the
+either `yarn publish`. The `prepare` script will run the
 equivalent of `npm run build` or `yarn build`. It will also be run if your
 module is installed as a git dependency (ie: `"mymodule":
 "github:myuser/mymodule#some-branch"`) so it can be depended on without checking
@@ -223,7 +223,7 @@ version updates.
 
 ## Inspiration
 
-tszip is an iteration on TSDX, which was originally ripped out of
+tszip is an iteration on [TSDX](https://github.com/formium/tsdx), which was originally ripped out of
 [Formik's](https://github.com/jaredpalmer/formik) build tooling. See
 [@developit/microbundle](https://github.com/developit/microbundle) for related
 work.
