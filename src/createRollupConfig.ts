@@ -274,7 +274,7 @@ export async function createRollupConfig(
           compilerOptions: {
             sourceMap: true,
             declaration: true,
-            jsx: 'react',
+            jsx: 'react-jsx',
           },
         },
         tsconfigOverride: {
