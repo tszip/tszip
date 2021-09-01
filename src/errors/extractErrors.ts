@@ -38,7 +38,7 @@ export async function extractErrors(opts: any) {
 
   if (!opts.name || !opts.name) {
     throw new Error(
-      'Missing options. Ensure you pass --name flag to export-ts'
+      'Missing options. Ensure you pass --name flag to tszip'
     );
   }
 

@@ -18,9 +18,9 @@ export async function moveTypes() {
 
   // see note above about deprecation window
   console.warn(
-    '[export-ts]: Your rootDir is currently set to "./". Please change your ' +
+    '[tszip]: Your rootDir is currently set to "./". Please change your ' +
       'rootDir to "./src".\n' +
-      'export-ts has deprecated setting tsconfig.compilerOptions.rootDir to ' +
+      'tszip has deprecated setting tsconfig.compilerOptions.rootDir to ' +
       '"./" as it caused buggy output for declarationMaps and more.\n' +
       'You may also need to change your include to remove "test", which also ' +
       'caused declarations to be unnecessarily created for test files.'

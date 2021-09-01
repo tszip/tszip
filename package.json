@@ -1,13 +1,23 @@
 {
-  "name": "export-ts",
+  "name": "tszip",
   "version": "0.2.2",
   "author": "C. Lewis <ctj.lewis@icloud.com>",
   "description": "Backwards-compatible compiler for TypeScript libraries.",
   "license": "MIT",
-  "homepage": "https://github.com/ctjlewis/export-ts",
+  "homepage": "https://github.com/tszip/tszip",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ctjlewis/export-ts"
+    "url": "git+https://github.com/tszip/tszip"
+  },
+  "bin": {
+    "tszip": "./dist/index.cjs"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "engines": {
+    "node": ">=14"
   },
   "keywords": [
     "react",
@@ -16,10 +26,7 @@
     "rollup"
   ],
   "bugs": {
-    "url": "https://github.com/ctjlewis/export-ts/issues"
-  },
-  "bin": {
-    "export-ts": "./dist/index.cjs"
+    "url": "https://github.com/tszip/tszip/issues"
   },
   "scripts": {
     "clean": "rm -rf dist",
@@ -35,13 +42,6 @@
     "release": "np",
     "deduplicate": "yarn-deduplicate -s fewer yarn.lock",
     "deduplicate:check": "yarn-deduplicate -s fewer yarn.lock --list --fail"
-  },
-  "files": [
-    "dist",
-    "templates"
-  ],
-  "engines": {
-    "node": ">=14"
   },
   "dependencies": {
     "@babel/core": "^7.4.4",

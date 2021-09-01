@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "export-ts build"
+    "build": "tszip build"
   },
   "name": "build-invalid",
   "license": "MIT"

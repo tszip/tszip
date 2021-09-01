@@ -1,6 +1,6 @@
 {
-  "name": "export-ts",
-  "short_name": "export-ts",
+  "name": "tszip",
+  "short_name": "tszip",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",

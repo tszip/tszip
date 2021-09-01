@@ -49,7 +49,7 @@ import { indentLog } from './utils/log';
 
 export * from './errors';
 
-const prog = sade('export-ts');
+const prog = sade('tszip');
 
 let appPackageJson: PackageJson;
 try {
@@ -120,7 +120,7 @@ prog
   .example('create --template react mypackage')
   .action(async (pkg: string, opts: any) => {
     console.log();
-    indentLog(chalk.bgBlue(`export-ts`), 2);
+    indentLog(chalk.bgBlue(`tszip`), 2);
     console.log();
 
     const bootSpinner = ora(`Creating ${chalk.bold.green(pkg)}...`);
@@ -619,8 +619,8 @@ prog
         opts['_'] = defaultInputs;
         console.log(
           chalk.yellow(
-            `Defaulting to "export-ts lint ${defaultInputs.join(' ')}"`,
-            '\nYou can override this in the package.json scripts, like "lint": "export-ts lint src otherDir"'
+            `Defaulting to "tszip lint ${defaultInputs.join(' ')}"`,
+            '\nYou can override this in the package.json scripts, like "lint": "tszip lint src otherDir"'
           )
         );
       }

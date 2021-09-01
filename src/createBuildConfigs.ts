@@ -7,7 +7,7 @@ import { ExportTsOptions, NormalizedOpts } from './types';
 import { createRollupConfig } from './createRollupConfig';
 import { existsSync } from 'fs';
 
-// check for custom example-ts.config.js
+// check for custom tszip.config.js
 let exportTsConfig = {
   rollup(config: RollupOptions, _options: ExportTsOptions): RollupOptions {
     return config;
@@ -36,7 +36,7 @@ export async function createBuildConfigs(
 
   return await Promise.all(
     allInputs.map(async (options: ExportTsOptions, index: number) => {
-      // pass the full rollup config to export-ts.config.js override
+      // pass the full rollup config to tszip.config.js override
       const config = await createRollupConfig(options, index);
       return exportTsConfig.rollup(config, options);
     })

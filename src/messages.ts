@@ -5,14 +5,14 @@ import { indentString } from './utils/log';
 
 // This was copied from Razzle. Lots of unused stuff.
 const program = {
-  name: 'export-ts',
+  name: 'tszip',
 };
 
 export const help = function () {
   return `
     Only ${chalk.green('<project-directory>')} is required.
     If you have any problems, do not hesitate to file an issue:
-    ${chalk.cyan('https://github.com/ctjlewis/export-ts/issues/new')}
+    ${chalk.cyan('https://github.com/tszip/tszip/issues/new')}
   `;
 };
 
@@ -21,7 +21,7 @@ export const missingProjectName = function () {
 Please specify the project directory:
   ${chalk.cyan(program.name)} ${chalk.green('<project-directory>')}
 For example:
-  ${chalk.cyan(program.name)} ${chalk.green('my-export-ts-lib')}
+  ${chalk.cyan(program.name)} ${chalk.green('my-tszip-lib')}
 Run ${chalk.cyan(`${program.name} --help`)} to see all options.
 `;
 };
@@ -82,7 +82,7 @@ export const start = async function (projectName: string) {
     ${Output.cmd(commands.test)}
     
   Questions? Feedback? Please let me know!
-  ${chalk.green('https://github.com/ctjlewis/export-ts/issues')}
+  ${chalk.green('https://github.com/tszip/tszip/issues')}
 `;
 };
 

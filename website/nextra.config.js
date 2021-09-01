@@ -2,7 +2,7 @@ import React from 'react';
 import { Logo } from 'components/logo';
 
 export default {
-  github: 'https://github.com/ctjlewis/export-ts',
+  github: 'https://github.com/tszip/tszip',
   titleSuffix: ' – TSDX',
   logo: (
     <>
