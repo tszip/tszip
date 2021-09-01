@@ -6,7 +6,7 @@
     "target": "ESNext",
     "module": "CommonJS",
     "allowJs": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "importHelpers": true,
     "esModuleInterop": true,
     "outDir": "dist",
