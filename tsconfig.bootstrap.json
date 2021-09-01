@@ -11,13 +11,13 @@
     "esModuleInterop": true,
     "outDir": "dist",
     "declaration": false,
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    // "strict": true,
+    // "noUnusedLocals": true,
+    // "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "incremental": true
+    "incremental": false
   }
 }

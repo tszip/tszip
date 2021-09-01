@@ -1,0 +1,3 @@
+import{eraseLine as o}from"ansi-escapes/index.js";import r from"chalk/source/index.js";import e from"ora/index.js";const s=o=>{console.log(`${r.gray(">")} ${o}`)},t=o=>{o instanceof Error&&(o=o.message),console.error(`${r.red("> Error!")} ${o}`)},a=o=>{console.log(`${r.green("> Success!")} ${o}`)},c=s=>{const t=e(r.green(s));return t.color="blue",t.start(),()=>{t.stop(),process.stdout.write(o)}},l=o=>r.bold(r.cyan(o)),n=o=>`${r.gray("`")}${r.bold(o)}${r.gray("`")}`,$=o=>r.bold(`${r.gray("{")}${r.bold(o)}${r.gray("}")}`);export{l as cmd,n as code,t as error,s as info,$ as param,a as success,c as wait};
+export default {};
+//# sourceMappingURL=output.mjs.map

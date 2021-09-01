@@ -400,12 +400,12 @@ prog
   )
   .action(async (dirtyOpts: BuildOpts) => {
     const opts = await normalizeOpts(dirtyOpts);
-    const buildConfigs = await createBuildConfigs(opts);
 
     console.log('> Cleaning dist/ and compiling TS.');
     await cleanDistFolder();
     await runTsc();
 
+    const buildConfigs = await createBuildConfigs(opts);
     const progressIndicator = await createProgressEstimator();
     if (opts.format.includes('cjs')) {
       await progressIndicator(

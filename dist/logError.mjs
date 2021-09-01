@@ -1,0 +1,2 @@
+import e from"chalk/source/index.js";const o=console.error.bind(console);function l(l){const c=l.error||l,n=`${c.name?c.name+": ":""}${c.message||c}`,r=c.plugin?"rpt2"===c.plugin?`(typescript) ${n}`:`(${c.plugin} plugin) ${n}`:n;if(o(e.bold.red(r)),c.loc&&(o(),o(`at ${c.loc.file}:${c.loc.line}:${c.loc.column}`)),c.frame)o(),o(e.dim(c.frame));else if(l.stack){const l=c.stack.replace(r,"");o(e.dim(l))}o()}export default l;
+//# sourceMappingURL=logError.mjs.map

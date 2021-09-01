@@ -107,6 +107,8 @@ export async function createRollupConfig(
     '.js',
   ].filter(Boolean);
 
+  const inputWithoutExtension = opts.input.replace(extname(opts.input), '');
+
   return {
     // Tell Rollup the entry point to the package
     input: opts.input,
@@ -149,7 +151,7 @@ export async function createRollupConfig(
     // Establish Rollup output
     output: {
       // Set filenames of the consumer's package
-      file: outputName,
+      file: `${inputWithoutExtension}.${opts.format === 'esm' ? 'mjs' : 'cjs'}`,
       // Pass through the file format
       format: isEsm ? 'es' : opts.format,
       // Do not let Rollup call Object.freeze() on namespace import objects
@@ -255,42 +257,42 @@ export async function createRollupConfig(
       /**
        * Run TSC and transpile TypeScript.
        */
-      typescript({
-        typescript: ts,
-        tsconfig: opts.tsconfig,
-        tsconfigDefaults: {
-          exclude: [
-            // all TS test files, regardless whether co-located or in test/ etc
-            '**/*.spec.ts',
-            '**/*.test.ts',
-            '**/*.spec.tsx',
-            '**/*.test.tsx',
-            // TS defaults below
-            'node_modules',
-            'bower_components',
-            'jspm_packages',
-            paths.appDist,
-          ],
-          compilerOptions: {
-            sourceMap: true,
-            declaration: true,
-            jsx: 'react',
-          },
-        },
-        tsconfigOverride: {
-          compilerOptions: {
-            // TS -> esnext, then leave the rest to babel-preset-env
-            module: 'esnext',
-            target: 'esnext',
-            // don't output declarations more than once
-            ...(outputNum > 0
-              ? { declaration: false, declarationMap: false }
-              : {}),
-          },
-        },
-        check: !opts.transpileOnly && outputNum === 0,
-        useTsconfigDeclarationDir: Boolean(tsCompilerOptions?.declarationDir),
-      }),
+      // typescript({
+      //   typescript: ts,
+      //   tsconfig: opts.tsconfig,
+      //   tsconfigDefaults: {
+      //     exclude: [
+      //       // all TS test files, regardless whether co-located or in test/ etc
+      //       '**/*.spec.ts',
+      //       '**/*.test.ts',
+      //       '**/*.spec.tsx',
+      //       '**/*.test.tsx',
+      //       // TS defaults below
+      //       'node_modules',
+      //       'bower_components',
+      //       'jspm_packages',
+      //       paths.appDist,
+      //     ],
+      //     compilerOptions: {
+      //       sourceMap: true,
+      //       declaration: true,
+      //       jsx: 'react',
+      //     },
+      //   },
+      //   tsconfigOverride: {
+      //     compilerOptions: {
+      //       // TS -> esnext, then leave the rest to babel-preset-env
+      //       module: 'esnext',
+      //       target: 'esnext',
+      //       // don't output declarations more than once
+      //       ...(outputNum > 0
+      //         ? { declaration: false, declarationMap: false }
+      //         : {}),
+      //     },
+      //   },
+      //   check: !opts.transpileOnly && outputNum === 0,
+      //   useTsconfigDeclarationDir: Boolean(tsCompilerOptions?.declarationDir),
+      // }),
       /**
        * In --legacy mode, use Babel to transpile to ES5.
        */

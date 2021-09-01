@@ -15,10 +15,10 @@
  */
 import * as ts from 'typescript';
 export declare function loadConfig(): ts.ParsedCommandLine;
-export declare function resolveId(id: string, importer?: string): string | null;
+export declare function resolveId(id: string, importer?: string): string;
 export declare function runTsc({ transpileOnly, watch }?: {
-    transpileOnly?: boolean | undefined;
-    watch?: boolean | undefined;
+    transpileOnly?: boolean;
+    watch?: boolean;
 }): Promise<void>;
 /**
  * This simply runs `tsc` in process.cwd(), reading the TSConfig in that

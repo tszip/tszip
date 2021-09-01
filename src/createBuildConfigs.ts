@@ -6,6 +6,7 @@ import { ExportTsOptions, NormalizedOpts } from './types';
 
 import { createRollupConfig } from './createRollupConfig';
 import { existsSync } from 'fs';
+import glob from 'tiny-glob';
 
 // check for custom example-ts.config.js
 let exportTsConfig = {
@@ -21,8 +22,9 @@ if (existsSync(paths.appConfig)) {
 export async function createBuildConfigs(
   opts: NormalizedOpts
 ): Promise<Array<RollupOptions & { output: OutputOptions }>> {
+  const inputs = await glob('dist/**/*.js');
   const allInputs = concatAllArray(
-    opts.input.map((input: string) =>
+    inputs.map((input: string) =>
       createAllFormats(opts, input).map(
         (options: ExportTsOptions, index: number) => ({
           ...options,
