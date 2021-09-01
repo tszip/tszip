@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "tsdx build"
+    "build": "export-ts build"
   },
   "name": "build-default-2",
   "license": "MIT"

@@ -112,7 +112,7 @@ export async function createRollupConfig(
     input: opts.input,
     // Tell Rollup which packages to ignore
     external: (id: string) => {
-      // bundle in polyfills as TSDX can't (yet) ensure they're installed as deps
+      // bundle in polyfills as export-ts can't (yet) ensure they're installed as deps
       if (id.startsWith('regenerator-runtime')) {
         return false;
       }
@@ -128,7 +128,7 @@ export async function createRollupConfig(
     // Rollup has treeshaking by default, but we can optimize it further...
     treeshake: {
       // We assume reading a property of an object never has side-effects.
-      // This means tsdx WILL remove getters and setters defined directly on objects.
+      // This means export-ts WILL remove getters and setters defined directly on objects.
       // Any getters or setters defined on classes will not be effected.
       //
       // @example
@@ -349,13 +349,6 @@ export async function createRollupConfig(
           };
         },
       },
-      // opts.env &&
-      //   replace({
-      //     preventAssignment: true,
-      //     'process.env.NODE_ENV': JSON.stringify(
-      //       PRODUCTION ? 'production' : 'development'
-      //     ),
-      //   }),
       /**
        * If not in --legacy mode, ensure lodash imports are optimized in the
        * final bundle.

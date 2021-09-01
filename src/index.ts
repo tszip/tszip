@@ -149,7 +149,10 @@ prog
       });
 
       pkg = await prompt.run();
-      projectPath = (await fs.realpath(process.cwd())) + '/' + pkg;
+
+      const realPath = await fs.realpath(process.cwd());
+      projectPath = realPath + '/' + pkg;
+
       bootSpinner.start(`Creating ${chalk.bold.green(pkg)}...`);
       return await getProjectPath(projectPath); // recursion!
     }
@@ -401,24 +404,25 @@ prog
   .action(async (dirtyOpts: BuildOpts) => {
     const opts = await normalizeOpts(dirtyOpts);
     const buildConfigs = await createBuildConfigs(opts);
+    const progressIndicator = await createProgressEstimator();
 
-    console.log('> Cleaning dist/.');
-    await cleanDistFolder();
+    await progressIndicator(cleanDistFolder(), 'Cleaning dist/.');
     // await runTsc();
 
-    const progressIndicator = await createProgressEstimator();
     if (opts.format.includes('cjs')) {
       await progressIndicator(
         writeCjsEntryFile(opts.name).catch(logError),
         'Creating CJS entry file'
       );
     }
+
     if (opts.format.includes('esm')) {
       await progressIndicator(
         writeMjsEntryFile(opts.name).catch(logError),
         'Creating MJS entry file'
       );
     }
+
     try {
       await progressIndicator(
         Promise.all(

@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "tsdx build --extractErrors"
+    "build": "export-ts build --extractErrors"
   },
   "name": "build-options",
   "license": "MIT"

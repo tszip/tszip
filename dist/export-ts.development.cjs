@@ -529,7 +529,7 @@ async function createRollupConfig(opts, outputNum) {
         input: opts.input,
         // Tell Rollup which packages to ignore
         external: (id) => {
-            // bundle in polyfills as TSDX can't (yet) ensure they're installed as deps
+            // bundle in polyfills as export-ts can't (yet) ensure they're installed as deps
             if (id.startsWith('regenerator-runtime')) {
                 return false;
             }
@@ -543,7 +543,7 @@ async function createRollupConfig(opts, outputNum) {
         // Rollup has treeshaking by default, but we can optimize it further...
         treeshake: {
             // We assume reading a property of an object never has side-effects.
-            // This means tsdx WILL remove getters and setters defined directly on objects.
+            // This means export-ts WILL remove getters and setters defined directly on objects.
             // Any getters or setters defined on classes will not be effected.
             //
             // @example
@@ -760,13 +760,6 @@ async function createRollupConfig(opts, outputNum) {
                     };
                 },
             },
-            // opts.env &&
-            //   replace({
-            //     preventAssignment: true,
-            //     '"development"': JSON.stringify(
-            //       PRODUCTION ? 'production' : 'development'
-            //     ),
-            //   }),
             /**
              * If not in --legacy mode, ensure lodash imports are optimized in the
              * final bundle.
@@ -1245,7 +1238,8 @@ prog
             result: (v) => v.trim(),
         });
         pkg = await prompt.run();
-        projectPath = (await fs__default['default'].realpath(process.cwd())) + '/' + pkg;
+        const realPath = await fs__default['default'].realpath(process.cwd());
+        projectPath = realPath + '/' + pkg;
         bootSpinner.start(`Creating ${chalk__default['default'].bold.green(pkg)}...`);
         return await getProjectPath(projectPath); // recursion!
     }
@@ -1450,10 +1444,9 @@ prog
     .action(async (dirtyOpts) => {
     const opts = await normalizeOpts(dirtyOpts);
     const buildConfigs = await createBuildConfigs(opts);
-    console.log('> Cleaning dist/.');
-    await cleanDistFolder();
-    // await runTsc();
     const progressIndicator = await createProgressEstimator();
+    await progressIndicator(cleanDistFolder(), 'Cleaning dist/.');
+    // await runTsc();
     if (opts.format.includes('cjs')) {
         await progressIndicator(writeCjsEntryFile(opts.name).catch(logError), 'Creating CJS entry file');
     }
