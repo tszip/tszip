@@ -14,7 +14,8 @@
  * @see https://twitter.com/jaffathecake/status/1145979217852678144
  */
 
-import { spawn } from 'child_process';
+// import { spawn } from 'child_process';
+import execa from 'execa';
 import { copy } from 'fs-extra';
 import { basename, extname, join } from 'path';
 import glob from 'tiny-glob';
@@ -107,20 +108,16 @@ export async function runTsc({
   const progressIndicator = await createProgressEstimator();
 
   await progressIndicator(
-    new Promise((resolve) => {
-      const proc = spawn('tsc', parsedArgs, {
-        stdio: 'inherit',
-      });
-
-      proc.on('exit', (code) => {
-        if (code !== 0) {
-          if (!transpileOnly) {
-            throw Error('TypeScript build failed');
-          }
+    (async () => {
+      try {
+        await execa('tsc', parsedArgs);
+      } catch (error: any) {
+        if (!transpileOnly) {
+          console.error(error.toString());
+          process.exit(1);
         }
-        resolve(void 0);
-      });
-    }),
+      }
+    })(),
     `TS ➡ JS: Compiling with TSC`
   );
 
@@ -135,9 +132,7 @@ export async function runTsc({
   );
 
   if (watch) {
-    spawn('tsc', [...parsedArgs, '--watch', '--preserveWatchOutput'], {
-      stdio: 'inherit',
-    });
+    await execa('tsc', [...parsedArgs, '--watch', '--preserveWatchOutput']);
   }
 }
 
