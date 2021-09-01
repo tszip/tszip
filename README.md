@@ -2,12 +2,16 @@
 
 <!-- ![tsdx](https://user-images.githubusercontent.com/4060187/56918426-fc747600-6a8b-11e9-806d-2da0b49e89e4.png) -->
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-101-orange.svg?style=flat-square)](#contributors-)
+[![All
+Contributors](https://img.shields.io/badge/all_contributors-101-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 *Backwards-compatible compiler for TypeScript libraries.*
 
-Use tszip to compile TypeScript libraries, including React components, to 100% backwards-compatible output. An iteration on [TSDX](https://github.com/formium/tsdx), tszip output is meant to be lightweight and, more importantly, *always work* when imported on Node 14+.
+Use tszip to compile TypeScript libraries, including React components, to 100%
+backwards-compatible output. An iteration on
+[TSDX](https://github.com/formium/tsdx), tszip output is meant to be lightweight
+and, more importantly, *always work* when imported on Node 14+.
 
 This is accomplished largely by: 
   1. emitting `.mjs` and `.cjs` entry-points
@@ -49,10 +53,14 @@ Your exports should *just work* out of the box in both ESM and CJS contexts.
 
 ## Features
 
-tszip comes with the "battery-pack included" and is part of a complete TypeScript breakfast:
+tszip comes with the "battery-pack included" and is part of a complete
+TypeScript breakfast:
 
-- Bundles your code with [Rollup](https://github.com/rollup/rollup) and outputs multiple module formats (CJS & ESM by default, and also UMD if you want) plus development and production builds
-- Comes with treeshaking, ready-to-rock lodash optimizations, and minification/compression
+- Bundles your code with [Rollup](https://github.com/rollup/rollup) and outputs
+  multiple module formats (CJS & ESM by default, and also UMD if you want) plus
+  development and production builds
+- Comes with treeshaking, ready-to-rock lodash optimizations, and
+  minification/compression
 - Live reload / watch-mode
 - Works with React
 - Human readable error messages (and in VSCode-friendly format)
@@ -61,7 +69,8 @@ tszip comes with the "battery-pack included" and is part of a complete TypeScrip
 - Jest test runner setup with sensible defaults via `tszip test`
 - ESLint with Prettier setup with sensible defaults via `tszip lint`
 - Zero-config, single dependency
-- Escape hatches for customization via `.babelrc.js`, `jest.config.js`, `.eslintrc.js`, and `tszip.config.js`
+- Escape hatches for customization via `.babelrc.js`, `jest.config.js`,
+  `.eslintrc.js`, and `tszip.config.js`
 
 ## Quick Start
 
@@ -71,22 +80,27 @@ npx tszip create --template react mylib
 cd mylib && yarn start
 ```
 
-That's it. You don't need to worry about setting up TypeScript or Rollup or Jest or other plumbing. Just start editing `src/index.ts` and go!
+That's it. You don't need to worry about setting up TypeScript or Rollup or Jest
+or other plumbing. Just start editing `src/index.ts` and go!
 
 Below is a list of commands you will probably find useful:
 
 ### `npm start` or `yarn start`
 
-Runs the project in development/watch mode. Your project will be rebuilt upon changes. tszip has a special logger for your convenience. Error messages are pretty printed and formatted for compatibility VS Code's Problems tab.
+Runs the project in development/watch mode. Your project will be rebuilt upon
+changes. tszip has a special logger for your convenience. Error messages are
+pretty printed and formatted for compatibility VS Code's Problems tab.
 
-<img src="https://user-images.githubusercontent.com/4060187/52168303-574d3a00-26f6-11e9-9f3b-71dbec9ebfcb.gif" width="600" />
+<img
+src="https://user-images.githubusercontent.com/4060187/52168303-574d3a00-26f6-11e9-9f3b-71dbec9ebfcb.gif"
+width="600" />
 
 Your library will be rebuilt if you make edits.
 
 ### `npm run build` or `yarn build`
 
-Bundles the package to the `dist` folder.
-The package is optimized and bundled with Rollup into multiple formats (CommonJS, UMD, and ES Module).
+Bundles the package to the `dist` folder. The package is optimized and bundled
+with Rollup into multiple formats (CommonJS, UMD, and ES Module).
 
 <!-- <img src="https://user-images.githubusercontent.com/4060187/52168322-a98e5b00-26f6-11e9-8cf6-222d716b75ef.gif" width="600" /> -->
 
@@ -96,22 +110,33 @@ Runs your tests using Jest.
 
 ### `npm run lint` or `yarn lint`
 
-Runs Eslint with Prettier on .ts and .tsx files.
-If you want to customize eslint you can add an `eslint` block to your package.json, or you can run `yarn lint --write-file` and edit the generated `.eslintrc.js` file.
+Runs Eslint with Prettier on .ts and .tsx files. If you want to customize eslint
+you can add an `eslint` block to your package.json, or you can run `yarn lint
+--write-file` and edit the generated `.eslintrc.js` file.
 
 ### `prepare` script
 
-Bundles and packages to the `dist` folder.
-Runs automatically when you run either `npm publish` or `yarn publish`. The `prepare` script will run the equivalent of `npm run build` or `yarn build`. It will also be run if your module is installed as a git dependency (ie: `"mymodule": "github:myuser/mymodule#some-branch"`) so it can be depended on without checking the transpiled code into git.
+Bundles and packages to the `dist` folder. Runs automatically when you run
+either `npm publish` or `yarn publish`. The `prepare` script will run the
+equivalent of `npm run build` or `yarn build`. It will also be run if your
+module is installed as a git dependency (ie: `"mymodule":
+"github:myuser/mymodule#some-branch"`) so it can be depended on without checking
+the transpiled code into git.
 
 ## Customization
 
 ### Rollup
 
 > **❗⚠️❗ Warning**: <br>
-> These modifications will override the default behavior and configuration of tszip. As such they can invalidate internal guarantees and assumptions. These types of changes can break internal behavior and can be very fragile against updates. Use with discretion!
+> These modifications will override the default behavior and configuration of
+> tszip. As such they can invalidate internal guarantees and assumptions. These
+> types of changes can break internal behavior and can be very fragile against
+> updates. Use with discretion!
 
-tszip uses Rollup under the hood. The defaults are solid for most packages (Formik uses the defaults!). However, if you do wish to alter the rollup configuration, you can do so by creating a file called `tszip.config.js` at the root of your project like so:
+tszip uses Rollup under the hood. The defaults are solid for most packages
+(Formik uses the defaults!). However, if you do wish to alter the rollup
+configuration, you can do so by creating a file called `tszip.config.js` at the
+root of your project like so:
 
 ```js
 // Not transpiled with TypeScript or Babel, so use plain Es6/Node.js!
@@ -181,16 +206,20 @@ module.exports = {
 
 ### Jest
 
-You can add your own `jest.config.js` to the root of your project and tszip will **shallow merge** it with [its own Jest config](./src/createJestConfig.ts).
+You can add your own `jest.config.js` to the root of your project and tszip will
+**shallow merge** it with [its own Jest config](./src/createJestConfig.ts).
 
 ### ESLint
 
-You can add your own `.eslintrc.js` to the root of your project and tszip will **deep merge** it with [its own ESLint config](./src/createEslintConfig.ts).
+You can add your own `.eslintrc.js` to the root of your project and tszip will
+**deep merge** it with [its own ESLint config](./src/createEslintConfig.ts).
 
 ### `patch-package`
 
-If you still need more customizations, we recommend using [`patch-package`](https://github.com/ds300/patch-package) so you don't need to fork.
-Keep in mind that these types of changes may be quite fragile against version updates.
+If you still need more customizations, we recommend using
+[`patch-package`](https://github.com/ds300/patch-package) so you don't need to
+fork. Keep in mind that these types of changes may be quite fragile against
+version updates.
 
 ## Inspiration
 
@@ -208,7 +237,9 @@ Some key differences include:
 - tszip includes a bootstrap command with a few package templates
 - tszip allows for some lightweight customization
 - tszip is TypeScript focused, but also supports plain JavaScript
-- tszip outputs distinct development and production builds (like React does) for CJS and UMD builds. This means you can include rich error messages and other dev-friendly goodies without sacrificing final bundle size.
+- tszip outputs distinct development and production builds (like React does) for
+  CJS and UMD builds. This means you can include rich error messages and other
+  dev-friendly goodies without sacrificing final bundle size.
 
 ## API Reference
 
@@ -279,7 +310,10 @@ Examples
 
 ### `tszip test`
 
-This runs Jest, forwarding all CLI flags to it. See [https://jestjs.io](https://jestjs.io) for options. For example, if you would like to run in watch mode, you can run `tszip test --watch`. So you could set up your `package.json` `scripts` like:
+This runs Jest, forwarding all CLI flags to it. See
+[https://jestjs.io](https://jestjs.io) for options. For example, if you would
+like to run in watch mode, you can run `tszip test --watch`. So you could set up
+your `package.json` `scripts` like:
 
 ```json
 {
@@ -331,7 +365,8 @@ Please see the [Contributing Guidelines](./CONTRIBUTING.md).
 
 ## Contributors ✨
 
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+Thanks goes to these wonderful people ([emoji
+key](https://allcontributors.org/docs/en/emoji-key)):
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
@@ -750,4 +785,6 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+This project follows the
+[all-contributors](https://github.com/all-contributors/all-contributors)
+specification. Contributions of any kind welcome!
