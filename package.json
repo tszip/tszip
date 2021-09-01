@@ -1,6 +1,6 @@
 {
   "name": "export-ts",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "author": "C. Lewis <ctj.lewis@icloud.com>",
   "description": "Backwards-compatible compiler for TypeScript libraries.",
   "license": "MIT",
