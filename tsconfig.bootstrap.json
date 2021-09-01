@@ -10,7 +10,6 @@
     "importHelpers": true,
     "esModuleInterop": true,
     "outDir": "dist",
-    "declaration": false,
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -18,6 +17,8 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "incremental": true
+    "incremental": false,
+    "declaration": false,
+    "sourceMap": false,
   }
 }

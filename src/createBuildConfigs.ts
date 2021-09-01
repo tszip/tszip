@@ -2,14 +2,14 @@ import { RollupOptions, OutputOptions } from 'rollup';
 import { concatAllArray } from 'jpjs';
 
 import { paths } from './constants';
-import { ExportTsOptions, NormalizedOpts } from './types';
+import { TszipOptions, NormalizedOpts } from './types';
 
 import { createRollupConfig } from './createRollupConfig';
 import { existsSync } from 'fs';
 
 // check for custom tszip.config.js
 let exportTsConfig = {
-  rollup(config: RollupOptions, _options: ExportTsOptions): RollupOptions {
+  rollup(config: RollupOptions, _options: TszipOptions): RollupOptions {
     return config;
   },
 };
@@ -24,7 +24,7 @@ export async function createBuildConfigs(
   const allInputs = concatAllArray(
     opts.input.map((input: string) =>
       createAllFormats(opts, input).map(
-        (options: ExportTsOptions, index: number) => ({
+        (options: TszipOptions, index: number) => ({
           ...options,
           // We want to know if this is the first run for each entryfile
           // for certain plugins (e.g. css)
@@ -35,7 +35,7 @@ export async function createBuildConfigs(
   );
 
   return await Promise.all(
-    allInputs.map(async (options: ExportTsOptions, index: number) => {
+    allInputs.map(async (options: TszipOptions, index: number) => {
       // pass the full rollup config to tszip.config.js override
       const config = await createRollupConfig(options, index);
       return exportTsConfig.rollup(config, options);
@@ -46,7 +46,7 @@ export async function createBuildConfigs(
 function createAllFormats(
   opts: NormalizedOpts,
   input: string
-): [ExportTsOptions, ...ExportTsOptions[]] {
+): [TszipOptions, ...TszipOptions[]] {
   return [
     opts.format.includes('cjs') && {
       ...opts,
@@ -85,5 +85,5 @@ function createAllFormats(
       env: 'production',
       input,
     },
-  ].filter(Boolean) as [ExportTsOptions, ...ExportTsOptions[]];
+  ].filter(Boolean) as [TszipOptions, ...TszipOptions[]];
 }

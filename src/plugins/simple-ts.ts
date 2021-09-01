@@ -60,8 +60,10 @@ export function resolveId(id: string, importer = '') {
 export async function runTsc({ transpileOnly = false, watch = false } = {}) {
   /**
    * Force src/ rootDir, dist/ outDir, and override noEmit.
+   *
+   * @todo Leave sourceMaps and declarations in when splitting per-file.
    */
-  const argString = `--rootDir src/ --outDir dist/ --noEmit false --strict ${transpileOnly}`;
+  const argString = `--rootDir src/ --outDir dist/ --noEmit false --strict ${!transpileOnly}`;
   const args = argString.split(' ');
 
   console.log(`> Command: tsc ${args.join(' ')}`);

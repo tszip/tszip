@@ -9,8 +9,6 @@
     "rootDir": "src",
     "outDir": "dist",
     "importHelpers": true,
-    "declaration": true,
-    "sourceMap": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
@@ -20,6 +18,8 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
-    "incremental": true
+    "incremental": false,
+    "declaration": false,
+    "sourceMap": false,
   }
 }

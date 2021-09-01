@@ -15,7 +15,7 @@ import ts from 'typescript';
 
 import { extractErrors } from './errors/extractErrors';
 import { babelPluginExportTs } from './babelPluginExportTs';
-import { ExportTsOptions } from './types';
+import { TszipOptions } from './types';
 import { optimizeLodashImports } from '@optimize-lodash/rollup-plugin';
 import { extname, resolve, sep } from 'path';
 import { existsSync, readFileSync } from 'fs';
@@ -61,7 +61,7 @@ const errorCodeOpts = {
 };
 
 export async function createRollupConfig(
-  opts: ExportTsOptions,
+  opts: TszipOptions,
   outputNum: number
 ): Promise<RollupOptions> {
   const findAndRecordErrorCodes = await extractErrors({
