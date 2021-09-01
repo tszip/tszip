@@ -36,6 +36,7 @@ import {
   BuildOpts,
   ModuleFormat,
   NormalizedOpts,
+  TszipOptions,
 } from './types';
 import { createProgressEstimator } from './createProgressEstimator';
 import { templates } from './templates';
@@ -45,7 +46,7 @@ import fs from 'fs-extra';
 import { readFileSync } from 'fs';
 import { stat } from 'fs/promises';
 import { indentLog } from './utils/log';
-// import { runTsc } from './plugins/simple-ts';
+import { runTsc } from './plugins/simple-ts';
 
 export * from './errors';
 
@@ -118,7 +119,7 @@ prog
     )}]`
   )
   .example('create --template react mypackage')
-  .action(async (pkg: string, opts: any) => {
+  .action(async (pkg: string, opts: TszipOptions) => {
     console.log();
     indentLog(chalk.bgBlue(`tszip`), 2);
     console.log();
@@ -404,19 +405,26 @@ prog
     const buildConfigs = await createBuildConfigs(opts);
     const progressIndicator = await createProgressEstimator();
 
+    const packageName = opts.name.includes('@')
+      ? opts.name.slice(opts.name.indexOf('/') + 1)
+      : opts.name;
+
     await progressIndicator(cleanDistFolder(), 'Cleaning dist/.');
-    // await runTsc();
+    await runTsc({
+      tsconfig: opts.tsconfig,
+      transpileOnly: opts.transpileOnly,
+    });
 
     if (opts.format.includes('cjs')) {
       await progressIndicator(
-        writeCjsEntryFile(opts.name).catch(logError),
+        writeCjsEntryFile(packageName).catch(logError),
         'Creating CJS entry file'
       );
     }
 
     if (opts.format.includes('esm')) {
       await progressIndicator(
-        writeMjsEntryFile(opts.name).catch(logError),
+        writeMjsEntryFile(packageName).catch(logError),
         'Creating MJS entry file'
       );
     }
