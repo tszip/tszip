@@ -2,10 +2,8 @@ import { safeVariableName } from './utils';
 import { paths } from './constants';
 import { RollupOptions } from 'rollup';
 import { terser } from 'rollup-plugin-terser';
-import { DEFAULT_EXTENSIONS as DEFAULT_BABEL_EXTENSIONS } from '@babel/core';
 
 import { extractErrors } from './errors/extractErrors';
-import { babelPluginExportTs } from './babelPluginExportTs';
 import { TszipOptions } from './types';
 import { optimizeLodashImports } from '@optimize-lodash/rollup-plugin';
 import { resolveImports } from './plugins/resolveImports';
@@ -26,63 +24,26 @@ export async function createRollupConfig(
     ...opts,
   });
 
-  const isEsm = opts.format.includes('es') || opts.format.includes('esm');
-
   const shouldMinify = !opts.transpileOnly && !opts.noMinify;
-
   const PRODUCTION = process.env.NODE_ENV === 'production';
 
   return {
-    // Tell Rollup the entry point to the package
     input: opts.input,
     /**
      * Everything except the entry point is external.
      */
-    external: (id: string) => {
-      return id !== opts.input;
-    },
-    // Minimize runtime error surface as much as possible
-    shimMissingExports: false,
-    // Rollup has treeshaking by default, but we can optimize it further...
+    external: (id: string) => id !== opts.input,
+    shimMissingExports: true,
     treeshake: {
-      // We assume reading a property of an object never has side-effects.
-      // This means tszip WILL remove getters and setters defined directly on objects.
-      // Any getters or setters defined on classes will not be effected.
-      //
-      // @example
-      //
-      // const foo = {
-      //  get bar() {
-      //    console.log('effect');
-      //    return 'bar';
-      //  }
-      // }
-      //
-      // const result = foo.bar;
-      // const illegalAccess = foo.quux.tooDeep;
-      //
-      // Punchline....Don't use getters and setters
       propertyReadSideEffects: false,
     },
-    // Establish Rollup output
     output: {
-      // Set filenames of the consumer's package
       file: opts.output,
-      // Pass through the file format
       format: 'es',
-      // Do not let Rollup call Object.freeze() on namespace import objects
-      // (i.e. import * as namespaceImportObject from...) that are accessed dynamically.
       freeze: false,
-      // Respect tsconfig esModuleInterop when setting __esModule.
       esModule: true,
       name: opts.name || safeVariableName(opts.name),
-      sourcemap: true,
-      globals: {
-        react: 'React',
-        'react-native': 'ReactNative',
-        'lodash-es': 'lodashEs',
-        'lodash/fp': 'lodashFp',
-      },
+      sourcemap: false,
       exports: 'named',
     },
     plugins: [
@@ -111,33 +72,19 @@ export async function createRollupConfig(
       {
         name: 'Remove shebang',
         transform(code: string) {
-          let reg = /^#!(.*)/;
-          code = code.replace(reg, '');
+          code = code.trim();
 
+          if (!code.startsWith('#!')) {
+            return null;
+          }
+
+          code = code.replace(/^#!(.*)/, '');
           return {
             code,
             map: null,
           };
         },
       },
-      /**
-       * In --legacy mode, use Babel to transpile to ES5.
-       */
-      opts.legacy &&
-        babelPluginExportTs({
-          exclude: 'node_modules/**',
-          extensions: [...DEFAULT_BABEL_EXTENSIONS, 'ts', 'tsx'],
-          passPerPreset: true,
-          custom: {
-            targets: {
-              ...(opts.target === 'node' ? { node: 14 } : {}),
-              esmodules: isEsm,
-            },
-            extractErrors: opts.extractErrors,
-            format: opts.format,
-          },
-          babelHelpers: 'bundled',
-        }),
       /**
        * Replace process.env.NODE_ENV variable, preventing assignment. Runs
        * before Terser for DCE (`if (...)` => `if (false)` => removed).
@@ -171,7 +118,7 @@ export async function createRollupConfig(
             pure_getters: true,
             // passes: 10,
           },
-          ecma: opts.legacy ? 5 : 2020,
+          ecma: 2020,
           module: true,
           toplevel: true,
         }),
@@ -179,10 +126,9 @@ export async function createRollupConfig(
        * If not in --legacy mode, ensure lodash imports are optimized in the
        * final bundle.
        */
-      !opts.legacy &&
-        optimizeLodashImports({
-          useLodashEs: isEsm || undefined,
-        }),
+      optimizeLodashImports({
+        useLodashEs: true,
+      }),
       /**
        * Rewrite final emitted imports.
        */
@@ -203,26 +149,6 @@ export async function createRollupConfig(
           };
         },
       },
-      /**
-       * Ensure there's an empty default export. This is the only way to have a
-       * dist/index.mjs with `export { default } from './package.min.mjs'` and
-       * support default exports at all.
-       *
-       * @see https://www.npmjs.com/package/rollup-plugin-export-default
-       */
-      // {
-      //   name: 'Ensure default exports',
-      //   renderChunk: async (code: string, chunk: any) => {
-      //     if (chunk.exports.includes('default') || !isEsm) {
-      //       return null;
-      //     }
-
-      //     return {
-      //       code: `${code}\nexport default {};`,
-      //       map: null,
-      //     };
-      //   },
-      // },
     ],
   };
 }

@@ -396,8 +396,6 @@ prog
   .example('build --name Foo')
   .option('--format', 'Specify module format(s)', 'cjs,esm')
   .example('build --format cjs,esm')
-  .option('--legacy', 'Babel transpile and emit ES5.')
-  .example('build --legacy')
   .option('--tsconfig', 'Specify custom tsconfig path')
   .example('build --tsconfig ./tsconfig.foo.json')
   .option('--transpileOnly', 'Skip type checking')
