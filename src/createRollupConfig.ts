@@ -139,7 +139,7 @@ export async function createRollupConfig(
       {
         name: 'Shim require(),',
         renderChunk: async (code: string, _: any) => {
-          if (code.includes('require(')) {
+          if (code.includes('require(') || code.includes('require.')) {
             code = REQUIRE_SHIM + code;
           }
 
