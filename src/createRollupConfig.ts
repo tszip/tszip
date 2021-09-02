@@ -1,6 +1,6 @@
 import resolveExports from 'resolve.exports';
 
-import { safeVariableName, safePackageName, external } from './utils';
+import { safeVariableName, external } from './utils';
 import { paths } from './constants';
 import { RollupOptions } from 'rollup';
 import { terser } from 'rollup-plugin-terser';
@@ -71,18 +71,18 @@ export async function createRollupConfig(
       ? opts.minify
       : opts.env === 'production' || isEsm;
 
-  let formatString = ['esm', 'cjs'].includes(opts.format) ? '' : opts.format;
-  let fileExtension = opts.format === 'esm' ? 'mjs' : 'cjs';
+  // let formatString = ['esm', 'cjs'].includes(opts.format) ? '' : opts.format;
+  // let fileExtension = opts.format === 'esm' ? 'mjs' : 'cjs';
 
-  const outputName = [
-    `${paths.appDist}/${safePackageName(opts.name)}`,
-    formatString,
-    opts.env,
-    shouldMinify ? 'min' : '',
-    fileExtension,
-  ]
-    .filter(Boolean)
-    .join('.');
+  // const outputName = [
+  //   `${paths.appDist}/${safePackageName(opts.name)}`,
+  //   formatString,
+  //   opts.env,
+  //   shouldMinify ? 'min' : '',
+  //   fileExtension,
+  // ]
+  //   .filter(Boolean)
+  //   .join('.');
 
   const tsconfigPath = opts.tsconfig || paths.tsconfigJson;
   // borrowed from https://github.com/facebook/create-react-app/pull/7248
@@ -104,7 +104,7 @@ export async function createRollupConfig(
 
   return {
     // Tell Rollup the entry point to the package
-    input: './dist/index.js',
+    input: opts.input,
     // Tell Rollup which packages to ignore
     external: (id: string) => {
       // bundle in polyfills as tszip can't (yet) ensure they're installed as deps
@@ -144,7 +144,7 @@ export async function createRollupConfig(
     // Establish Rollup output
     output: {
       // Set filenames of the consumer's package
-      file: outputName,
+      file: opts.output,
       // Pass through the file format
       format: isEsm ? 'es' : opts.format,
       // Do not let Rollup call Object.freeze() on namespace import objects
@@ -248,45 +248,6 @@ export async function createRollupConfig(
         },
       },
       /**
-       * Run TSC and transpile TypeScript.
-       */
-      // typescript({
-      //   typescript: ts,
-      //   tsconfig: opts.tsconfig,
-      //   tsconfigDefaults: {
-      //     exclude: [
-      //       // all TS test files, regardless whether co-located or in test/ etc
-      //       '**/*.spec.ts',
-      //       '**/*.test.ts',
-      //       '**/*.spec.tsx',
-      //       '**/*.test.tsx',
-      //       // TS defaults below
-      //       'node_modules',
-      //       'bower_components',
-      //       'jspm_packages',
-      //       paths.appDist,
-      //     ],
-      //     compilerOptions: {
-      //       sourceMap: true,
-      //       declaration: true,
-      //       jsx: 'react-jsx',
-      //     },
-      //   },
-      //   tsconfigOverride: {
-      //     compilerOptions: {
-      //       // TS -> esnext, then leave the rest to babel-preset-env
-      //       module: 'esnext',
-      //       target: 'esnext',
-      //       // don't output declarations more than once
-      //       ...(outputNum > 0
-      //         ? { declaration: false, declarationMap: false }
-      //         : {}),
-      //     },
-      //   },
-      //   check: !opts.transpileOnly && outputNum === 0,
-      //   useTsconfigDeclarationDir: Boolean(tsCompilerOptions?.declarationDir),
-      // }),
-      /**
        * In --legacy mode, use Babel to transpile to ES5.
        */
       opts.legacy &&
@@ -304,7 +265,22 @@ export async function createRollupConfig(
           },
           babelHelpers: 'bundled',
         }),
-      // sourceMaps(),
+      /**
+       * Replace process.env.NODE_ENV variable, preventing assignment. Runs
+       * before Terser for DCE (`if (...)` => `if (false)` => removed).
+       */
+      opts.env && {
+        name: 'Replace process.NODE_ENV',
+        renderChunk: async (code: string, _: any) => {
+          return {
+            code: code.replace(
+              /process\.env\.NODE_ENV(?!\s*=)/g,
+              JSON.stringify(PRODUCTION ? 'production' : 'development')
+            ),
+            map: null,
+          };
+        },
+      },
       /**
        * Minify and compress with Terser for max DCE. Emit latest featureset.
        *
@@ -329,21 +305,6 @@ export async function createRollupConfig(
       optimizeLodashImports({
         useLodashEs: isEsm || undefined,
       }),
-      /**
-       * Replace process.env.NODE_ENV variable, preventing assignment.
-       */
-      opts.env && {
-        name: 'Ensure default exports',
-        renderChunk: async (code: string, _: any) => {
-          return {
-            code: code.replace(
-              /process\.env\.NODE_ENV(?!\s*=)/g,
-              JSON.stringify(PRODUCTION ? 'production' : 'development')
-            ),
-            map: null,
-          };
-        },
-      },
       /**
        * If not in --legacy mode, ensure lodash imports are optimized in the
        * final bundle.

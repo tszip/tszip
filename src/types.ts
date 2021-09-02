@@ -38,12 +38,14 @@ export interface TszipOptions extends SharedOpts {
   name: string;
   // path to file
   input: string;
+  // output
+  output: string;
   // Environment
   env: 'development' | 'production';
   // Module format
   format: ModuleFormat;
   /** If `true`, Babel transpile and emit ES5. */
-  legacy: boolean;
+  legacy?: boolean;
   // Is minifying?
   minify?: boolean;
   // Is this the very first rollup config (and thus should one-off metadata be extracted)?

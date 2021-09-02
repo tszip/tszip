@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import sade from 'sade';
-import glob from 'glob-promise';
 import { rollup, watch, RollupWatchOptions, WatcherOptions } from 'rollup';
 import chalk from 'chalk';
 import jest from 'jest';
@@ -47,6 +46,7 @@ import { readFileSync } from 'fs';
 import { stat } from 'fs/promises';
 import { indentLog } from './utils/log';
 import { runTsc } from './plugins/simple-ts';
+import glob from 'tiny-glob';
 
 export * from './errors';
 
@@ -103,7 +103,9 @@ async function getInputs(
     }
   }
 
-  const inputPromises = entryList.map(async (file) => await glob(file));
+  const inputPromises = entryList.map(
+    async (file) => await glob(file, { filesOnly: true })
+  );
   const inputs = await Promise.all(inputPromises);
   return inputs.flat();
 }
@@ -305,7 +307,7 @@ prog
       await writeMjsEntryFile(opts.name);
     }
 
-    await cleanOldJS();
+    // await cleanOldJS();
 
     type Killer = execa.ExecaChildProcess | null;
 
@@ -443,7 +445,7 @@ prog
       /**
        * Remove old index.js.
        */
-      await cleanOldJS();
+      // await cleanOldJS();
     } catch (error) {
       logError(error);
       process.exit(1);
@@ -464,15 +466,15 @@ async function normalizeOpts(opts: WatchOpts): Promise<NormalizedOpts> {
   };
 }
 
-async function cleanOldJS() {
-  const progressIndicator = await createProgressEstimator();
-  const oldJS = await glob(`${paths.appDist}/**/*.js`);
-  // console.log({ oldJS });
-  await progressIndicator(
-    Promise.all(oldJS.map(async (file: string) => await fs.unlink(file))),
-    'Removing original emitted TypeScript output (dist/**/*.js).'
-  );
-}
+// async function cleanOldJS() {
+//   const progressIndicator = await createProgressEstimator();
+//   const oldJS = await glob(`${paths.appDist}/**/*.js`);
+//   // console.log({ oldJS });
+//   await progressIndicator(
+//     Promise.all(oldJS.map(async (file: string) => await fs.unlink(file))),
+//     'Removing original emitted TypeScript output (dist/**/*.js).'
+//   );
+// }
 
 async function cleanDistFolder() {
   await fs.remove(paths.appDist);

@@ -6,6 +6,9 @@ import { TszipOptions, NormalizedOpts } from './types';
 
 import { createRollupConfig } from './createRollupConfig';
 import { existsSync } from 'fs';
+import glob from 'tiny-glob';
+import { extname, resolve } from 'path';
+import { renameExtension } from './utils/renameExtension';
 
 // check for custom tszip.config.js
 let exportTsConfig = {
@@ -21,9 +24,13 @@ if (existsSync(paths.appConfig)) {
 export async function createBuildConfigs(
   opts: NormalizedOpts
 ): Promise<Array<RollupOptions & { output: OutputOptions }>> {
+  const distFiles = await glob('./dist/**/*', { filesOnly: true });
+  const filesToOptimize = distFiles.filter((file) =>
+    /^\.(js|jsx)/.test(extname(file))
+  );
   const allInputs = concatAllArray(
-    opts.input.map((input: string) =>
-      createAllFormats(opts, input).map(
+    filesToOptimize.map((input: string) =>
+      createAllFormats(opts, resolve(input)).map(
         (options: TszipOptions, index: number) => ({
           ...options,
           // We want to know if this is the first run for each entryfile
@@ -47,43 +54,32 @@ function createAllFormats(
   opts: NormalizedOpts,
   input: string
 ): [TszipOptions, ...TszipOptions[]] {
+  if (input === resolve('dist', 'index.js')) {
+    return [
+      {
+        ...opts,
+        input,
+        output: renameExtension(input, '.cjs'),
+        format: 'cjs',
+        env: 'production',
+      },
+      {
+        ...opts,
+        input,
+        output: renameExtension(input, '.mjs'),
+        format: 'esm',
+        env: 'production',
+      },
+    ];
+  }
+
   return [
-    opts.format.includes('cjs') && {
+    {
       ...opts,
-      format: 'cjs',
-      env: 'development',
       input,
-    },
-    opts.format.includes('cjs') && {
-      ...opts,
+      output: input,
       format: 'cjs',
       env: 'production',
-      input,
     },
-    opts.format.includes('esm') && { ...opts, format: 'esm', input },
-    opts.format.includes('umd') && {
-      ...opts,
-      format: 'umd',
-      env: 'development',
-      input,
-    },
-    opts.format.includes('umd') && {
-      ...opts,
-      format: 'umd',
-      env: 'production',
-      input,
-    },
-    opts.format.includes('system') && {
-      ...opts,
-      format: 'system',
-      env: 'development',
-      input,
-    },
-    opts.format.includes('system') && {
-      ...opts,
-      format: 'system',
-      env: 'production',
-      input,
-    },
-  ].filter(Boolean) as [TszipOptions, ...TszipOptions[]];
+  ];
 }

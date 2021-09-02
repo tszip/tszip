@@ -125,7 +125,9 @@ export async function runTsc({
   await progressIndicator(
     Promise.all(
       srcFiles
-        .filter((file) => !/^\.(ts|tsx|js|jsx|json)$/.test(extname(file)))
+        .filter(
+          (file) => !/^\.(ts|cjs|mjs|tsx|js|jsx|json)$/.test(extname(file))
+        )
         .map(async (file) => await copy(file, join('dist', basename(file))))
     ),
     'Copying all non-TS and non-JS src/ files to dist/.'
