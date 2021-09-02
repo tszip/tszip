@@ -23,22 +23,16 @@ describe('tsdx build :: options', () => {
 
     expect(shell.test('-f', 'dist/index.cjs')).toBeTruthy();
     expect(shell.test('-f', 'dist/build-default.development.cjs')).toBeTruthy();
-    expect(
-      shell.test('-f', 'dist/build-default.production.min.cjs')
-    ).toBeTruthy();
+    expect(shell.test('-f', 'dist/build-default.cjs')).toBeTruthy();
     expect(shell.test('-f', 'dist/build-default.min.mjs')).toBeTruthy();
     expect(
       shell.test('-f', 'dist/build-default.umd.development.cjs')
     ).toBeTruthy();
-    expect(
-      shell.test('-f', 'dist/build-default.umd.production.min.cjs')
-    ).toBeTruthy();
+    expect(shell.test('-f', 'dist/build-default.umd.cjs')).toBeTruthy();
     expect(
       shell.test('-f', 'dist/build-default.system.development.cjs')
     ).toBeTruthy();
-    expect(
-      shell.test('-f', 'dist/build-default.system.production.min.cjs')
-    ).toBeTruthy();
+    expect(shell.test('-f', 'dist/build-default.system.cjs')).toBeTruthy();
 
     expect(shell.test('-f', 'dist/index.d.ts')).toBeTruthy();
 

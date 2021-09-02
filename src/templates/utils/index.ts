@@ -13,11 +13,11 @@ export const composePackageJson =
       author,
       'size-limit': [
         {
-          path: `dist/${name}.production.min.cjs`,
+          path: `dist/${name}.cjs`,
           limit: '10 KB',
         },
         {
-          path: `dist/${name}.min.mjs`,
+          path: `dist/${name}.mjs`,
           limit: '10 KB',
         },
       ],

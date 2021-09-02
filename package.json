@@ -10,7 +10,7 @@
     "url": "git+https://github.com/tszip/tszip"
   },
   "bin": {
-    "tszip": "./dist/index.cjs"
+    "tszip": "./dist/index.mjs"
   },
   "files": [
     "dist",
@@ -31,14 +31,14 @@
   "scripts": {
     "clean": "rm -rf dist",
     "prebootstrap": "yarn clean",
-    "bootstrap": "tsc -p tsconfig.bootstrap.json && node dist/index.js build",
+    "bootstrap": "tsc -p tsconfig.bootstrap.json && yarn rollup -c --silent && node dist/index.cjs build",
     "prepare": "yarn build",
-    "dev": "yarn bootstrap && node dist/index.cjs watch",
-    "build": "yarn bootstrap && node dist/index.cjs build",
+    "dev": "yarn bootstrap && node dist/index.mjs watch",
+    "build": "yarn bootstrap && node dist/index.mjs build",
     "postbuild": "chmod +x dist/index.*js",
     "lint": "yarn build && yarn lint:post-build",
-    "lint:post-build": "node dist/index.cjs lint ./ --ignore-pattern 'test/e2e/fixtures/lint'",
-    "test": "yarn build && node dist/index.cjs test",
+    "lint:post-build": "node dist/index.mjs lint ./ --ignore-pattern 'test/e2e/fixtures/lint'",
+    "test": "yarn build && node dist/index.mjs test",
     "release": "np",
     "deduplicate": "yarn-deduplicate -s fewer yarn.lock",
     "deduplicate:check": "yarn-deduplicate -s fewer yarn.lock --list --fail"
@@ -54,8 +54,9 @@
     "@rollup/plugin-babel": "^5.1.0",
     "@rollup/plugin-commonjs": "^19.0.0",
     "@rollup/plugin-json": "^4.0.0",
-    "@rollup/plugin-node-resolve": "^13.0.0",
+    "@rollup/plugin-node-resolve": "^13.0.4",
     "@rollup/plugin-replace": "ctjlewis/replace",
+    "@rollup/plugin-typescript": "^8.2.5",
     "@types/jest": "^26.0.24",
     "@typescript-eslint/eslint-plugin": "^4.28.2",
     "@typescript-eslint/parser": "^4.28.2",
@@ -92,6 +93,7 @@
     "prettier": "^2.3.2",
     "progress-estimator": "^0.3.0",
     "regenerator-runtime": "^0.13.7",
+    "resolve": "^1.20.0",
     "resolve.exports": "^1.0.2",
     "rollup": "^2.52.8",
     "rollup-plugin-terser": "^7.0.2",

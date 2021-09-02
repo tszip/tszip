@@ -21,5 +21,6 @@
     "incremental": false,
     "declaration": false,
     "sourceMap": false,
+    "checkJs": true
   }
 }

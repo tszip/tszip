@@ -1,6 +1,4 @@
-import resolveExports from 'resolve.exports';
-
-import { safeVariableName, safePackageName, external } from './utils';
+import { safeVariableName, external } from './utils';
 import { paths } from './constants';
 import { RollupOptions } from 'rollup';
 import { terser } from 'rollup-plugin-terser';
@@ -13,39 +11,6 @@ import { extractErrors } from './errors/extractErrors';
 import { babelPluginExportTs } from './babelPluginExportTs';
 import { TszipOptions } from './types';
 import { optimizeLodashImports } from '@optimize-lodash/rollup-plugin';
-import { extname, resolve, sep } from 'path';
-import { existsSync, readFileSync } from 'fs';
-
-/**
- * A crude RegExp to match the `from 'import-source'` part of import statements,
- * or a require(...) call.
- */
-const generateImportPattern = (importSource: string) =>
-  new RegExp(
-    `(from|require\\()\\s*['"]${importSource.replace('.', '\\.')}['"]`,
-    'g'
-  );
-
-/**
- * Get the package.json for a given absolute entry point.
- */
-function getPackageJson(absPath: string) {
-  const parts = absPath.split('node_modules');
-  const rootPath = parts[0];
-
-  if (parts.length < 2) return null;
-  const moduleParts = parts[1].split(sep);
-
-  /**
-   * node_modules/name => name
-   * node_modules/@test/test => @test/test
-   */
-  const moduleName = moduleParts[1].startsWith('@')
-    ? moduleParts.slice(1, 3).join(sep)
-    : moduleParts[1];
-
-  return resolve(rootPath, 'node_modules', moduleName, 'package.json');
-}
 
 /**
  * These packages will not be resolved by Rollup and will be left as imports.
@@ -71,18 +36,18 @@ export async function createRollupConfig(
       ? opts.minify
       : opts.env === 'production' || isEsm;
 
-  let formatString = ['esm', 'cjs'].includes(opts.format) ? '' : opts.format;
-  let fileExtension = opts.format === 'esm' ? 'mjs' : 'cjs';
+  // let formatString = ['esm', 'cjs'].includes(opts.format) ? '' : opts.format;
+  // let fileExtension = opts.format === 'esm' ? 'mjs' : 'cjs';
 
-  const outputName = [
-    `${paths.appDist}/${safePackageName(opts.name)}`,
-    formatString,
-    opts.env,
-    shouldMinify ? 'min' : '',
-    fileExtension,
-  ]
-    .filter(Boolean)
-    .join('.');
+  // const outputName = [
+  //   `${paths.appDist}/${safePackageName(opts.name)}`,
+  //   formatString,
+  //   opts.env,
+  //   shouldMinify ? 'min' : '',
+  //   fileExtension,
+  // ]
+  //   .filter(Boolean)
+  //   .join('.');
 
   const tsconfigPath = opts.tsconfig || paths.tsconfigJson;
   // borrowed from https://github.com/facebook/create-react-app/pull/7248
@@ -96,15 +61,9 @@ export async function createRollupConfig(
 
   const PRODUCTION = process.env.NODE_ENV === 'production';
 
-  const fileExtensions = [
-    opts.format === 'esm' ? '.mjs' : null,
-    opts.format === 'cjs' ? '.cjs' : null,
-    '.js',
-  ].filter(Boolean);
-
   return {
     // Tell Rollup the entry point to the package
-    input: './dist/index.js',
+    input: opts.input,
     // Tell Rollup which packages to ignore
     external: (id: string) => {
       // bundle in polyfills as tszip can't (yet) ensure they're installed as deps
@@ -119,7 +78,7 @@ export async function createRollupConfig(
       return external(id);
     },
     // Minimize runtime error surface as much as possible
-    shimMissingExports: true,
+    shimMissingExports: false,
     // Rollup has treeshaking by default, but we can optimize it further...
     treeshake: {
       // We assume reading a property of an object never has side-effects.
@@ -144,9 +103,9 @@ export async function createRollupConfig(
     // Establish Rollup output
     output: {
       // Set filenames of the consumer's package
-      file: outputName,
+      file: opts.output,
       // Pass through the file format
-      format: isEsm ? 'es' : opts.format,
+      format: 'es',
       // Do not let Rollup call Object.freeze() on namespace import objects
       // (i.e. import * as namespaceImportObject from...) that are accessed dynamically.
       freeze: false,
@@ -177,24 +136,6 @@ export async function createRollupConfig(
           return { code, map: null };
         },
       },
-      /**
-       * Resolve only non-JS. Leave regular imports alone, since packages will
-       * ship with dependencies.
-       */
-      // resolvePlugin({
-      //   /**
-      //    * Do not allow CJS imports.
-      //    */
-      //   modulesOnly: true,
-      //   /**
-      //    * For node output, do not resolve `browser` field.
-      //    */
-      //   browser: opts.target !== 'node',
-      //   /**
-      //    * Resolve JSX, JSON, and .node files.
-      //    */
-      //   extensions: ['.jsx', '.json', '.node'],
-      // }),
       /**
        * All bundled external modules need to be converted from CJS to ESM.
        */
@@ -248,45 +189,6 @@ export async function createRollupConfig(
         },
       },
       /**
-       * Run TSC and transpile TypeScript.
-       */
-      // typescript({
-      //   typescript: ts,
-      //   tsconfig: opts.tsconfig,
-      //   tsconfigDefaults: {
-      //     exclude: [
-      //       // all TS test files, regardless whether co-located or in test/ etc
-      //       '**/*.spec.ts',
-      //       '**/*.test.ts',
-      //       '**/*.spec.tsx',
-      //       '**/*.test.tsx',
-      //       // TS defaults below
-      //       'node_modules',
-      //       'bower_components',
-      //       'jspm_packages',
-      //       paths.appDist,
-      //     ],
-      //     compilerOptions: {
-      //       sourceMap: true,
-      //       declaration: true,
-      //       jsx: 'react-jsx',
-      //     },
-      //   },
-      //   tsconfigOverride: {
-      //     compilerOptions: {
-      //       // TS -> esnext, then leave the rest to babel-preset-env
-      //       module: 'esnext',
-      //       target: 'esnext',
-      //       // don't output declarations more than once
-      //       ...(outputNum > 0
-      //         ? { declaration: false, declarationMap: false }
-      //         : {}),
-      //     },
-      //   },
-      //   check: !opts.transpileOnly && outputNum === 0,
-      //   useTsconfigDeclarationDir: Boolean(tsCompilerOptions?.declarationDir),
-      // }),
-      /**
        * In --legacy mode, use Babel to transpile to ES5.
        */
       opts.legacy &&
@@ -304,7 +206,22 @@ export async function createRollupConfig(
           },
           babelHelpers: 'bundled',
         }),
-      // sourceMaps(),
+      /**
+       * Replace process.env.NODE_ENV variable, preventing assignment. Runs
+       * before Terser for DCE (`if (...)` => `if (false)` => removed).
+       */
+      opts.env && {
+        name: 'Replace process.NODE_ENV',
+        renderChunk: async (code: string, _: any) => {
+          return {
+            code: code.replace(
+              /process\.env\.NODE_ENV(?!\s*=)/g,
+              JSON.stringify(PRODUCTION ? 'production' : 'development')
+            ),
+            map: null,
+          };
+        },
+      },
       /**
        * Minify and compress with Terser for max DCE. Emit latest featureset.
        *
@@ -330,21 +247,6 @@ export async function createRollupConfig(
         useLodashEs: isEsm || undefined,
       }),
       /**
-       * Replace process.env.NODE_ENV variable, preventing assignment.
-       */
-      opts.env && {
-        name: 'Ensure default exports',
-        renderChunk: async (code: string, _: any) => {
-          return {
-            code: code.replace(
-              /process\.env\.NODE_ENV(?!\s*=)/g,
-              JSON.stringify(PRODUCTION ? 'production' : 'development')
-            ),
-            map: null,
-          };
-        },
-      },
-      /**
        * If not in --legacy mode, ensure lodash imports are optimized in the
        * final bundle.
        */
@@ -352,98 +254,6 @@ export async function createRollupConfig(
         optimizeLodashImports({
           useLodashEs: isEsm || undefined,
         }),
-      /**
-       * Resolve every relative import in output to their entry points.
-       *
-       * TypeScript loves to leave things like `import { jsx } from
-       * 'react/jsx-runtime` when react/jsx-runtime isn't a valid import
-       * source:  react/jsx-runtime.js *is*.
-       */
-      {
-        name: 'Resolve final runtime imports to files',
-        renderChunk: async (code: string, chunk: any) => {
-          /**
-           * Iterate over imports and rewrite all import sources to entry
-           * points.
-           */
-          for (const chunkImport of chunk.imports) {
-            /**
-             * If the import already has a file extension, do not touch.
-             */
-            if (extname(chunkImport)) continue;
-            /**
-             * The absolute location of the module entry point.
-             * `require.resolve` logic can be used to resolve the "vanilla"
-             * entry point as the output will be ES, and then module-specific
-             * extensions (.mjs, .cjs) will be tried.
-             */
-            let absEntryPoint = require.resolve(chunkImport);
-            const originalFileExt = extname(absEntryPoint);
-            const absEntryWithoutExtension = absEntryPoint.replace(
-              originalFileExt,
-              ''
-            );
-            /**
-             * Try to resolve ESM/CJS-specific extensions over .js when bundling
-             * for those formats.
-             */
-            if (opts.format === 'esm' || opts.format === 'cjs') {
-              for (const fileExtension of fileExtensions) {
-                const withExtension = absEntryWithoutExtension + fileExtension;
-                if (existsSync(withExtension)) {
-                  absEntryPoint = withExtension;
-                  break;
-                }
-              }
-            }
-
-            const packageJsonPath = getPackageJson(absEntryPoint);
-            if (!packageJsonPath || !existsSync(packageJsonPath)) continue;
-
-            /**
-             * Check if there's `exports` package.json logic. if there is, it
-             * controls the flow.
-             */
-            const packageJsonContent = readFileSync(packageJsonPath, 'utf-8');
-            const packageJson = JSON.parse(packageJsonContent);
-            const exportsFieldResolution = resolveExports.resolve(
-              packageJson,
-              chunkImport
-            );
-
-            /**
-             * If there is `exports` logic that resolves this import, do not
-             * rewrite it.
-             */
-            if (exportsFieldResolution) continue;
-
-            /**
-             * Remove unnecessary absolute specification.
-             */
-            const relativeEntryPoint = absEntryPoint.slice(
-              absEntryPoint.indexOf(chunkImport)
-            );
-            /**
-             * The pattern matching the "from ..." import statement for this
-             * import.
-             */
-            const importPattern = generateImportPattern(chunkImport);
-            /**
-             * Read the matched import/require statements and replace them.
-             */
-            const matches = code.match(importPattern) ?? [];
-            for (const match of matches) {
-              const rewritten = match.replace(chunkImport, relativeEntryPoint);
-              code = code.replace(match, rewritten);
-            }
-          }
-
-          return {
-            code,
-            map: null,
-          };
-        },
-      },
       /**
        * Ensure there's an empty default export. This is the only way to have a
        * dist/index.mjs with `export { default } from './package.min.mjs'` and

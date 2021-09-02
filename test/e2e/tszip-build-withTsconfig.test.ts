@@ -22,9 +22,7 @@ describe('tsdx build :: build with custom tsconfig.json options', () => {
     expect(
       shell.test('-f', 'dist/build-withtsconfig.development.cjs')
     ).toBeTruthy();
-    expect(
-      shell.test('-f', 'dist/build-withtsconfig.production.min.cjs')
-    ).toBeTruthy();
+    expect(shell.test('-f', 'dist/build-withtsconfig.cjs')).toBeTruthy();
     expect(shell.test('-f', 'dist/build-withtsconfig.min.mjs')).toBeTruthy();
 
     expect(shell.test('-f', 'dist/index.d.ts')).toBeFalsy();
@@ -37,7 +35,7 @@ describe('tsdx build :: build with custom tsconfig.json options', () => {
   it('should set __esModule according to esModuleInterop', () => {
     const output = execWithCache('node ../dist/index.cjs build --legacy');
 
-    const lib = require(`../../${stageName}/dist/build-withtsconfig.production.min.cjs`);
+    const lib = require(`../../${stageName}/dist/build-withtsconfig.cjs`);
     // if esModuleInterop: false, no __esModule is added, therefore undefined
     expect(lib.__esModule).toBe(undefined);
 
@@ -53,9 +51,7 @@ describe('tsdx build :: build with custom tsconfig.json options', () => {
     expect(
       shell.test('-f', 'dist/build-withtsconfig.development.cjs')
     ).toBeTruthy();
-    expect(
-      shell.test('-f', 'dist/build-withtsconfig.production.min.cjs')
-    ).toBeTruthy();
+    expect(shell.test('-f', 'dist/build-withtsconfig.cjs')).toBeTruthy();
 
     expect(shell.test('-f', 'dist/index.d.ts')).toBeFalsy();
     expect(shell.test('-f', 'typingsCustom/index.d.ts')).toBeTruthy();

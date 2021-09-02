@@ -3,8 +3,8 @@
   "exclude": ["src/template/**/*"],
   "compilerOptions": {
     "moduleResolution": "node",
-    "target": "ESNext",
-    "module": "CommonJS",
+    "target": "esnext",
+    "module": "commonjs",
     "allowJs": true,
     "jsx": "react-jsx",
     "importHelpers": true,
@@ -18,7 +18,8 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "incremental": false,
-    "declaration": false,
-    "sourceMap": false,
+    "declaration": true,
+    "sourceMap": true,
+    "checkJs": true
   }
 }

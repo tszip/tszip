@@ -48,9 +48,7 @@ describe('integration :: tsdx build :: tszip.config.js', () => {
     expect(
       shell.test('-f', 'dist/build-withconfig.development.cjs')
     ).toBeTruthy();
-    expect(
-      shell.test('-f', 'dist/build-withconfig.production.min.cjs')
-    ).toBeTruthy();
+    expect(shell.test('-f', 'dist/build-withconfig.cjs')).toBeTruthy();
     expect(shell.test('-f', 'dist/build-withconfig.min.mjs')).toBeTruthy();
 
     expect(shell.test('-f', 'dist/index.d.ts')).toBeTruthy();

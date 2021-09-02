@@ -1,0 +1,100 @@
+yarn run v1.22.5
+$ yarn clean
+$ rm -rf dist
+$ tsc -p tsconfig.bootstrap.json && yarn rollup -c && node dist/index.cjs build
+$ /home/christian/PersonalProjects/tszip/node_modules/.bin/rollup -c
+loaded rollup.config.js with warnings
+(!) Unused external imports
+default imported from external module 'tiny-glob' but never used
+
+src/index.ts → dist/index.cjs...
+(!) Plugin typescript: @rollup/plugin-typescript: Rollup requires that TypeScript produces ES Modules. Unfortunately your configuration specifies a "module" other than "esnext". Unless you know what you're doing, please change "module" to "esnext" in the target tsconfig.json file or plugin options.
+(!) Plugin typescript: @rollup/plugin-typescript: Rollup 'sourcemap' option must be set to generate source maps.
+created dist/index.cjs in 3.5s
+✓ Cleaning dist/. 5 ms
+⠙ TS ➡ JS: Compiling with TSC  2%                  0.1s, estimated 3.8s
+[2K[1A[2K[G⠹ TS ➡ JS: Compiling with TSC  4%                  0.2s, estimated 3.8s
+[2K[1A[2K[G⠸ TS ➡ JS: Compiling with TSC  6%                  0.2s, estimated 3.8s
+[2K[1A[2K[G⠼ TS ➡ JS: Compiling with TSC  8%                  0.3s, estimated 3.8s
+[2K[1A[2K[G⠴ TS ➡ JS: Compiling with TSC  10%                 0.4s, estimated 3.8s
+[2K[1A[2K[G⠦ TS ➡ JS: Compiling with TSC  13%                 0.5s, estimated 3.8s
+[2K[1A[2K[G⠧ TS ➡ JS: Compiling with TSC  15%                 0.6s, estimated 3.8s
+[2K[1A[2K[G⠇ TS ➡ JS: Compiling with TSC  17%                 0.6s, estimated 3.8s
+[2K[1A[2K[G⠏ TS ➡ JS: Compiling with TSC  19%                 0.7s, estimated 3.8s
+[2K[1A[2K[G⠋ TS ➡ JS: Compiling with TSC  21%                 0.8s, estimated 3.8s
+[2K[1A[2K[G⠙ TS ➡ JS: Compiling with TSC  23%                 0.9s, estimated 3.8s
+[2K[1A[2K[G⠹ TS ➡ JS: Compiling with TSC  25%                 1.0s, estimated 3.8s
+[2K[1A[2K[G⠸ TS ➡ JS: Compiling with TSC  27%                 1.0s, estimated 3.8s
+[2K[1A[2K[G⠼ TS ➡ JS: Compiling with TSC  29%                 1.1s, estimated 3.8s
+[2K[1A[2K[G⠴ TS ➡ JS: Compiling with TSC  32%                 1.2s, estimated 3.8s
+[2K[1A[2K[G⠦ TS ➡ JS: Compiling with TSC  34%                 1.3s, estimated 3.8s
+[2K[1A[2K[G⠧ TS ➡ JS: Compiling with TSC  36%                 1.4s, estimated 3.8s
+[2K[1A[2K[G⠇ TS ➡ JS: Compiling with TSC  38%                 1.4s, estimated 3.8s
+[2K[1A[2K[G⠏ TS ➡ JS: Compiling with TSC  40%                 1.5s, estimated 3.8s
+[2K[1A[2K[G⠋ TS ➡ JS: Compiling with TSC  42%                 1.6s, estimated 3.8s
+[2K[1A[2K[G⠙ TS ➡ JS: Compiling with TSC  44%                 1.7s, estimated 3.8s
+[2K[1A[2K[G⠹ TS ➡ JS: Compiling with TSC  46%                 1.8s, estimated 3.8s
+[2K[1A[2K[G⠸ TS ➡ JS: Compiling with TSC  48%                 1.8s, estimated 3.8s
+[2K[1A[2K[G⠼ TS ➡ JS: Compiling with TSC  50%                 1.9s, estimated 3.8s
+[2K[1A[2K[G⠴ TS ➡ JS: Compiling with TSC  53%                 2.0s, estimated 3.8s
+[2K[1A[2K[G⠦ TS ➡ JS: Compiling with TSC  55%                 2.1s, estimated 3.8s
+[2K[1A[2K[G⠧ TS ➡ JS: Compiling with TSC  57%                 2.2s, estimated 3.8s
+[2K[1A[2K[G⠇ TS ➡ JS: Compiling with TSC  59%                 2.2s, estimated 3.8s
+[2K[1A[2K[G⠏ TS ➡ JS: Compiling with TSC  61%                 2.3s, estimated 3.8s
+[2K[1A[2K[G⠋ TS ➡ JS: Compiling with TSC  63%                 2.4s, estimated 3.8s
+[2K[1A[2K[G⠙ TS ➡ JS: Compiling with TSC  65%                 2.5s, estimated 3.8s
+[2K[1A[2K[G⠹ TS ➡ JS: Compiling with TSC  67%                 2.6s, estimated 3.8s
+[2K[1A[2K[G⠸ TS ➡ JS: Compiling with TSC  69%                 2.6s, estimated 3.8s
+[2K[1A[2K[G⠼ TS ➡ JS: Compiling with TSC  71%                 2.7s, estimated 3.8s
+[2K[1A[2K[G⠴ TS ➡ JS: Compiling with TSC  74%                 2.8s, estimated 3.8s
+[2K[1A[2K[G⠦ TS ➡ JS: Compiling with TSC  76%                 2.9s, estimated 3.8s
+[2K[1A[2K[G⠧ TS ➡ JS: Compiling with TSC  78%                 3.0s, estimated 3.8s
+[2K[1A[2K[G⠇ TS ➡ JS: Compiling with TSC  80%                 3.0s, estimated 3.8s
+[2K[1A[2K[G✓ TS ➡ JS: Compiling with TSC 3.1 secs
+✓ Copying all non-TS and non-JS src/ files to dist/. 0 ms
+✓ Creating CJS entry file 1 ms
+✓ Creating MJS entry file 0 ms
+Generated an empty chunk: "types"
+⠙ TS ➡ JS: Transpiling TS to JS  35%                 1.6s, estimated 4.5s
+[2K[1A[2K[G⠹ TS ➡ JS: Transpiling TS to JS  45%                 2.0s, estimated 4.5s
+[2K[1A[2K[G⠸ TS ➡ JS: Transpiling TS to JS  52%                 2.3s, estimated 4.5s
+[2K[1A[2K[G⠼ TS ➡ JS: Transpiling TS to JS  55%                 2.5s, estimated 4.5s
+Missing export "invertObject" has been shimmed in module dist/errors/invertObject.js.
+Missing export "evalToString" has been shimmed in module dist/errors/evalToString.js.
+Missing export "indentString" has been shimmed in module dist/utils/log.js.
+Missing export "error" has been shimmed in module dist/output.js.
+Missing export "default" has been shimmed in module dist/getInstallCmd.js.
+Missing export "cmd" has been shimmed in module dist/output.js.
+Missing export "getPackageJson" has been shimmed in module dist/utils/filesystem.js.
+Missing export "generateImportPattern" has been shimmed in module dist/utils/filesystem.js.
+Missing export "default" has been shimmed in module dist/templates/basic.js.
+Missing export "default" has been shimmed in module dist/templates/basic.js.
+[2K[1A[2K[G⠴ TS ➡ JS: Transpiling TS to JS  76%                 3.4s, estimated 4.5s
+[2K[1A[2K[G⠦ TS ➡ JS: Transpiling TS to JS  79%                 3.5s, estimated 4.5s
+Missing export "babelPluginExportTs" has been shimmed in module dist/babelPluginExportTs.js.
+Missing export "paths" has been shimmed in module dist/constants.js.
+Missing export "paths" has been shimmed in module dist/constants.js.
+[2K[1A[2K[G⠧ TS ➡ JS: Transpiling TS to JS  94%                 4.2s, estimated 4.5s
+Missing export "extractErrors" has been shimmed in module dist/errors/extractErrors.js.
+Missing export "evalToString" has been shimmed in module dist/errors/evalToString.js.
+Missing export "invertObject" has been shimmed in module dist/errors/invertObject.js.
+[2K[1A[2K[G⠇ TS ➡ JS: Transpiling TS to JS  99%                 4.7s, estimated 4.5s
+[2K[1A[2K[G⠏ TS ➡ JS: Transpiling TS to JS  99%                 4.8s, estimated 4.5s
+Missing export "indentString" has been shimmed in module dist/utils/log.js.
+Missing export "default" has been shimmed in module dist/getInstallCmd.js.
+Missing export "indentLog" has been shimmed in module dist/utils/log.js.
+Missing export "composePackageJson" has been shimmed in module dist/templates/utils/index.js.
+Missing export "default" has been shimmed in module dist/logError.js.
+Missing export "default" has been shimmed in module dist/getInstallArgs.js.
+Missing export "createJestConfig" has been shimmed in module dist/createJestConfig.js.
+[2K[1A[2K[G⠋ TS ➡ JS: Transpiling TS to JS  99%                 5.2s, estimated 4.5s
+[2K[1A[2K[G⠙ TS ➡ JS: Transpiling TS to JS  99%                 5.2s, estimated 4.5s
+[2K[1A[2K[G⠹ TS ➡ JS: Transpiling TS to JS  99%                 5.3s, estimated 4.5s
+[2K[1A[2K[G⠸ TS ➡ JS: Transpiling TS to JS  99%                 5.4s, estimated 4.5s
+[2K[1A[2K[G⠼ TS ➡ JS: Transpiling TS to JS  99%                 5.5s, estimated 4.5s
+[2K[1A[2K[G⠴ TS ➡ JS: Transpiling TS to JS  99%                 5.6s, estimated 4.5s
+[2K[1A[2K[G⠦ TS ➡ JS: Transpiling TS to JS  99%                 5.6s, estimated 4.5s
+[2K[1A[2K[G⠧ TS ➡ JS: Transpiling TS to JS  99%                 5.7s, estimated 4.5s
+[2K[1A[2K[G⠇ TS ➡ JS: Transpiling TS to JS  99%                 5.8s, estimated 4.5s
+[2K[1A[2K[G✓ TS ➡ JS: Transpiling TS to JS 5.8 secs
+Done in 17.63s.

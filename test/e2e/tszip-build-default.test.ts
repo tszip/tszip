@@ -20,9 +20,7 @@ describe('tsdx build :: zero-config defaults', () => {
 
     expect(shell.test('-f', 'dist/index.cjs')).toBeTruthy();
     expect(shell.test('-f', 'dist/build-default.development.cjs')).toBeTruthy();
-    expect(
-      shell.test('-f', 'dist/build-default.production.min.cjs')
-    ).toBeTruthy();
+    expect(shell.test('-f', 'dist/build-default.cjs')).toBeTruthy();
     expect(shell.test('-f', 'dist/build-default.min.mjs')).toBeTruthy();
 
     expect(shell.test('-f', 'dist/index.d.ts')).toBeTruthy();
@@ -122,18 +120,14 @@ describe('tsdx build :: zero-config defaults', () => {
 
     // build-default files have been cleaned out
     expect(shell.test('-f', 'dist/build-default.development.cjs')).toBeFalsy();
-    expect(
-      shell.test('-f', 'dist/build-default.production.min.cjs')
-    ).toBeFalsy();
+    expect(shell.test('-f', 'dist/build-default.cjs')).toBeFalsy();
     expect(shell.test('-f', 'dist/build-default.min.mjs')).toBeFalsy();
 
     // build-default-2 files have been added
     expect(
       shell.test('-f', 'dist/build-default-2.development.cjs')
     ).toBeTruthy();
-    expect(
-      shell.test('-f', 'dist/build-default-2.production.min.cjs')
-    ).toBeTruthy();
+    expect(shell.test('-f', 'dist/build-default-2.cjs')).toBeTruthy();
     expect(shell.test('-f', 'dist/build-default-2.min.mjs')).toBeTruthy();
 
     expect(shell.test('-f', 'dist/index.d.ts')).toBeTruthy();

@@ -298,14 +298,14 @@ prog
       await cleanDistFolder();
     }
 
-    if (opts.format.includes('cjs')) {
-      await writeCjsEntryFile(opts.name);
-    }
-    if (opts.format.includes('esm')) {
-      await writeMjsEntryFile(opts.name);
-    }
+    // if (opts.format.includes('cjs')) {
+    //   await writeCjsEntryFile(opts.name);
+    // }
+    // if (opts.format.includes('esm')) {
+    //   await writeMjsEntryFile(opts.name);
+    // }
 
-    await cleanOldJS();
+    // await cleanOldJS();
 
     type Killer = execa.ExecaChildProcess | null;
 
@@ -405,29 +405,25 @@ prog
     const buildConfigs = await createBuildConfigs(opts);
     const progressIndicator = await createProgressEstimator();
 
-    const packageName = opts.name.includes('@')
-      ? opts.name.slice(opts.name.indexOf('/') + 1)
-      : opts.name;
-
     await progressIndicator(cleanDistFolder(), 'Cleaning dist/.');
     await runTsc({
       tsconfig: opts.tsconfig,
       transpileOnly: opts.transpileOnly,
     });
 
-    if (opts.format.includes('cjs')) {
-      await progressIndicator(
-        writeCjsEntryFile(packageName).catch(logError),
-        'Creating CJS entry file'
-      );
-    }
+    // if (opts.format.includes('cjs')) {
+    //   await progressIndicator(
+    //     writeCjsEntryFile(packageName).catch(logError),
+    //     'Creating CJS entry file'
+    //   );
+    // }
 
-    if (opts.format.includes('esm')) {
-      await progressIndicator(
-        writeMjsEntryFile(packageName).catch(logError),
-        'Creating MJS entry file'
-      );
-    }
+    // if (opts.format.includes('esm')) {
+    //   await progressIndicator(
+    //     writeMjsEntryFile(packageName).catch(logError),
+    //     'Creating MJS entry file'
+    //   );
+    // }
 
     try {
       await progressIndicator(
@@ -440,10 +436,6 @@ prog
         'TS ➡ JS: Transpiling TS to JS'
         // 'JS ➡ JS: Compressing and transforming emitted TypeScript output.'
       );
-      /**
-       * Remove old index.js.
-       */
-      await cleanOldJS();
     } catch (error) {
       logError(error);
       process.exit(1);
@@ -464,44 +456,17 @@ async function normalizeOpts(opts: WatchOpts): Promise<NormalizedOpts> {
   };
 }
 
-async function cleanOldJS() {
-  const progressIndicator = await createProgressEstimator();
-  const oldJS = await glob(`${paths.appDist}/**/*.js`);
-  // console.log({ oldJS });
-  await progressIndicator(
-    Promise.all(oldJS.map(async (file: string) => await fs.unlink(file))),
-    'Removing original emitted TypeScript output (dist/**/*.js).'
-  );
-}
+// async function cleanOldJS() {
+//   const progressIndicator = await createProgressEstimator();
+
+//   await progressIndicator(
+//     (async () => await fs.unlink('dist/index.js'))(),
+//     'Removing temp files in dist/.'
+//   );
+// }
 
 async function cleanDistFolder() {
   await fs.remove(paths.appDist);
-}
-
-function writeCjsEntryFile(name: string) {
-  const safeName = safePackageName(name);
-  /**
-   * After an hour of tinkering, this is the *only* way to write this code that
-   * will not break Rollup (by pulling process.env.NODE_ENV out with
-   * destructuring).
-   */
-  const contents = `#!/usr/bin/env node
-
-'use strict';
-module.exports = require('./${safeName}.production.min.cjs');
-`;
-
-  return fs.outputFile(path.join(paths.appDist, 'index.cjs'), contents);
-}
-
-function writeMjsEntryFile(name: string) {
-  const contents = `#!/usr/bin/env node
-
-export { default } from './${name}.min.mjs';
-export * from './${name}.min.mjs';
-`;
-
-  return fs.outputFile(path.join(paths.appDist, 'index.mjs'), contents);
 }
 
 function getAuthorName() {

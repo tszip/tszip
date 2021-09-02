@@ -128,7 +128,7 @@ export async function runTsc({
         .filter((file) => !/^\.(ts|tsx|js|jsx|json)$/.test(extname(file)))
         .map(async (file) => await copy(file, join('dist', basename(file))))
     ),
-    'Copying all non-TS and non-JS src/ files to dist/.'
+    'src/ ➡ dist/: Copying all non-TS and non-JS files.'
   );
 
   if (watch) {
