@@ -1,6 +1,6 @@
-import chalk from 'chalk';
-import getInstallCmd from './getInstallCmd';
+import * as chalk from 'chalk';
 import * as Output from './output';
+import getInstallCmd from './getInstallCmd';
 import { indentString } from './utils/log';
 
 // This was copied from Razzle. Lots of unused stuff.

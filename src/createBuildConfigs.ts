@@ -6,9 +6,10 @@ import { TszipOptions, NormalizedOpts } from './types';
 
 import { createRollupConfig } from './createRollupConfig';
 import { existsSync } from 'fs';
-import glob from 'tiny-glob';
 import { extname, resolve } from 'path';
 import { renameExtension } from './utils/filesystem';
+
+const glob = require('glob-promise');
 
 // check for custom tszip.config.js
 let exportTsConfig = {
@@ -24,10 +25,20 @@ if (existsSync(paths.appConfig)) {
 export async function createBuildConfigs(
   opts: NormalizedOpts
 ): Promise<Array<RollupOptions & { output: OutputOptions }>> {
-  const distFiles = await glob('./dist/**/*', { filesOnly: true });
-  const filesToOptimize = distFiles.filter((file) =>
+  const distFiles = await glob('./dist/**/*', { nodir: true });
+  const filesToOptimize = distFiles.filter((file: string) =>
     /^\.(js|jsx)/.test(extname(file))
   );
+
+  // const configPromises = filesToOptimize.map(async (input) => {
+  //   const configs = createAllFormats(opts, resolve(input));
+  //   const rollupConfigs = [];
+  //   for await (const config of configs) {
+  //     const rollupConfig = await createRollupConfig(config);
+  //     rollupConfigs.push(exportTsConfig.rollup(rollupConfig, opts));
+  //   }
+  // });
+
   const allInputs = concatAllArray(
     filesToOptimize.map((input: string) =>
       createAllFormats(opts, resolve(input)).map(

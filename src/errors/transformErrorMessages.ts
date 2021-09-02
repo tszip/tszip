@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import fs from 'fs';
+import * as fs from 'fs';
 import { invertObject } from './invertObject';
 import { evalToString } from './evalToString';
 import { addDefault } from '@babel/helper-module-imports';

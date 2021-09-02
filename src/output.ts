@@ -1,6 +1,6 @@
-import { eraseLine } from 'ansi-escapes';
-import chalk from 'chalk';
-import ora from 'ora';
+import escapes from 'ansi-escapes';
+import * as chalk from 'chalk';
+const ora = require('ora');
 
 // This was copied from Razzle. Lots of unused stuff.
 export const info = (msg: string) => {
@@ -26,7 +26,7 @@ export const wait = (msg: string) => {
 
   return () => {
     spinner.stop();
-    process.stdout.write(eraseLine);
+    process.stdout.write(escapes.eraseLine);
   };
 };
 

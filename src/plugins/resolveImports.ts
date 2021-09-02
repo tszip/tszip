@@ -1,11 +1,11 @@
 import { existsSync, readFileSync } from 'fs';
-import { pathExistsSync } from 'fs-extra';
-import { extname } from 'path';
+import { dirname, extname, isAbsolute, relative } from 'path';
 import { resolve as resolveExports } from 'resolve.exports';
 import { TszipOptions } from '../types';
-import { generateImportPattern } from '../utils/filesystem';
+import { generateImportPattern, renameExtension } from '../utils/filesystem';
 import { getPackageJson } from '../utils/filesystem';
 // import { createRequire } from 'module';
+import fs from 'fs-extra';
 import resolve from 'resolve';
 
 /**
@@ -34,18 +34,7 @@ export const resolveImports = (opts: TszipOptions) => {
          * If the import already has a file extension, do not touch.
          */
         if (extname(chunkImport)) continue;
-
         let absEntryPoint = resolve.sync(chunkImport);
-
-        // const require = createRequire(import.meta.url);
-        // let absEntryPoint;
-        // try {
-        //   absEntryPoint = require.resolve(chunkImport);
-        // } catch {
-        //   absEntryPoint = require.resolve(join(chunkImport, 'index'));
-        // }
-        console.log({ chunkImport, absEntryPoint });
-
         /**
          * The absolute location of the module entry point.
          * `require.resolve` logic can be used to resolve the "vanilla"
@@ -64,47 +53,83 @@ export const resolveImports = (opts: TszipOptions) => {
         if (opts.format === 'esm' || opts.format === 'cjs') {
           for (const fileExtension of fileExtensions) {
             const withExtension = absEntryWithoutExtension + fileExtension;
-            if (pathExistsSync(withExtension)) {
+            if (fs.pathExistsSync(withExtension)) {
               absEntryPoint = withExtension;
               break;
             }
           }
         }
-
-        const packageJsonPath = getPackageJson(absEntryPoint);
-        if (!packageJsonPath || !existsSync(packageJsonPath)) continue;
-
-        /**
-         * Check if there's `exports` package.json logic. if there is, it
-         * controls the flow.
-         */
-        const packageJsonContent = readFileSync(packageJsonPath, 'utf-8');
-        const packageJson = JSON.parse(packageJsonContent);
-        const exportsFieldResolution = resolveExports(packageJson, chunkImport);
-
-        /**
-         * If there is `exports` logic that resolves this import, do not
-         * rewrite it.
-         */
-        if (exportsFieldResolution) continue;
-
-        /**
-         * Remove unnecessary absolute specification.
-         */
-        const relativeEntryPoint = absEntryPoint.slice(
-          absEntryPoint.indexOf(chunkImport)
-        );
         /**
          * The pattern matching the "from ..." import statement for this
          * import.
          */
-        const importPattern = generateImportPattern(chunkImport);
+        let importToReplace;
+        /**
+         * The path to replace this import with.
+         */
+        let importReplacement;
+        /**
+         * Crawl package.json.
+         */
+        const packageJsonPath = getPackageJson(absEntryPoint);
+        if (packageJsonPath && existsSync(packageJsonPath)) {
+          /**
+           * Check if there's `exports` package.json logic. if there is, it
+           * controls the flow.
+           */
+          const packageJsonContent = readFileSync(packageJsonPath, 'utf-8');
+          const packageJson = JSON.parse(packageJsonContent);
+          const exportsFieldResolution = resolveExports(
+            packageJson,
+            chunkImport
+          );
+          /**
+           * If there is `exports` logic that resolves this import, do not
+           * rewrite it.
+           */
+          if (exportsFieldResolution) continue;
+          importToReplace = chunkImport;
+          importReplacement = absEntryPoint.slice(
+            absEntryPoint.indexOf(chunkImport)
+          );
+        } else {
+          /**
+           * If package.json not found, bail if the path is relative (implies
+           * builtin, i.e. { absEntryPoint: 'path' }).
+           */
+          if (!isAbsolute(absEntryPoint)) continue;
+          /**
+           * Otherwise, this is a relative import specified absolutely by
+           * Rollup.
+           */
+          const baseDir = dirname(opts.input);
+          let relativeEntry = relative(baseDir, absEntryPoint);
+          if (!relativeEntry.startsWith('.')) {
+            relativeEntry = './' + relativeEntry;
+          }
+          const relativeImportNoExt = renameExtension(relativeEntry, '');
+          importToReplace = relativeImportNoExt;
+          /**
+           * ./path/to/module/index will be in TS output as ./path/to/module.
+           */
+          if (importToReplace.endsWith('/index')) {
+            importToReplace = importToReplace.slice(0, -'/index'.length);
+          }
+          importReplacement = renameExtension(relativeEntry, '.mjs');
+          // console.log(opts.input, {
+          //   absEntryPoint,
+          //   importToReplace,
+          //   importReplacement,
+          // });
+        }
+        if (!importToReplace || !importReplacement) continue;
         /**
          * Read the matched import/require statements and replace them.
          */
+        const importPattern = generateImportPattern(importToReplace);
         const matches = code.match(importPattern) ?? [];
         for (const match of matches) {
-          const rewritten = match.replace(chunkImport, relativeEntryPoint);
+          const rewritten = match.replace(importToReplace, importReplacement);
           code = code.replace(match, rewritten);
         }
       }

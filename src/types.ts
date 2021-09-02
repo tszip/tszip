@@ -47,7 +47,7 @@ export interface TszipOptions extends SharedOpts {
   /** If `true`, Babel transpile and emit ES5. */
   legacy?: boolean;
   // Is minifying?
-  minify?: boolean;
+  noMinify?: boolean;
   // Is this the very first rollup config (and thus should one-off metadata be extracted)?
   writeMeta?: boolean;
   // Only transpile, do not type check (makes compilation faster)

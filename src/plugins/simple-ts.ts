@@ -15,13 +15,13 @@
  */
 
 // import { spawn } from 'child_process';
-import execa from 'execa';
 import { copy } from 'fs-extra';
 import { basename, extname, join } from 'path';
-import glob from 'tiny-glob';
 import * as ts from 'typescript';
 import { createProgressEstimator } from '../createProgressEstimator';
 
+const glob = require('glob-promise');
+const execa = require('execa');
 // const extRe = /\.tsx?$/;
 
 export function loadConfig() {
@@ -97,6 +97,7 @@ export async function runTsc({
     declaration: true,
     sourceMap: true,
     esModuleInterop: true,
+    allowSyntheticDefaultImports: true,
     resolveJsonModule: true,
   };
 
@@ -118,17 +119,21 @@ export async function runTsc({
         }
       }
     })(),
-    `TS ➡ JS: Compiling with TSC`
+    `TS ➡ JS: Compiling with tsc.`
   );
 
-  const srcFiles = await glob('src/**/*', { filesOnly: true });
+  const srcFiles = await glob('src/**/*', { nodir: true });
   await progressIndicator(
     Promise.all(
       srcFiles
-        .filter((file) => !/^\.(ts|tsx|js|jsx|json)$/.test(extname(file)))
-        .map(async (file) => await copy(file, join('dist', basename(file))))
+        .filter(
+          (file: string) => !/^\.(ts|tsx|js|jsx|json)$/.test(extname(file))
+        )
+        .map(
+          async (file: string) => await copy(file, join('dist', basename(file)))
+        )
     ),
-    'src/ ➡ dist/: Copying all non-TS and non-JS files.'
+    'Copying all non-TS and non-JS files to dist/.'
   );
 
   if (watch) {

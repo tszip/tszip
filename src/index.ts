@@ -1,19 +1,26 @@
 #!/usr/bin/env node
+// import * as sade from 'sade';
+// import * as glob from 'glob-promise';
+// import * as chalk from 'chalk';
+// import * as jest from 'jest';
+// import * as path from 'path';
+// import * as execa from 'execa';
+// import * as shell from 'shelljs';
+// import * as ora from 'ora';
+// import * as semver from 'semver';
+// import * as Messages from './messages';
+// import * as deprecated from './deprecated';
+// import * as fs from 'fs-extra';
 
-import sade from 'sade';
-import glob from 'glob-promise';
-import { rollup, watch, RollupWatchOptions, WatcherOptions } from 'rollup';
-import chalk from 'chalk';
-import jest from 'jest';
-import { CLIEngine } from 'eslint';
+import getInstallCmd from './getInstallCmd';
+import getInstallArgs from './getInstallArgs';
+import Input from 'enquirer/lib/prompts/input.js';
+import Select from 'enquirer/lib/prompts/select.js';
 import logError from './logError';
-import path from 'path';
-import execa from 'execa';
-import shell from 'shelljs';
-import ora from 'ora';
-import semver from 'semver';
+
+import { rollup, watch, RollupWatchOptions, WatcherOptions } from 'rollup';
+import { CLIEngine } from 'eslint';
 import { paths } from './constants';
-import * as Messages from './messages';
 import { createBuildConfigs } from './createBuildConfigs';
 import { createJestConfig, JestConfigOptions } from './createJestConfig';
 import { createEslintConfig } from './createEslintConfig';
@@ -23,12 +30,6 @@ import {
   clearConsole,
   getNodeEngineRequirement,
 } from './utils';
-// import { concatAllArray } from 'jpjs';
-import getInstallCmd from './getInstallCmd';
-import getInstallArgs from './getInstallArgs';
-
-import Input from 'enquirer/lib/prompts/input.js';
-import Select from 'enquirer/lib/prompts/select.js';
 
 import {
   PackageJson,
@@ -38,15 +39,30 @@ import {
   NormalizedOpts,
   TszipOptions,
 } from './types';
+
 import { createProgressEstimator } from './createProgressEstimator';
 import { templates } from './templates';
 import { composePackageJson } from './templates/utils';
-import * as deprecated from './deprecated';
-import fs from 'fs-extra';
 import { readFileSync } from 'fs';
 import { stat } from 'fs/promises';
 import { indentLog } from './utils/log';
 import { runTsc } from './plugins/simple-ts';
+
+import type execa from 'execa';
+import shell from 'shelljs';
+import { incorrectNodeVersion, installing, start } from './messages';
+import { moveTypes } from './deprecated';
+
+const sade = require('sade');
+const glob = require('glob-promise');
+const chalk = require('chalk');
+const jest = require('jest');
+const path = require('path');
+const execaProcess = require('execa');
+// const shell = require('shelljs');
+const ora = require('ora');
+const semver = require('semver');
+const fs = require('fs-extra');
 
 export * from './errors';
 
@@ -228,13 +244,13 @@ prog
         nodeVersionReq &&
         !semver.satisfies(process.version, nodeVersionReq)
       ) {
-        bootSpinner.fail(Messages.incorrectNodeVersion(nodeVersionReq));
+        bootSpinner.fail(incorrectNodeVersion(nodeVersionReq));
         process.exit(1);
       }
 
       await fs.outputJSON(path.resolve(projectPath, 'package.json'), pkgJson);
       bootSpinner.succeed(`Created ${chalk.bold.green(pkg)}`);
-      await Messages.start(pkg);
+      await start(pkg);
     } catch (error) {
       bootSpinner.fail(`Failed to create ${chalk.bold.red(pkg)}`);
       logError(error);
@@ -244,16 +260,16 @@ prog
     const templateConfig = templates[template as keyof typeof templates];
     const { dependencies: deps } = templateConfig;
 
-    const installSpinner = ora(Messages.installing(deps.sort())).start();
+    const installSpinner = ora(installing(deps.sort())).start();
     try {
       const cmd = await getInstallCmd();
-      await execa(cmd, getInstallArgs(cmd, deps));
+      await execaProcess(cmd, getInstallArgs(cmd, deps));
       installSpinner.succeed('Installed dependencies');
 
       indentLog('Initializing git repo.');
-      await execa('git', ['init']);
+      await execaProcess('git', ['init']);
 
-      console.log(await Messages.start(pkg));
+      console.log(await start(pkg));
     } catch (error) {
       installSpinner.fail('Failed to install dependencies');
       logError(error);
@@ -298,14 +314,7 @@ prog
       await cleanDistFolder();
     }
 
-    // if (opts.format.includes('cjs')) {
-    //   await writeCjsEntryFile(opts.name);
-    // }
-    // if (opts.format.includes('esm')) {
-    //   await writeMjsEntryFile(opts.name);
-    // }
-
-    // await cleanOldJS();
+    await cleanOldJS();
 
     type Killer = execa.ExecaChildProcess | null;
 
@@ -319,7 +328,7 @@ prog
       }
 
       const [exec, ...args] = command.split(' ');
-      return execa(exec, args, {
+      return execaProcess(exec, args, {
         stdio: 'inherit',
       });
     }
@@ -363,7 +372,7 @@ prog
 `);
 
         try {
-          await deprecated.moveTypes();
+          await moveTypes();
 
           if (firstTime && opts.onFirstSuccess) {
             firstTime = false;
@@ -402,7 +411,6 @@ prog
   )
   .action(async (dirtyOpts: BuildOpts) => {
     const opts = await normalizeOpts(dirtyOpts);
-    const buildConfigs = await createBuildConfigs(opts);
     const progressIndicator = await createProgressEstimator();
 
     await progressIndicator(cleanDistFolder(), 'Cleaning dist/.');
@@ -411,19 +419,7 @@ prog
       transpileOnly: opts.transpileOnly,
     });
 
-    // if (opts.format.includes('cjs')) {
-    //   await progressIndicator(
-    //     writeCjsEntryFile(packageName).catch(logError),
-    //     'Creating CJS entry file'
-    //   );
-    // }
-
-    // if (opts.format.includes('esm')) {
-    //   await progressIndicator(
-    //     writeMjsEntryFile(packageName).catch(logError),
-    //     'Creating MJS entry file'
-    //   );
-    // }
+    const buildConfigs = await createBuildConfigs(opts);
 
     try {
       await progressIndicator(
@@ -433,9 +429,12 @@ prog
             await bundle.write(buildConfig.output);
           })
         ),
-        'TS ➡ JS: Transpiling TS to JS'
-        // 'JS ➡ JS: Compressing and transforming emitted TypeScript output.'
+        'JS ➡ JS: Optimizing JS entry-points.'
       );
+      /**
+       * Remove old index.js.
+       */
+      await cleanOldJS();
     } catch (error) {
       logError(error);
       process.exit(1);
@@ -456,14 +455,16 @@ async function normalizeOpts(opts: WatchOpts): Promise<NormalizedOpts> {
   };
 }
 
-// async function cleanOldJS() {
-//   const progressIndicator = await createProgressEstimator();
+async function cleanOldJS() {
+  const progressIndicator = await createProgressEstimator();
 
-//   await progressIndicator(
-//     (async () => await fs.unlink('dist/index.js'))(),
-//     'Removing temp files in dist/.'
-//   );
-// }
+  const oldJS = await glob(`${paths.appDist}/**/*.js`);
+  // console.log({ oldJS });
+  await progressIndicator(
+    Promise.all(oldJS.map(async (file: string) => await fs.unlink(file))),
+    'Removing original emitted TypeScript output (dist/**/*.js).'
+  );
+}
 
 async function cleanDistFolder() {
   await fs.remove(paths.appDist);

@@ -1,21 +1,18 @@
-import { safeVariableName, external } from './utils';
+import { safeVariableName } from './utils';
 import { paths } from './constants';
 import { RollupOptions } from 'rollup';
 import { terser } from 'rollup-plugin-terser';
 import { DEFAULT_EXTENSIONS as DEFAULT_BABEL_EXTENSIONS } from '@babel/core';
-import commonjs from '@rollup/plugin-commonjs';
-import json from '@rollup/plugin-json';
-import ts from 'typescript';
 
 import { extractErrors } from './errors/extractErrors';
 import { babelPluginExportTs } from './babelPluginExportTs';
 import { TszipOptions } from './types';
 import { optimizeLodashImports } from '@optimize-lodash/rollup-plugin';
+import { resolveImports } from './plugins/resolveImports';
 
-/**
- * These packages will not be resolved by Rollup and will be left as imports.
- */
-const EXTERNAL_PACKAGES = ['react', 'react-native'];
+const REQUIRE_SHIM =
+  `const require=await(async()=>{const{createRequire:t}=await import("module");` +
+  `return t(import.meta.url)})();`;
 
 const errorCodeOpts = {
   errorMapFilePath: paths.appErrorsJson,
@@ -31,51 +28,18 @@ export async function createRollupConfig(
 
   const isEsm = opts.format.includes('es') || opts.format.includes('esm');
 
-  const shouldMinify =
-    opts.minify !== undefined
-      ? opts.minify
-      : opts.env === 'production' || isEsm;
-
-  // let formatString = ['esm', 'cjs'].includes(opts.format) ? '' : opts.format;
-  // let fileExtension = opts.format === 'esm' ? 'mjs' : 'cjs';
-
-  // const outputName = [
-  //   `${paths.appDist}/${safePackageName(opts.name)}`,
-  //   formatString,
-  //   opts.env,
-  //   shouldMinify ? 'min' : '',
-  //   fileExtension,
-  // ]
-  //   .filter(Boolean)
-  //   .join('.');
-
-  const tsconfigPath = opts.tsconfig || paths.tsconfigJson;
-  // borrowed from https://github.com/facebook/create-react-app/pull/7248
-  const tsconfigJSON = ts.readConfigFile(tsconfigPath, ts.sys.readFile).config;
-  // borrowed from https://github.com/ezolenko/rollup-plugin-typescript2/blob/42173460541b0c444326bf14f2c8c27269c4cb11/src/parse-tsconfig.ts#L48
-  const tsCompilerOptions = ts.parseJsonConfigFileContent(
-    tsconfigJSON,
-    ts.sys,
-    './'
-  ).options;
+  const shouldMinify = !opts.transpileOnly && !opts.noMinify;
 
   const PRODUCTION = process.env.NODE_ENV === 'production';
 
   return {
     // Tell Rollup the entry point to the package
     input: opts.input,
-    // Tell Rollup which packages to ignore
+    /**
+     * Everything except the entry point is external.
+     */
     external: (id: string) => {
-      // bundle in polyfills as tszip can't (yet) ensure they're installed as deps
-      if (id.startsWith('regenerator-runtime')) {
-        return false;
-      }
-
-      if (EXTERNAL_PACKAGES.includes(id)) {
-        return true;
-      }
-
-      return external(id);
+      return id !== opts.input;
     },
     // Minimize runtime error surface as much as possible
     shimMissingExports: false,
@@ -110,7 +74,7 @@ export async function createRollupConfig(
       // (i.e. import * as namespaceImportObject from...) that are accessed dynamically.
       freeze: false,
       // Respect tsconfig esModuleInterop when setting __esModule.
-      esModule: Boolean(tsCompilerOptions?.esModuleInterop) || isEsm,
+      esModule: true,
       name: opts.name || safeVariableName(opts.name),
       sourcemap: true,
       globals: {
@@ -136,38 +100,6 @@ export async function createRollupConfig(
           return { code, map: null };
         },
       },
-      /**
-       * All bundled external modules need to be converted from CJS to ESM.
-       */
-      commonjs({
-        /**
-         * CJS/ESM interop. Support Node's .cjs and .mjs spec.
-         */
-        extensions: ['.js', '.cjs', '.mjs'],
-        /**
-         * Allow require('my-package') === await import('my-package').
-         *
-         * The `modulesOnly` option of @rollup/plugin-node-resolve ensures that
-         * the compiler will throw if there is an issue
-         */
-        esmExternals: true,
-        requireReturnsDefault: true,
-        /**
-         * Turn `require` statements into `import` statements in ESM out.
-         */
-        transformMixedEsModules: true,
-        /**
-         * Use Regex to make sure to include eventual hoisted packages.
-         */
-        include:
-          opts.format === 'umd' || isEsm
-            ? /\/node_modules\//
-            : /\/regenerator-runtime\//,
-      }),
-      /**
-       * Convert JSON to ESM.
-       */
-      json(),
       /**
        * Custom plugin that removes shebang from code because newer versions of
        * bublé bundle their own private version of `acorn` and we can't find a
@@ -237,15 +169,12 @@ export async function createRollupConfig(
           compress: {
             keep_infinity: true,
             pure_getters: true,
-            passes: 10,
+            // passes: 10,
           },
           ecma: opts.legacy ? 5 : 2020,
-          module: isEsm,
-          toplevel: opts.format === 'cjs' || isEsm,
+          module: true,
+          toplevel: true,
         }),
-      optimizeLodashImports({
-        useLodashEs: isEsm || undefined,
-      }),
       /**
        * If not in --legacy mode, ensure lodash imports are optimized in the
        * final bundle.
@@ -255,25 +184,45 @@ export async function createRollupConfig(
           useLodashEs: isEsm || undefined,
         }),
       /**
+       * Rewrite final emitted imports.
+       */
+      resolveImports({
+        ...opts,
+        format: 'esm',
+      }),
+      {
+        name: 'Shim require(),',
+        renderChunk: async (code: string, _: any) => {
+          if (code.includes('require(')) {
+            code = REQUIRE_SHIM + code;
+          }
+
+          return {
+            code,
+            map: null,
+          };
+        },
+      },
+      /**
        * Ensure there's an empty default export. This is the only way to have a
        * dist/index.mjs with `export { default } from './package.min.mjs'` and
        * support default exports at all.
        *
        * @see https://www.npmjs.com/package/rollup-plugin-export-default
        */
-      {
-        name: 'Ensure default exports',
-        renderChunk: async (code: string, chunk: any) => {
-          if (chunk.exports.includes('default') || !isEsm) {
-            return null;
-          }
+      // {
+      //   name: 'Ensure default exports',
+      //   renderChunk: async (code: string, chunk: any) => {
+      //     if (chunk.exports.includes('default') || !isEsm) {
+      //       return null;
+      //     }
 
-          return {
-            code: `${code}\nexport default {};`,
-            map: null,
-          };
-        },
-      },
+      //     return {
+      //       code: `${code}\nexport default {};`,
+      //       map: null,
+      //     };
+      //   },
+      // },
     ],
   };
 }

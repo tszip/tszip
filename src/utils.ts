@@ -1,8 +1,8 @@
-import fs from 'fs-extra';
-import path from 'path';
-import camelCase from 'camelcase';
-
+import * as path from 'path';
 import { PackageJson } from './types';
+
+const fs = require('fs-extra');
+const camelCase = require('camelcase');
 
 // Remove the package name scope if it exists
 export const removeScope = (name: string) => name.replace(/^@.*\//, '');
