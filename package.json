@@ -1,5 +1,6 @@
 {
   "name": "@tszip/tszip",
+  "type": "module",
   "version": "0.2.6",
   "author": "C. Lewis <ctj.lewis@icloud.com>",
   "description": "Backwards-compatible compiler for TypeScript libraries.",
@@ -32,7 +33,7 @@
     "clean": "rm -rf dist",
     "force-cjs": "echo '{\"type\": \"commonjs\"}' > dist/package.json",
     "prebootstrap": "yarn clean && tsc -p tsconfig.bootstrap.json && yarn force-cjs",
-    "bootstrap": "yarn rollup -c --silent && node dist/index.cjs build && yarn build",
+    "bootstrap": "node dist/index.js build && yarn build",
     "prepare": "yarn bootstrap",
     "dev": "yarn bootstrap && node dist/index.mjs watch",
     "build": "node dist/index.mjs build",
