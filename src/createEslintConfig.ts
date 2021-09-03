@@ -25,7 +25,7 @@ const CONFIG = {
 export async function createEslintConfig({
   pkg: _,
   rootDir,
-  writeFile: __,
+  writeFile,
 }: CreateEslintConfigArgs): Promise<CLIEngine.Options['baseConfig'] | void> {
   // const isReactLibrary = Boolean(getReactVersion(pkg));
 
@@ -43,9 +43,9 @@ export async function createEslintConfig({
   //   },
   // };
 
-  // if (!writeFile) {
-  //   return config;
-  // }
+  if (!writeFile) {
+    return CONFIG;
+  }
 
   const file = path.join(rootDir, '.eslintrc');
   try {
