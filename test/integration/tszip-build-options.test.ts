@@ -18,6 +18,7 @@ const stageName = `stage-integration-${fixtureName}`;
  *
  * @todo Split entry points like TSC and restore --extractErrors functionality.
  */
+test.todo('integration :: tsdx build :: options');
 xdescribe('integration :: tsdx build :: options', () => {
   beforeAll(() => {
     util.teardownStage(stageName);

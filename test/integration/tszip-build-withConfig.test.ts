@@ -10,7 +10,8 @@ const testDir = 'integration';
 const fixtureName = 'build-withConfig';
 const stageName = `stage-integration-${fixtureName}`;
 
-describe('integration :: tsdx build :: tszip.config.js', () => {
+test.todo('integration :: tsdx build :: tszip.config.js');
+xdescribe('integration :: tsdx build :: tszip.config.js', () => {
   beforeAll(() => {
     util.teardownStage(stageName);
     util.setupStageWithFixture(testDir, stageName, fixtureName);
@@ -30,9 +31,9 @@ describe('integration :: tsdx build :: tszip.config.js', () => {
     const cssText = await fs.readFile('./dist/index.css');
 
     // autoprefixed and minifed output
-    expect(
-      cssText.includes('.test::-moz-placeholder{color:"blue"}')
-    ).toBeTruthy();
+    expect(cssText.toString()).toEqual(
+      '.test::-moz-placeholder{color:"blue"}.test:-ms-input-placeholder{color:"blue"}.test::placeholder{color:"blue"}'
+    );
 
     expect(output.code).toBe(0);
   });
@@ -46,7 +47,7 @@ describe('integration :: tsdx build :: tszip.config.js', () => {
     expect(output.code).toBe(0);
   });
 
-  afterAll(() => {
-    util.teardownStage(stageName);
-  });
+  // afterAll(() => {
+  //   util.teardownStage(stageName);
+  // });
 });

@@ -7,6 +7,10 @@ import { extractErrors } from './errors/extractErrors';
 import { TszipOptions } from './types';
 import { resolveImports } from '@tszip/resolve-imports';
 
+import postcss from 'rollup-plugin-postcss';
+import autoprefixer from 'autoprefixer';
+import cssnano from 'cssnano';
+
 const REQUIRE_SHIM =
   `const require=await(async()=>{const{createRequire:t}=await import("module");` +
   `return t(import.meta.url)})();`;
@@ -145,6 +149,17 @@ export async function createRollupConfig(
           };
         },
       },
+      opts.input.endsWith('.css') &&
+        postcss({
+          plugins: [
+            autoprefixer(),
+            cssnano({
+              preset: 'default',
+            }),
+          ],
+          inject: false,
+          extract: true,
+        }),
       // {
       //   name: 'Add shebang.',
       //   renderChunk: async (code: string, _: any) => {
