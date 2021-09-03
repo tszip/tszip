@@ -11,9 +11,10 @@ Contributors](https://img.shields.io/badge/all_contributors-101-orange.svg?style
 Use tszip to compile TypeScript libraries, including React components, to 100%
 tree-shakeable ESM (**not bundles**).
 
-The [legacy fork](https://npmjs.com/package/@tszip/legacy), which aimed to guarantee backwards compatibility if that is
-your goal, is now deprecated (before ever having been released). If you need CJS
-interop (which you never would at the upstream library level) use that package.
+The [legacy fork](https://npmjs.com/package/@tszip/legacy), which aimed to
+guarantee backwards compatibility if that is your goal, is now deprecated
+(before ever having been released). If you need CJS interop, which you never
+would at the upstream library level, please use that package.
 
 <!-- *Backwards-compatible compiler for TypeScript libraries.*
 
