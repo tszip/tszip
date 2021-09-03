@@ -33,7 +33,7 @@
     "force-cjs": "echo '{\"type\": \"commonjs\"}' > dist/package.json",
     "prebootstrap": "yarn clean && tsc -p tsconfig.bootstrap.json && yarn force-cjs",
     "bootstrap": "yarn rollup -c --silent && node dist/index.cjs build && yarn build",
-    "prepare": "yarn build",
+    "prepare": "yarn bootstrap",
     "dev": "yarn bootstrap && node dist/index.mjs watch",
     "build": "node dist/index.mjs build",
     "postbuild": "chmod +x dist/index.*js",
