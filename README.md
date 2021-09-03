@@ -6,7 +6,16 @@
 Contributors](https://img.shields.io/badge/all_contributors-101-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-*Backwards-compatible compiler for TypeScript libraries.*
+*TypeScript to ES Module compiler.*
+
+Use tszip to compile TypeScript libraries, including React components, to 100%
+tree-shakeable ESM (**not bundles**).
+
+The [legacy fork](https://npmjs.com/package/@tszip/legacy), which aimed to guarantee backwards compatibility if that is
+your goal, is now deprecated (before ever having been released). If you need CJS
+interop (which you never would at the upstream library level) use that package.
+
+<!-- *Backwards-compatible compiler for TypeScript libraries.*
 
 Use tszip to compile TypeScript libraries, including React components, to 100%
 backwards-compatible output. An iteration on
@@ -18,7 +27,7 @@ This is accomplished largely by:
   2. emitting a modern ES featureset by default
   3. resolving relative imports in output
 
-Your exports should *just work* out of the box in both ESM and CJS contexts.
+Your exports should *just work* out of the box in both ESM and CJS contexts. -->
 
 ## Table of Contents
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -70,7 +79,7 @@ TypeScript breakfast:
 - ESLint with Prettier setup with sensible defaults via `tszip lint`
 - Zero-config, single dependency
 - Escape hatches for customization via `.babelrc.js`, `jest.config.mjs`,
-  `.eslintrc`, and `tszip.config.js`
+  `.eslintrc`, and `tszip.config.mjs`
 
 ## Quick Start
 
@@ -135,44 +144,30 @@ the transpiled code into git.
 
 tszip uses Rollup under the hood. The defaults are solid for most packages
 (Formik uses the defaults!). However, if you do wish to alter the rollup
-configuration, you can do so by creating a file called `tszip.config.js` at the
+configuration, you can do so by creating a file called `tszip.config.mjs` at the
 root of your project like so:
 
 ```js
-// Not transpiled with TypeScript or Babel, so use plain Es6/Node.js!
-module.exports = {
-  // This function will run for each entry/format/env combination
+// Override the Rollup config.
+const tszipConfig = {
   rollup(config, options) {
-    return config; // always return a config.
+    return config;
   },
 };
+
+export default tszipConfig;
 ```
 
-The `options` object contains the following:
-
+### CLI Options
 ```tsx
 export interface TsdxOptions {
-  // path to file
-  input: string;
-  // Name of package
-  name: string;
-  // JS target
-  target: 'node' | 'browser';
-  // Module format
-  format: 'cjs' | 'umd' | 'esm' | 'system';
-  // Environment
-  env: 'development' | 'production';
-  // Path to tsconfig file
+  // Override the tsconfig location.
   tsconfig?: string;
-  // If `true`, Babel transpile and emit ES5.
-  legacy: boolean;
-  // Is error extraction running?
+  // If true, extract errors.
   extractErrors?: boolean;
-  // Is minifying?
-  minify?: boolean;
-  // Is this the very first rollup config (and thus should one-off metadata be extracted)?
-  writeMeta?: boolean;
-  // Only transpile, do not type check (makes compilation faster)
+  // If true, do not minify.
+  noMinify?: boolean;
+  // If true, do not type-check.
   transpileOnly?: boolean;
 }
 ```
@@ -228,7 +223,7 @@ tszip is an iteration on [TSDX](https://github.com/formium/tsdx), which was orig
 [@developit/microbundle](https://github.com/developit/microbundle) for related
 work.
 
-### Comparison with Microbundle
+<!-- ### Comparison with Microbundle
 
 Some key differences include:
 
@@ -239,7 +234,7 @@ Some key differences include:
 - tszip is TypeScript focused, but also supports plain JavaScript
 - tszip outputs distinct development and production builds (like React does) for
   CJS and UMD builds. This means you can include rich error messages and other
-  dev-friendly goodies without sacrificing final bundle size.
+  dev-friendly goodies without sacrificing final bundle size. -->
 
 ## API Reference
 
@@ -355,13 +350,9 @@ Examples
 
 Please see the [Contributing Guidelines](./CONTRIBUTING.md).
 
-## Author
-
-- [Jared Palmer](https://twitter.com/jaredpalmer)
-
 ## License
 
-[MIT](https://oss.ninja/mit/jaredpalmer/)
+Release under the MIT License.
 
 ## Contributors ✨
 
