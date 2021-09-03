@@ -1,29 +1,20 @@
 #!/usr/bin/env node
-// import * as sade from 'sade';
-// import * as glob from 'glob-promise';
-// import * as chalk from 'chalk';
-// import * as jest from 'jest';
-// import * as path from 'path';
-// import * as execa from 'execa';
-// import * as shell from 'shelljs';
-// import * as ora from 'ora';
-// import * as semver from 'semver';
-// import * as Messages from './messages';
-// import * as deprecated from './deprecated';
-// import * as fs from 'fs-extra';
-
 import getInstallCmd from './getInstallCmd';
 import getInstallArgs from './getInstallArgs';
 import Input from 'enquirer/lib/prompts/input.js';
 import Select from 'enquirer/lib/prompts/select.js';
 import logError from './logError';
 
-import { rollup, watch, RollupWatchOptions, WatcherOptions } from 'rollup';
+import { watch, RollupWatchOptions, WatcherOptions } from 'rollup';
 import { CLIEngine } from 'eslint';
 import { paths } from './constants';
 import { createBuildConfigs } from './createBuildConfigs';
 import { createJestConfig, JestConfigOptions } from './createJestConfig';
 import { createEslintConfig } from './createEslintConfig';
+import { WatchOpts, TszipOptions } from './types';
+import { templates } from './templates';
+import { composePackageJson } from './templates/utils';
+import { indentLog } from './utils/log';
 import {
   resolveApp,
   safePackageName,
@@ -31,101 +22,29 @@ import {
   getNodeEngineRequirement,
 } from './utils';
 
-import {
-  PackageJson,
-  WatchOpts,
-  BuildOpts,
-  ModuleFormat,
-  NormalizedOpts,
-  TszipOptions,
-} from './types';
-
-import { createProgressEstimator } from './createProgressEstimator';
-import { templates } from './templates';
-import { composePackageJson } from './templates/utils';
-import { readFileSync } from 'fs';
-import { stat } from 'fs/promises';
-import { indentLog } from './utils/log';
-import { runTsc } from './plugins/simple-ts';
-
-import type execa from 'execa';
-import jest from 'jest';
-
-import shell from 'shelljs';
 import { incorrectNodeVersion, installing, start } from './messages';
 import { moveTypes } from './deprecated';
 import { fileURLToPath } from 'url';
+import {
+  cleanDistFolder,
+  cleanOldJS,
+  getAppPackageJson,
+} from './utils/filesystem';
+import { build, normalizeOpts } from './commands/build';
+
+import type execa from 'execa';
+import jest from 'jest';
+import shell from 'shelljs';
 
 const sade = require('sade');
-const glob = require('glob-promise');
 const chalk = require('chalk');
 
 const path = require('path');
 const execaProcess = require('execa');
-// const shell = require('shelljs');
 const ora = require('ora');
 const semver = require('semver');
 const fs = require('fs-extra');
-
-export * from './errors';
-
 const prog = sade('tszip');
-
-let appPackageJson: PackageJson;
-try {
-  appPackageJson = JSON.parse(readFileSync(paths.appPackageJson, 'utf-8'));
-} catch (e) {}
-
-export const isDir = (name: string) =>
-  stat(name)
-    .then((stats) => stats.isDirectory())
-    .catch(() => false);
-
-export const isFile = (name: string) =>
-  stat(name)
-    .then((stats) => stats.isFile())
-    .catch(() => false);
-
-async function jsOrTs(filename: string) {
-  const extension = (await isFile(resolveApp(filename + '.ts')))
-    ? '.ts'
-    : (await isFile(resolveApp(filename + '.tsx')))
-    ? '.tsx'
-    : (await isFile(resolveApp(filename + '.jsx')))
-    ? '.jsx'
-    : '.js';
-
-  return resolveApp(`${filename}${extension}`);
-}
-
-async function getInputs(
-  entries?: string | string[],
-  source?: string
-): Promise<string[]> {
-  let entryList = [];
-  if (entries) {
-    if (!Array.isArray(entries)) {
-      entryList.push(entries);
-    } else {
-      entryList.push(...entries);
-    }
-  } else {
-    if (source) {
-      const appDir = resolveApp(source);
-      entryList.push(appDir);
-    } else {
-      const srcExists = await isDir(resolveApp('src'));
-      if (srcExists) {
-        const entryPoint = await jsOrTs('src/index');
-        entryList.push(entryPoint);
-      }
-    }
-  }
-
-  const inputPromises = entryList.map(async (file) => await glob(file));
-  const inputs = await Promise.all(inputPromises);
-  return inputs.flat();
-}
 
 prog
   .command('create <pkg>')
@@ -413,66 +332,7 @@ prog
   .example(
     'build --extractErrors=https://reactjs.org/docs/error-decoder.html?invariant='
   )
-  .action(async (dirtyOpts: BuildOpts) => {
-    const opts = await normalizeOpts(dirtyOpts);
-    const progressIndicator = await createProgressEstimator();
-
-    await progressIndicator(cleanDistFolder(), 'Cleaning dist/.');
-    await runTsc({
-      tsconfig: opts.tsconfig,
-      transpileOnly: opts.transpileOnly,
-    });
-
-    const buildConfigs = await createBuildConfigs(opts);
-
-    try {
-      await progressIndicator(
-        Promise.all(
-          buildConfigs.map(async (buildConfig) => {
-            const bundle = await rollup(buildConfig);
-            await bundle.write(buildConfig.output);
-          })
-        ),
-        'JS ➡ JS: Optimizing JS entry-points.'
-      );
-      /**
-       * Remove old index.js.
-       */
-      await cleanOldJS();
-    } catch (error) {
-      logError(error);
-      process.exit(1);
-    }
-  });
-
-async function normalizeOpts(opts: WatchOpts): Promise<NormalizedOpts> {
-  return {
-    ...opts,
-    name: opts.name || appPackageJson.name,
-    input: await getInputs(opts.entry, appPackageJson.source),
-    format: opts.format.split(',').map((format: string) => {
-      if (format === 'es') {
-        return 'esm';
-      }
-      return format;
-    }) as [ModuleFormat, ...ModuleFormat[]],
-  };
-}
-
-async function cleanOldJS() {
-  const progressIndicator = await createProgressEstimator();
-
-  const oldJS = await glob(`${paths.appDist}/**/*.js`);
-  // console.log({ oldJS });
-  await progressIndicator(
-    Promise.all(oldJS.map(async (file: string) => await fs.unlink(file))),
-    'Removing original emitted TypeScript output (dist/**/*.js).'
-  );
-}
-
-async function cleanDistFolder() {
-  await fs.remove(paths.appDist);
-}
+  .action(build);
 
 function getAuthorName() {
   let author = '';
@@ -521,6 +381,8 @@ prog
     process.on('unhandledRejection', (err) => {
       throw err;
     });
+
+    const appPackageJson = await getAppPackageJson();
 
     const argv = process.argv.slice(2);
     let jestConfig: JestConfigOptions = {
@@ -604,6 +466,8 @@ prog
           )
         );
       }
+
+      const appPackageJson = await getAppPackageJson();
 
       const config = await createEslintConfig({
         pkg: appPackageJson,

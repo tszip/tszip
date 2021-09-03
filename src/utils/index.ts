@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { PackageJson } from './types';
+import { PackageJson } from '../types';
 
 const fs = require('fs-extra');
 const camelCase = require('camelcase');

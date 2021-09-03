@@ -1,4 +1,11 @@
+import { readFile, rmdir, stat, unlink } from 'fs/promises';
 import { extname, resolve, sep } from 'path';
+import { paths } from '../constants';
+import { createProgressEstimator } from '../createProgressEstimator';
+import { PackageJson } from '../types';
+import { resolveApp } from '.';
+
+const glob = require('glob-promise');
 
 export const generateImportPattern = (importSource: string) =>
   new RegExp(
@@ -30,4 +37,53 @@ export const getPackageJson = (absPath: string) => {
 export const renameExtension = (file: string, dotExtension: string) => {
   const oldExt = extname(file);
   return file.replace(new RegExp(`\\${oldExt}$`), dotExtension);
+};
+
+export const cleanOldJS = async () => {
+  const progressIndicator = await createProgressEstimator();
+
+  const oldJS = await glob(`${paths.appDist}/**/*.js`);
+  // console.log({ oldJS });
+  await progressIndicator(
+    Promise.all(oldJS.map(async (file: string) => await unlink(file))),
+    'Removing original emitted TypeScript output (dist/**/*.js).'
+  );
+};
+
+export const cleanDistFolder = async () => {
+  await rmdir(paths.appDist, { recursive: true });
+};
+
+export const isDir = async (name: string) => {
+  const stats = await stat(name);
+  return stats.isDirectory();
+};
+
+export const isFile = async (name: string) => {
+  const stats = await stat(name);
+  return stats.isFile();
+};
+
+export const jsOrTs = async (filename: string) => {
+  const extension = (await isFile(resolveApp(filename + '.ts')))
+    ? '.ts'
+    : (await isFile(resolveApp(filename + '.tsx')))
+    ? '.tsx'
+    : (await isFile(resolveApp(filename + '.jsx')))
+    ? '.jsx'
+    : '.js';
+
+  return resolveApp(`${filename}${extension}`);
+};
+
+export const getAppPackageJson = async () => {
+  try {
+    const appPackageJson: PackageJson = JSON.parse(
+      await readFile(paths.appPackageJson, 'utf-8')
+    );
+    return appPackageJson;
+  } catch (e) {
+    console.log(e);
+    throw new Error('No package.json found in project directory.');
+  }
 };
