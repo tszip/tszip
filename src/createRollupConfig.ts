@@ -6,6 +6,7 @@ import { terser } from 'rollup-plugin-terser';
 import { extractErrors } from './errors/extractErrors';
 import { TszipOptions } from './types';
 import { resolveImports } from '@tszip/resolve-imports';
+import { join } from 'path';
 
 import postcss from 'rollup-plugin-postcss';
 import autoprefixer from 'autoprefixer';
@@ -28,7 +29,6 @@ export async function createRollupConfig(
   });
 
   const shouldMinify = !opts.transpileOnly && !opts.noMinify;
-  const PRODUCTION = process.env.NODE_ENV === 'production';
 
   return {
     input: opts.input,
@@ -55,6 +55,32 @@ export async function createRollupConfig(
     },
     plugins: [
       /**
+       * Custom plugin that removes shebang from code because newer versions of
+       * bublé bundle their own private version of `acorn` and we can't find a
+       * way to patch in the option `allowHashBang` to acorn. Taken from
+       * microbundle.
+       *
+       * @see https://github.com/Rich-Harris/buble/pull/165
+       */
+      {
+        name: 'Remove shebang',
+        transform: (code: string) => {
+          /**
+           * If no hashbang, skip.
+           */
+          if (!code.startsWith('#!')) {
+            return null;
+          }
+          /**
+           * Otherwise, trim first line.
+           */
+          return {
+            code: code.slice(code.indexOf('\n')),
+            map: null,
+          };
+        },
+      },
+      /**
        * Extract errors to `errors/` dir if --extractErrors passed.
        */
       opts.extractErrors && {
@@ -66,46 +92,6 @@ export async function createRollupConfig(
             return null;
           }
           return { code, map: null };
-        },
-      },
-      /**
-       * Custom plugin that removes shebang from code because newer versions of
-       * bublé bundle their own private version of `acorn` and we can't find a
-       * way to patch in the option `allowHashBang` to acorn. Taken from
-       * microbundle.
-       *
-       * @see https://github.com/Rich-Harris/buble/pull/165
-       */
-      {
-        name: 'Remove shebang',
-        transform(code: string) {
-          code = code.trim();
-
-          if (!code.startsWith('#!')) {
-            return null;
-          }
-
-          code = code.replace(/^#!(.*)/, '');
-          return {
-            code,
-            map: null,
-          };
-        },
-      },
-      /**
-       * Replace process.env.NODE_ENV variable, preventing assignment. Runs
-       * before Terser for DCE (`if (...)` => `if (false)` => removed).
-       */
-      opts.env && {
-        name: 'Replace process.NODE_ENV',
-        renderChunk: async (code: string, _: any) => {
-          return {
-            code: code.replace(
-              /process\.env\.NODE_ENV(?!\s*=)/g,
-              JSON.stringify(PRODUCTION ? 'production' : 'development')
-            ),
-            map: null,
-          };
         },
       },
       /**
@@ -160,15 +146,23 @@ export async function createRollupConfig(
           inject: false,
           extract: true,
         }),
-      // {
-      //   name: 'Add shebang.',
-      //   renderChunk: async (code: string, _: any) => {
-      //     return {
-      //       code,
-      //       map: null,
-      //     };
-      //   },
-      // },
+      {
+        name: 'Add shebang.',
+        renderChunk: async (code: string, chunk: any) => {
+          const entryPoint = chunk.facadeModuleId;
+          const packageEntry = join(paths.appDist, 'index.js');
+
+          if (entryPoint !== packageEntry) {
+            return null;
+          }
+
+          code = `#!/bin/env node\n` + code;
+          return {
+            code,
+            map: null,
+          };
+        },
+      },
     ],
   };
 }
