@@ -1,6 +1,6 @@
 {
-  "name": "@tszip/tszip",
-  "version": "0.2.6",
+  "name": "@tszip/legacy",
+  "version": "0.2.7",
   "author": "C. Lewis <ctj.lewis@icloud.com>",
   "description": "Backwards-compatible compiler for TypeScript libraries.",
   "license": "MIT",
