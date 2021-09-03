@@ -5,14 +5,12 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-import * as fs from 'fs-extra';
 import { parse, ParserOptions } from '@babel/parser';
 import traverse from '@babel/traverse';
 import { invertObject } from './invertObject';
 import { evalToString } from './evalToString';
 import { paths } from '../constants';
-import { safeVariableName } from '../utils';
-import { pascalCase } from 'pascal-case';
+import { mkdir, readFile, writeFile } from 'fs/promises';
 
 const babelParserOptions: ParserOptions = {
   sourceType: 'module',
@@ -36,9 +34,9 @@ export async function extractErrors(opts: any) {
     );
   }
 
-  if (!opts.name || !opts.name) {
-    throw new Error('Missing options. Ensure you pass --name flag to tszip');
-  }
+  // if (!opts.name || !opts.name) {
+  //   throw new Error('Missing options. Ensure you pass --name flag to tszip');
+  // }
 
   const errorMapFilePath = opts.errorMapFilePath;
   let existingErrorMap: any;
@@ -48,7 +46,7 @@ export async function extractErrors(opts: any) {
      * are cached, and the cache map is not properly invalidated after file
      * changes.
      */
-    const fileContents = await fs.readFile(errorMapFilePath, 'utf-8');
+    const fileContents = await readFile(errorMapFilePath, 'utf-8');
     existingErrorMap = JSON.parse(fileContents);
   } catch (e) {
     existingErrorMap = {};
@@ -94,19 +92,18 @@ export async function extractErrors(opts: any) {
   }
 
   async function flush() {
-    const prettyName = pascalCase(safeVariableName(opts.name));
     // Ensure that the ./src/errors directory exists or create it
-    await fs.ensureDir(paths.appErrors);
+    await mkdir(paths.appErrors, { recursive: true });
 
     // Output messages to ./errors/codes.json
-    await fs.writeFile(
+    await writeFile(
       errorMapFilePath,
       JSON.stringify(invertObject(existingErrorMap), null, 2) + '\n',
       'utf-8'
     );
 
     // Write the error files, unless they already exist
-    await fs.writeFile(
+    await writeFile(
       paths.appErrors + '/ErrorDev.js',
       `
 function ErrorDev(message) {
@@ -120,7 +117,7 @@ export default ErrorDev;
       'utf-8'
     );
 
-    await fs.writeFile(
+    await writeFile(
       paths.appErrors + '/ErrorProd.js',
       `
 function ErrorProd(code) {
@@ -130,7 +127,7 @@ function ErrorProd(code) {
     url += '&args[]=' + encodeURIComponent(arguments[i]);
   }
   return new Error(
-    \`Minified ${prettyName} error #$\{code}; visit $\{url} for the full message or \` +
+    \`Minified error #$\{code}; visit $\{url} for the full message or \` +
       'use the non-minified dev environment for full errors and additional ' +
       'helpful warnings. '
   );

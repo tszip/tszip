@@ -1,6 +1,6 @@
 interface SharedOpts {
   // JS target
-  target: 'node' | 'browser';
+  target?: 'node' | 'browser';
   // Path to tsconfig file
   tsconfig?: string;
   // Is error extraction running?
@@ -34,16 +34,16 @@ export interface NormalizedOpts
 }
 
 export interface TszipOptions extends SharedOpts {
-  // Name of package
-  name: string;
   // path to file
   input: string;
   // output
   output: string;
+  // Name of package
+  name?: string;
   // Environment
-  env: 'development' | 'production';
+  env?: 'development' | 'production';
   // Module format
-  format: ModuleFormat;
+  format?: ModuleFormat;
   // Is minifying?
   noMinify?: boolean;
   // Is this the very first rollup config (and thus should one-off metadata be extracted)?

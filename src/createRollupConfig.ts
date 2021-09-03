@@ -1,4 +1,3 @@
-import { safeVariableName } from './utils';
 import { paths } from './constants';
 import { RollupOptions } from 'rollup';
 import { terser } from 'rollup-plugin-terser';
@@ -37,7 +36,7 @@ export async function createRollupConfig(
       format: 'es',
       freeze: false,
       esModule: true,
-      name: opts.name || safeVariableName(opts.name),
+      // name: opts.name || safeVariableName(opts.name),
       sourcemap: false,
       exports: 'named',
     },
@@ -109,7 +108,7 @@ export async function createRollupConfig(
           compress: {
             keep_infinity: true,
             pure_getters: true,
-            // passes: 10,
+            passes: 2,
           },
           ecma: 2020,
           module: true,

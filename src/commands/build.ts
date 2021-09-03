@@ -1,4 +1,4 @@
-import { rollup } from 'rollup';
+import { rollup, RollupOptions } from 'rollup';
 import { createBuildConfigs } from '../createBuildConfigs';
 import { createProgressEstimator } from '../createProgressEstimator';
 import logError from '../logError';
@@ -77,11 +77,22 @@ export const build = async (dirtyOpts: WatchOpts) => {
     await progressIndicator(
       Promise.all(
         buildConfigs.map(async (buildConfig) => {
-          const bundle = await rollup(buildConfig);
-          await bundle.write(buildConfig.output);
+          if (buildConfig.output) {
+            const outputs: RollupOptions[] = Array.isArray(buildConfig.output)
+              ? buildConfig.output
+              : [buildConfig.output];
+
+            return await Promise.all(
+              outputs.map(async (output) => {
+                const bundle = await rollup(buildConfig);
+                return await bundle.write(output);
+              })
+            );
+          }
+          return null;
         })
       ),
-      'JS ➡ JS: Optimizing JS entry-points.'
+      'JS ➡ JS: Resolving imports and minifying.'
     );
     /**
      * Remove old index.js.
