@@ -1,5 +1,5 @@
 import escapes from 'ansi-escapes';
-import * as chalk from 'chalk';
+const chalk = require('chalk');
 const ora = require('ora');
 
 // This was copied from Razzle. Lots of unused stuff.

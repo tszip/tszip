@@ -54,6 +54,7 @@ import jest from 'jest';
 import shell from 'shelljs';
 import { incorrectNodeVersion, installing, start } from './messages';
 import { moveTypes } from './deprecated';
+import { fileURLToPath } from 'url';
 
 const sade = require('sade');
 const glob = require('glob-promise');
@@ -143,7 +144,7 @@ prog
     console.log();
 
     const bootSpinner = ora(`Creating ${chalk.bold.green(pkg)}...`);
-    let template;
+    let template: any;
     // Helper fn to prompt the user for a different
     // folder name if one already exists
     async function getProjectPath(projectPath: string): Promise<string> {
@@ -191,9 +192,12 @@ prog
       }
 
       bootSpinner.start();
-      // copy the template
+      // Copy template files
+      void fileURLToPath;
+      const rootPath = fileURLToPath(import.meta.url);
+      const templateDir = path.resolve(rootPath, `../../templates/${template}`);
       await fs.copy(
-        path.resolve(__dirname, `../templates/${template}`),
+        templateDir,
         projectPath,
         {
           overwrite: true,

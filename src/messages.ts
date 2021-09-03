@@ -1,7 +1,8 @@
-import * as chalk from 'chalk';
 import * as Output from './output';
 import getInstallCmd from './getInstallCmd';
 import { indentString } from './utils/log';
+
+const chalk = require('chalk');
 
 // This was copied from Razzle. Lots of unused stuff.
 const program = {
@@ -69,7 +70,7 @@ export const start = async function (projectName: string) {
   return `
   ${chalk.green('Awesome!')} You're now ready to start coding.
   
-  I already ran ${Output.cmd(commands.install)} for you, so your next steps are:
+  ${Output.cmd(commands.install)} was run for you, so your next steps are:
     ${Output.cmd(`cd ${projectName}`)}
   
   To start developing (rebuilds on changes):

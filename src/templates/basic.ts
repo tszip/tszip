@@ -3,12 +3,12 @@ import { Template } from './template';
 const basicTemplate: Template = {
   name: 'basic',
   dependencies: [
-    'husky',
-    'tszip',
-    'tslib',
+    '@tszip/tszip',
     'typescript',
-    'size-limit',
-    '@size-limit/preset-small-lib',
+    'tslib',
+    'husky',
+    // 'size-limit',
+    // '@size-limit/preset-small-lib',
   ],
   packageJson: {
     // name: safeName,
@@ -37,8 +37,8 @@ const basicTemplate: Template = {
       posttest: 'node test/import.mjs && node test/require.cjs',
       lint: 'tszip lint',
       prepare: 'tszip build',
-      size: 'size-limit',
-      analyze: 'size-limit --why',
+      // size: 'size-limit',
+      // analyze: 'size-limit --why',
     },
     peerDependencies: {},
     husky: {
@@ -50,7 +50,7 @@ const basicTemplate: Template = {
       printWidth: 80,
       semi: true,
       singleQuote: true,
-      trailingComma: 'es5',
+      trailingComma: 'all',
     },
   },
 };
