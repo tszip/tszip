@@ -2,11 +2,11 @@ import { existsSync, readFileSync } from 'fs';
 import { dirname, extname, isAbsolute, relative } from 'path';
 import { resolve as resolveExports } from 'resolve.exports';
 import { TszipOptions } from '../types';
-import { generateImportPattern, renameExtension } from '../utils/filesystem';
-import { getPackageJson } from '../utils/filesystem';
 // import { createRequire } from 'module';
 import fs from 'fs-extra';
 import resolve from 'resolve';
+
+import { getPackageJson, importPattern, renameExtension } from '@tszip/resolve-imports';
 
 /**
  * Resolve every relative import in output to their entry points.
@@ -122,8 +122,8 @@ export const resolveImports = (opts: TszipOptions) => {
         /**
          * Read the matched import/require statements and replace them.
          */
-        const importPattern = generateImportPattern(importToReplace);
-        const matches = code.match(importPattern) ?? [];
+        const importMatch = importPattern(importToReplace);
+        const matches = code.match(importMatch) ?? [];
         for (const match of matches) {
           const rewritten = match.replace(importToReplace, importReplacement);
           code = code.replace(match, rewritten);

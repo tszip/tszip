@@ -1,7 +1,3 @@
-/**
- * A crude RegExp to match the `from 'import-source'` part of import statements,
- * or a require(...) call.
- */
 import { extname, resolve, sep } from 'path';
 
 export const generateImportPattern = (importSource: string) =>

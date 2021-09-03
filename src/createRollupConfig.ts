@@ -5,8 +5,7 @@ import { terser } from 'rollup-plugin-terser';
 
 import { extractErrors } from './errors/extractErrors';
 import { TszipOptions } from './types';
-import { resolveImports } from './plugins/resolveImports';
-// import { optimizeLodashImports } from '@optimize-lodash/rollup-plugin';
+import { resolveImports } from '@tszip/resolve-imports';
 
 const REQUIRE_SHIM =
   `const require=await(async()=>{const{createRequire:t}=await import("module");` +
@@ -134,7 +133,7 @@ export async function createRollupConfig(
         format: 'esm',
       }),
       {
-        name: 'Shim require(),',
+        name: 'Shim require().',
         renderChunk: async (code: string, _: any) => {
           if (code.includes('require(') || code.includes('require.')) {
             code = REQUIRE_SHIM + code;
@@ -146,6 +145,15 @@ export async function createRollupConfig(
           };
         },
       },
+      // {
+      //   name: 'Add shebang.',
+      //   renderChunk: async (code: string, _: any) => {
+      //     return {
+      //       code,
+      //       map: null,
+      //     };
+      //   },
+      // },
     ],
   };
 }
