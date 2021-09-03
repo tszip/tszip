@@ -6,7 +6,11 @@ import { TszipOptions } from '../types';
 import fs from 'fs-extra';
 import resolve from 'resolve';
 
-import { getPackageJson, importPattern, renameExtension } from '@tszip/resolve-imports';
+import {
+  getPackageJson,
+  importPattern,
+  renameExtension,
+} from '@tszip/resolve-imports';
 
 /**
  * Resolve every relative import in output to their entry points.

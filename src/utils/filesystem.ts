@@ -29,5 +29,5 @@ export const getPackageJson = (absPath: string) => {
 
 export const renameExtension = (file: string, dotExtension: string) => {
   const oldExt = extname(file);
-  return file.replace(new RegExp(`\\${oldExt}\$`), dotExtension);
+  return file.replace(new RegExp(`\\${oldExt}$`), dotExtension);
 };
