@@ -26,7 +26,7 @@ xdescribe('integration :: tsdx build :: options', () => {
 
   it('should create errors/ dir with --extractErrors', () => {
     const output = execWithCache(
-      'node ../dist/index.cjs build --legacy --extractErrors'
+      'node ../dist/index.mjs build  --extractErrors'
     );
 
     expect(shell.test('-f', 'errors/ErrorDev.js')).toBeTruthy();
@@ -38,7 +38,7 @@ xdescribe('integration :: tsdx build :: options', () => {
 
   it('should have correct errors/codes.json', () => {
     const output = execWithCache(
-      'node ../dist/index.cjs build --legacy --extractErrors'
+      'node ../dist/index.mjs build  --extractErrors'
     );
 
     const errors = require(`../../${stageName}/errors/codes.json`);
@@ -51,16 +51,11 @@ xdescribe('integration :: tsdx build :: options', () => {
 
   it('should compile files into a dist directory', () => {
     const output = execWithCache(
-      'node ../dist/index.cjs build --legacy --extractErrors'
+      'node ../dist/index.mjs build  --extractErrors'
     );
 
-    expect(shell.test('-f', 'dist/index.cjs')).toBeTruthy();
-    expect(shell.test('-f', 'dist/build-options.development.cjs')).toBeTruthy();
-    expect(shell.test('-f', 'dist/build-options.cjs')).toBeTruthy();
-    expect(shell.test('-f', 'dist/build-options.min.mjs')).toBeTruthy();
-
+    expect(shell.test('-f', 'dist/index.mjs')).toBeTruthy();
     expect(shell.test('-f', 'dist/index.d.ts')).toBeTruthy();
-
     expect(output.code).toBe(0);
   });
 

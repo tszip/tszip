@@ -77,8 +77,8 @@ You can add your own `.babelrc` to the root of your project and TSDX will **merg
 
 ## Jest
 
-You can add your own `jest.config.js` to the root of your project and TSDX will **shallow merge** it with [its own Jest config](https://github.com/formium/tsdx/blob/master/src/createJestConfig.ts).
+You can add your own `jest.config.mjs` to the root of your project and TSDX will **shallow merge** it with [its own Jest config](https://github.com/formium/tsdx/blob/master/src/createJestConfig.ts).
 
 ## ESLint
 
-You can add your own `.eslintrc.js` to the root of your project and TSDX will **deep merge** it with [its own ESLint config](https://github.com/formium/tsdx/blob/master/src/createEslintConfig.ts).
+You can add your own `.eslintrc` to the root of your project and TSDX will **deep merge** it with [its own ESLint config](https://github.com/formium/tsdx/blob/master/src/createEslintConfig.ts).

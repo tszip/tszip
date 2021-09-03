@@ -1,4 +1,19 @@
-module.exports = {
+/**
+ * @see https://github.com/facebook/jest/issues/9395
+ */
+
+const jestConfig = {
+  globals: {
+    'ts-jest': {
+      tsconfig: {
+        module: 'esnext',
+      },
+    },
+  },
+  // preset: 'ts-jest/presets/js-with-babel',
+  // transform: {
+  //   '^.+\\.jsx?$': 'babel-jest',
+  // },
   testEnvironment: 'node',
   testMatch: ['<rootDir>/**/*(*.)@(test).[tj]s?(x)'],
   testPathIgnorePatterns: [
@@ -8,3 +23,5 @@ module.exports = {
     '<rootDir>/stage-.*/', // don't run tests in auto-generated (and auto-removed) test dirs
   ],
 };
+
+export default jestConfig;

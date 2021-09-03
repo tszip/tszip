@@ -5,8 +5,8 @@ import { terser } from 'rollup-plugin-terser';
 
 import { extractErrors } from './errors/extractErrors';
 import { TszipOptions } from './types';
-import { optimizeLodashImports } from '@optimize-lodash/rollup-plugin';
 import { resolveImports } from './plugins/resolveImports';
+// import { optimizeLodashImports } from '@optimize-lodash/rollup-plugin';
 
 const REQUIRE_SHIM =
   `const require=await(async()=>{const{createRequire:t}=await import("module");` +
@@ -29,14 +29,6 @@ export async function createRollupConfig(
 
   return {
     input: opts.input,
-    /**
-     * Everything except the entry point is external.
-     */
-    external: (id: string) => id !== opts.input,
-    shimMissingExports: true,
-    treeshake: {
-      propertyReadSideEffects: false,
-    },
     output: {
       file: opts.output,
       format: 'es',
@@ -45,6 +37,18 @@ export async function createRollupConfig(
       name: opts.name || safeVariableName(opts.name),
       sourcemap: false,
       exports: 'named',
+    },
+    /**
+     * Everything except the entry point is external.
+     */
+    external: (id: string) => id !== opts.input,
+    /**
+     * Silence warnings.
+     */
+    onwarn: () => {},
+    shimMissingExports: true,
+    treeshake: {
+      propertyReadSideEffects: false,
     },
     plugins: [
       /**
@@ -122,13 +126,6 @@ export async function createRollupConfig(
           module: true,
           toplevel: true,
         }),
-      /**
-       * If not in --legacy mode, ensure lodash imports are optimized in the
-       * final bundle.
-       */
-      optimizeLodashImports({
-        useLodashEs: true,
-      }),
       /**
        * Rewrite final emitted imports.
        */

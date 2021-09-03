@@ -1,6 +1,6 @@
 {
   "include": ["src/**/*"],
-  "exclude": ["src/template/**/*"],
+  "exclude": ["src/template/**/*", "test/**"],
   "compilerOptions": {
     "moduleResolution": "node",
     "target": "esnext",

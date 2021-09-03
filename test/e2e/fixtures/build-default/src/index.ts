@@ -6,8 +6,8 @@ export { testOptionalChaining } from './syntax/optional-chaining';
 export { testGenerator } from './syntax/generator';
 export { testAsync } from './syntax/async';
 
-export { kebabCase } from 'lodash';
-export { merge, mergeAll } from 'lodash/fp';
+export { kebabCase } from 'lodash-es';
+export { merge } from 'lodash-es';
 
 export { returnsTrue } from './returnsTrue';
 

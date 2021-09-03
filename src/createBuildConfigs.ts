@@ -27,7 +27,7 @@ export async function createBuildConfigs(
 ): Promise<Array<RollupOptions & { output: OutputOptions }>> {
   const distFiles = await glob('./dist/**/*', { nodir: true });
   const filesToOptimize = distFiles.filter((file: string) =>
-    /^\.(js|jsx)/.test(extname(file))
+    /^\.(css|js|jsx)/.test(extname(file))
   );
 
   // const configPromises = filesToOptimize.map(async (input) => {

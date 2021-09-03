@@ -69,8 +69,8 @@ TypeScript breakfast:
 - Jest test runner setup with sensible defaults via `tszip test`
 - ESLint with Prettier setup with sensible defaults via `tszip lint`
 - Zero-config, single dependency
-- Escape hatches for customization via `.babelrc.js`, `jest.config.js`,
-  `.eslintrc.js`, and `tszip.config.js`
+- Escape hatches for customization via `.babelrc.js`, `jest.config.mjs`,
+  `.eslintrc`, and `tszip.config.js`
 
 ## Quick Start
 
@@ -112,7 +112,7 @@ Runs your tests using Jest.
 
 Runs Eslint with Prettier on .ts and .tsx files. If you want to customize eslint
 you can add an `eslint` block to your package.json, or you can run `yarn lint
---write-file` and edit the generated `.eslintrc.js` file.
+--write-file` and edit the generated `.eslintrc` file.
 
 ### `prepare` script
 
@@ -206,12 +206,12 @@ module.exports = {
 
 ### Jest
 
-You can add your own `jest.config.js` to the root of your project and tszip will
+You can add your own `jest.config.mjs` to the root of your project and tszip will
 **shallow merge** it with [its own Jest config](./src/createJestConfig.ts).
 
 ### ESLint
 
-You can add your own `.eslintrc.js` to the root of your project and tszip will
+You can add your own `.eslintrc` to the root of your project and tszip will
 **deep merge** it with [its own ESLint config](./src/createEslintConfig.ts).
 
 ### `patch-package`

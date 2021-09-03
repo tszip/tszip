@@ -6,7 +6,7 @@ import { extname, resolve, sep } from 'path';
 
 export const generateImportPattern = (importSource: string) =>
   new RegExp(
-    `(from|require\\()\\s*['"]${importSource.replace('.', '\\.')}['"]`,
+    `(from|require\\(|import)\\s*['"]${importSource.replace('.', '\\.')}['"]`,
     'g'
   );
 

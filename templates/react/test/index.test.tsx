@@ -1,4 +1,7 @@
-import * as React from 'react';
+/**
+ * @jest-environment jsdom
+ */
+// @ts-ignore
 import * as ReactDOM from 'react-dom';
 import { Thing } from '../src';
 

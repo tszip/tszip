@@ -1,10 +1,3 @@
-import glob from 'tiny-glob';
-/**
- * Actually have to pull in compiled TS ouput for now.
- */
-// import { removeShebang } from './dist/plugins/removeShebang.js';
-// import { resolveImports } from './dist/plugins/resolveImports.js';
-
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
@@ -18,6 +11,7 @@ const config = async () => {
       file: 'dist/index.cjs',
       format: 'cjs',
     },
+    onwarn: () => {},
     plugins: [
       typescript({
         tsconfig: 'tsconfig.bootstrap.json',

@@ -1,12 +1,10 @@
 {
-  "include": ["src/**/*"],
-  "exclude": ["src/template/**/*", "test/**"],
+  "include": ["./**/*.ts"],
   "compilerOptions": {
     "moduleResolution": "node",
     "target": "esnext",
     "module": "esnext",
     "jsx": "react-jsx",
-    "outDir": "dist",
     "allowJs": true,
     "importHelpers": true,
     "esModuleInterop": true,
@@ -21,6 +19,7 @@
     "incremental": false,
     "declaration": true,
     "sourceMap": true,
-    "checkJs": true
+    "checkJs": true,
+    "noEmit": true
   }
 }

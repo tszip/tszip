@@ -16,11 +16,7 @@ import resolve from 'resolve';
  * source:  react/jsx-runtime.js *is*.
  */
 export const resolveImports = (opts: TszipOptions) => {
-  const fileExtensions = [
-    opts.format === 'esm' ? '.mjs' : null,
-    opts.format === 'cjs' ? '.cjs' : null,
-    '.js',
-  ].filter(Boolean);
+  const fileExtensions = ['.mjs', '.js', '.jsx', '.cjs'];
 
   return {
     name: 'Resolve final runtime imports to files',
@@ -50,13 +46,11 @@ export const resolveImports = (opts: TszipOptions) => {
          * Try to resolve ESM/CJS-specific extensions over .js when bundling
          * for those formats.
          */
-        if (opts.format === 'esm' || opts.format === 'cjs') {
-          for (const fileExtension of fileExtensions) {
-            const withExtension = absEntryWithoutExtension + fileExtension;
-            if (fs.pathExistsSync(withExtension)) {
-              absEntryPoint = withExtension;
-              break;
-            }
+        for (const fileExtension of fileExtensions) {
+          const withExtension = absEntryWithoutExtension + fileExtension;
+          if (fs.pathExistsSync(withExtension)) {
+            absEntryPoint = withExtension;
+            break;
           }
         }
         /**
@@ -115,7 +109,9 @@ export const resolveImports = (opts: TszipOptions) => {
           if (importToReplace.endsWith('/index')) {
             importToReplace = importToReplace.slice(0, -'/index'.length);
           }
-          importReplacement = renameExtension(relativeEntry, '.mjs');
+          importReplacement = `${relativeImportNoExt}.mjs`;
+          // console.log(opts.input, { baseDir, relativeImportNoExt });
+          // console.log({ importToReplace, importReplacement });
           // console.log(opts.input, {
           //   absEntryPoint,
           //   importToReplace,

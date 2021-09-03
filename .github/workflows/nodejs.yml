@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - esm-only
   pull_request:
     types: [opened, synchronize, reopened]
 

@@ -1,3 +1,8 @@
+/**
+ * @jest-environment jsdom
+ */
+
+// @ts-ignore
 import * as ReactDOM from 'react-dom';
 import { Default as Thing } from '../stories/Thing.stories';
 
