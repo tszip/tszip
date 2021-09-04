@@ -58,6 +58,8 @@ prog
     indentLog(chalk.bgBlue(`tszip`), 2);
     console.log();
 
+    pkg = safePackageName(pkg);
+
     const bootSpinner = ora(`Creating ${chalk.bold.green(pkg)}...`);
     let template: any;
     // Helper fn to prompt the user for a different

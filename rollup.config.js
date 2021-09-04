@@ -34,18 +34,10 @@ const configs = async () => {
     output: {
       file: input,
       format: 'es',
-      freeze: false,
-      esModule: true,
-      sourcemap: false,
-      exports: 'named',
     },
     external: (id) => id !== input,
     plugins: [requireShim(), shebang(), resolveImports()],
     onwarn: () => {},
-    shimMissingExports: true,
-    treeshake: {
-      propertyReadSideEffects: false,
-    },
   }));
 };
 
