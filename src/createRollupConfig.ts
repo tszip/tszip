@@ -1,6 +1,7 @@
 import { paths } from './constants';
 import { RollupOptions } from 'rollup';
 import { terser } from 'rollup-plugin-terser';
+import sourceMaps from 'rollup-plugin-sourcemaps';
 
 import { extractErrors } from './errors/extractErrors';
 import { TszipOptions } from './types';
@@ -12,8 +13,8 @@ import autoprefixer from 'autoprefixer';
 import cssnano from 'cssnano';
 
 const REQUIRE_SHIM =
-  `const require=await(async()=>{const{createRequire:t}=await import("module");` +
-  `return t(import.meta.url)})();`;
+  `if(typeof require==='undefined')const require=await(async()=>{const{` +
+  `createRequire:t}=await import("module");return t(import.meta.url)})();`;
 
 const errorCodeOpts = {
   errorMapFilePath: paths.appErrorsJson,
@@ -53,6 +54,7 @@ export async function createRollupConfig(
       propertyReadSideEffects: false,
     },
     plugins: [
+      sourceMaps(),
       /**
        * Custom plugin that removes shebang from code because newer versions of
        * bublé bundle their own private version of `acorn` and we can't find a
@@ -117,10 +119,7 @@ export async function createRollupConfig(
       /**
        * Rewrite final emitted imports.
        */
-      resolveImports({
-        ...opts,
-        format: 'esm',
-      }),
+      resolveImports(),
       {
         name: 'Shim require().',
         renderChunk: async (code: string, _: any) => {
