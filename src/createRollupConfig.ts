@@ -6,11 +6,13 @@ import sourceMaps from 'rollup-plugin-sourcemaps';
 import { extractErrors } from './errors/extractErrors';
 import { TszipOptions } from './types';
 import { resolveImports } from '@tszip/resolve-imports';
-import { join } from 'path';
 
 import postcss from 'rollup-plugin-postcss';
 import autoprefixer from 'autoprefixer';
 import cssnano from 'cssnano';
+
+// @ts-ignore
+import shebang from 'rollup-plugin-preserve-shebang';
 
 const REQUIRE_SHIM = `import{require}from'@tszip/esm-require';`;
 
@@ -35,7 +37,6 @@ export async function createRollupConfig(
       format: 'es',
       freeze: false,
       esModule: true,
-      // name: opts.name || safeVariableName(opts.name),
       sourcemap: false,
       exports: 'named',
     },
@@ -53,32 +54,7 @@ export async function createRollupConfig(
     },
     plugins: [
       sourceMaps(),
-      /**
-       * Custom plugin that removes shebang from code because newer versions of
-       * bublé bundle their own private version of `acorn` and we can't find a
-       * way to patch in the option `allowHashBang` to acorn. Taken from
-       * microbundle.
-       *
-       * @see https://github.com/Rich-Harris/buble/pull/165
-       */
-      {
-        name: 'Remove shebang',
-        transform: (code: string) => {
-          /**
-           * If no hashbang, skip.
-           */
-          if (!code.startsWith('#!')) {
-            return null;
-          }
-          /**
-           * Otherwise, trim first line.
-           */
-          return {
-            code: code.slice(code.indexOf('\n')),
-            map: null,
-          };
-        },
-      },
+      shebang(),
       /**
        * Extract errors to `errors/` dir if --extractErrors passed.
        */
@@ -114,15 +90,19 @@ export async function createRollupConfig(
           module: true,
           toplevel: true,
         }),
-      /**
-       * Rewrite final emitted imports.
-       */
       resolveImports(),
       {
         name: 'Shim require().',
-        renderChunk: async (code: string, _: any) => {
+        renderChunk: async (code) => {
           if (code.includes('require(') || code.includes('require.')) {
-            code = REQUIRE_SHIM + code;
+            let banner = REQUIRE_SHIM;
+            if (code.startsWith('#!')) {
+              const afterNewline = code.indexOf('\n') + 1;
+              const shebang = code.slice(0, afterNewline);
+              code = code.slice(afterNewline);
+              banner = shebang + REQUIRE_SHIM;
+            }
+            code = banner + code;
           }
 
           return {
@@ -142,23 +122,6 @@ export async function createRollupConfig(
           inject: false,
           extract: true,
         }),
-      {
-        name: 'Add shebang.',
-        renderChunk: async (code: string, chunk: any) => {
-          const entryPoint = chunk.facadeModuleId;
-          const packageEntry = join(paths.appDist, 'index.js');
-
-          if (entryPoint !== packageEntry) {
-            return null;
-          }
-
-          code = `#!/bin/env node\n` + code;
-          return {
-            code,
-            map: null,
-          };
-        },
-      },
     ],
   };
 }

@@ -111,16 +111,16 @@ prog
       void fileURLToPath;
 
       // @todo Solve TS1343 error
-      // const rootPath = fileURLToPath(import.meta.url);
-      // const templateDir = path.resolve(rootPath, `../../templates/${template}`);
-      // await fs.copy(templateDir, projectPath, {
-      //   overwrite: true,
-      // });
-      // // fix gitignore
-      // await fs.move(
-      //   path.resolve(projectPath, './gitignore'),
-      //   path.resolve(projectPath, './.gitignore')
-      // );
+      const rootPath = fileURLToPath(import.meta.url);
+      const templateDir = path.resolve(rootPath, `../../templates/${template}`);
+      await fs.copy(templateDir, projectPath, {
+        overwrite: true,
+      });
+      // fix gitignore
+      await fs.move(
+        path.resolve(projectPath, './gitignore'),
+        path.resolve(projectPath, './.gitignore')
+      );
 
       // update license year and author
       let license: string = await fs.readFile(

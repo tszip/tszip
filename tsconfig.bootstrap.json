@@ -4,7 +4,7 @@
   "compilerOptions": {
     "moduleResolution": "node",
     "target": "esnext",
-    "module": "commonjs",
+    "module": "esnext",
     "allowJs": true,
     "jsx": "react-jsx",
     "outDir": "dist",
