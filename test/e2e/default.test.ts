@@ -1,7 +1,7 @@
 import * as shell from 'shelljs';
 
 import * as util from '../utils/fixture';
-import { execWithCache, grep } from '../utils/shell';
+import { execWithCache } from '../utils/shell';
 
 shell.config.silent = false;
 
@@ -31,14 +31,6 @@ describe('tsdx build :: zero-config defaults', () => {
     expect(shell.test('-d', 'dist/types/')).toBeFalsy();
 
     expect(output.code).toBe(0);
-  });
-
-  it('should compile with lodash-es', () => {
-    const output = execWithCache('node ../dist/index.mjs build');
-    expect(output.code).toBe(0);
-
-    const matched = grep(/lodash-es/, ['dist/index.mjs']);
-    expect(matched).toBeTruthy();
   });
 
   it('should clean the dist directory before rebuilding', () => {

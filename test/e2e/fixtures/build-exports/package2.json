@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "build": "tszip build"
+  },
+  "name": "build-default-2",
+  "license": "MIT"
+}

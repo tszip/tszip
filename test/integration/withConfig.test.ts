@@ -47,7 +47,7 @@ xdescribe('integration :: tsdx build :: tszip.config.js', () => {
     expect(output.code).toBe(0);
   });
 
-  // afterAll(() => {
-  //   util.teardownStage(stageName);
-  // });
+  afterAll(() => {
+    util.teardownStage(stageName);
+  });
 });

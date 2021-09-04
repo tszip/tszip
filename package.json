@@ -6,6 +6,10 @@
   "description": "Backwards-compatible compiler for TypeScript libraries.",
   "license": "MIT",
   "homepage": "https://github.com/tszip/tszip",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./*": "./dist/*.mjs"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tszip/tszip"
