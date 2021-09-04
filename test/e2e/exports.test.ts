@@ -1,8 +1,9 @@
-import { readFileSync } from 'fs';
 import { join, resolve } from 'path';
+import { readFileSync } from 'fs';
+import { execWithCache } from '../utils/shell';
+
 import * as shell from 'shelljs';
 import * as util from '../utils/fixture';
-import { execWithCache } from '../utils/shell';
 
 shell.config.silent = false;
 
@@ -51,7 +52,7 @@ describe('tsdx build :: exports', () => {
     });
   });
 
-  // afterAll(() => {
-  //   util.teardownStage(stageName);
-  // });
+  afterAll(() => {
+    util.teardownStage(stageName);
+  });
 });
