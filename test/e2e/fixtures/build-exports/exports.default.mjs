@@ -1,1 +1,1 @@
-import * as generators from 'build-default/syntax/generator';
+import * as generators from 'build-exports/syntax/generator';

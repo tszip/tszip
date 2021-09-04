@@ -1,1 +1,1 @@
-import { returnsTrue } from 'build-default/returnsTrue';
+import { returnsTrue } from 'build-exports/returnsTrue';
