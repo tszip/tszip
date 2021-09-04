@@ -16,7 +16,7 @@ export const createRollupConfig = async (
       : createConfig({
           input,
           minify,
-          env: 'dev',
+          env: 'production',
         });
 
   return config;
