@@ -27,14 +27,13 @@ describe('tsdx build :: exports', () => {
 
   describe('library exports', () => {
     const json = readFileSync(join(stageDir, 'package.json'), 'utf-8');
+    const packageJson = JSON.parse(json);
 
     it('should set package.json `exports` field', () => {
-      const packageJson = JSON.parse(json);
       expect(packageJson.exports).toBeTruthy();
     });
 
     it('should export `my-package/path/to/module` as my-package/path/to/module.mjs', () => {
-      const packageJson = JSON.parse(json);
       expect(packageJson.exports['.']).toEqual('./dist/index.mjs');
       expect(packageJson.exports['./*']).toEqual('./dist/*.mjs');
     });

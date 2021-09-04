@@ -2,6 +2,6 @@
   "scripts": {
     "build": "tszip build"
   },
-  "name": "build-default-2",
+  "name": "build-exports-2",
   "license": "MIT"
 }
