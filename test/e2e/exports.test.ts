@@ -45,7 +45,7 @@ describe('tsdx build :: exports', () => {
     });
   });
 
-  // afterAll(() => {
-  //   util.teardownStage(stageName);
-  // });
+  afterAll(() => {
+    util.teardownStage(stageName);
+  });
 });
