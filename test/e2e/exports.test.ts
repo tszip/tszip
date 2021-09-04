@@ -1,4 +1,4 @@
-import { readFile } from 'fs/promises';
+import { readFileSync } from 'fs';
 import { join, resolve } from 'path';
 import * as shell from 'shelljs';
 import * as util from '../utils/fixture';
@@ -26,15 +26,15 @@ describe('tsdx build :: exports', () => {
   });
 
   describe('library exports', () => {
-    let json = readFile(join(stageDir, 'package.json'), 'utf-8');
+    const json = readFileSync(join(stageDir, 'package.json'), 'utf-8');
 
-    it('should set package.json `exports` field', async () => {
-      const packageJson = JSON.parse(await json);
+    it('should set package.json `exports` field', () => {
+      const packageJson = JSON.parse(json);
       expect(packageJson.exports).toBeTruthy();
     });
 
-    it('should export `my-package/path/to/module` as my-package/path/to/module.mjs', async () => {
-      const packageJson = JSON.parse(await json);
+    it('should export `my-package/path/to/module` as my-package/path/to/module.mjs', () => {
+      const packageJson = JSON.parse(json);
       expect(packageJson.exports['.']).toEqual('./dist/index.mjs');
       expect(packageJson.exports['./*']).toEqual('./dist/*.mjs');
     });
@@ -52,7 +52,7 @@ describe('tsdx build :: exports', () => {
     });
   });
 
-  afterAll(() => {
-    util.teardownStage(stageName);
-  });
+  // afterAll(() => {
+  //   util.teardownStage(stageName);
+  // });
 });
