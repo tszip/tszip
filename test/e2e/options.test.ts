@@ -9,7 +9,7 @@ const fixtureName = 'build-default';
 // create a second version of build-default's stage for concurrent testing
 const stageName = 'stage-build-options';
 
-describe('tsdx build :: options', () => {
+describe('tszip build :: options', () => {
   beforeAll(() => {
     util.teardownStage(stageName);
     util.setupStageWithFixture(testDir, stageName, fixtureName);

@@ -18,8 +18,8 @@ const stageName = `stage-integration-${fixtureName}`;
  *
  * @todo Split entry points like TSC and restore --extractErrors functionality.
  */
-test.todo('integration :: tsdx build :: options');
-xdescribe('integration :: tsdx build :: options', () => {
+test.todo('integration :: tszip build :: options');
+xdescribe('integration :: tszip build :: options', () => {
   beforeAll(() => {
     util.teardownStage(stageName);
     util.setupStageWithFixture(testDir, stageName, fixtureName);

@@ -10,8 +10,8 @@ const testDir = 'integration';
 const fixtureName = 'build-withConfig';
 const stageName = `stage-integration-${fixtureName}`;
 
-test.todo('integration :: tsdx build :: tszip.config.js');
-xdescribe('integration :: tsdx build :: tszip.config.js', () => {
+test.todo('integration :: tszip build :: tszip.config.js');
+xdescribe('integration :: tszip build :: tszip.config.js', () => {
   beforeAll(() => {
     util.teardownStage(stageName);
     util.setupStageWithFixture(testDir, stageName, fixtureName);

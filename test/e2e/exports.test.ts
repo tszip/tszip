@@ -10,7 +10,7 @@ const testDir = 'e2e';
 const fixtureName = 'build-exports';
 const stageName = `stage-${fixtureName}`;
 
-describe('tsdx build :: exports', () => {
+describe('tszip build :: exports', () => {
   beforeAll(() => {
     util.teardownStage(stageName);
     util.setupStageWithFixture(testDir, stageName, fixtureName);
