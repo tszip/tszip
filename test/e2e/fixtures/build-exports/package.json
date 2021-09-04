@@ -1,7 +1,8 @@
 {
+  "type": "module",
   "exports": {
-    ".": "./dist/index.mjs",
-    "./*": "./dist/*.mjs"
+    ".": "./dist/index.js",
+    "./*": "./dist/*.js"
   },
   "scripts": {
     "build": "tszip build"

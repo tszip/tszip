@@ -17,7 +17,7 @@ export const composePackageJson =
           limit: '10 KB',
         },
         {
-          path: `dist/${name}.mjs`,
+          path: `dist/${name}.js`,
           limit: '10 KB',
         },
       ],

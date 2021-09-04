@@ -15,9 +15,9 @@ describe('tszip build :: build with custom tsconfig.json options', () => {
   });
 
   it('should use the declarationDir when set', () => {
-    const output = execWithCache('node ../dist/index.mjs build');
+    const output = execWithCache('node ../dist/index.js build');
 
-    expect(shell.test('-f', 'dist/index.mjs')).toBeTruthy();
+    expect(shell.test('-f', 'dist/index.js')).toBeTruthy();
 
     expect(shell.test('-f', 'dist/index.d.ts')).toBeFalsy();
     expect(shell.test('-f', 'typings/index.d.ts')).toBeTruthy();
@@ -28,10 +28,10 @@ describe('tszip build :: build with custom tsconfig.json options', () => {
 
   it('should read custom --tsconfig path', () => {
     const output = execWithCache(
-      'node ../dist/index.mjs build  --format cjs --tsconfig ./src/tsconfig.json'
+      'node ../dist/index.js build  --format cjs --tsconfig ./src/tsconfig.json'
     );
 
-    expect(shell.test('-f', 'dist/index.mjs')).toBeTruthy();
+    expect(shell.test('-f', 'dist/index.js')).toBeTruthy();
 
     expect(shell.test('-f', 'dist/index.d.ts')).toBeFalsy();
     expect(shell.test('-f', 'typingsCustom/index.d.ts')).toBeTruthy();

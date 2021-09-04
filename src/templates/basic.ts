@@ -10,17 +10,19 @@ const basicTemplate: Template = {
     // 'size-limit',
     // '@size-limit/preset-small-lib',
   ],
+
+  // @todo Update for ESM
   packageJson: {
     // name: safeName,
     version: '0.1.0',
     license: 'MIT',
     // author: author,
     main: './dist/index.cjs',
-    module: './dist/index.mjs',
+    module: './dist/index.js',
     exports: {
       './package.json': './package.json',
       '.': {
-        import: './dist/index.mjs',
+        import: './dist/index.js',
         require: './dist/index.cjs',
       },
     },
@@ -34,7 +36,7 @@ const basicTemplate: Template = {
       start: 'tszip watch',
       build: 'tszip build',
       test: 'tszip test',
-      posttest: 'node test/import.mjs && node test/require.cjs',
+      posttest: 'node test/import.js && node test/require.cjs',
       lint: 'tszip lint',
       prepare: 'tszip build',
       // size: 'size-limit',

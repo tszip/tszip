@@ -16,16 +16,16 @@ describe('tszip build :: invalid build', () => {
   });
 
   it('should fail gracefully with exit code 1 when build failed', () => {
-    const output = execWithCache('node ../dist/index.mjs build');
+    const output = execWithCache('node ../dist/index.js build');
     expect(output.code).toBe(1);
   });
 
   it('should only transpile and not type check', () => {
     const output = execWithCache(
-      'node ../dist/index.mjs build  --transpileOnly'
+      'node ../dist/index.js build  --transpileOnly'
     );
 
-    expect(shell.test('-f', 'dist/index.mjs')).toBeTruthy();
+    expect(shell.test('-f', 'dist/index.js')).toBeTruthy();
     expect(shell.test('-f', 'dist/index.d.ts')).toBeTruthy();
     expect(output.code).toBe(0);
   });

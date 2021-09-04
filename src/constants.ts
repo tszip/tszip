@@ -10,6 +10,6 @@ export const paths = {
   appErrors: resolveApp('errors'),
   appDist: resolveApp('dist'),
   appConfig: resolveApp('tszip.config.js'),
-  jestConfig: resolveApp('jest.config.mjs'),
+  jestConfig: resolveApp('jest.config.js'),
   progressEstimatorCache: resolveApp('node_modules/.cache/.progress-estimator'),
 };

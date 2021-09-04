@@ -25,11 +25,7 @@ import {
 import { incorrectNodeVersion, installing, start } from './messages';
 import { moveTypes } from './deprecated';
 import { fileURLToPath } from 'url';
-import {
-  cleanDistFolder,
-  cleanOldJS,
-  getAppPackageJson,
-} from './utils/filesystem';
+import { cleanDistFolder, getAppPackageJson } from './utils/filesystem';
 import { build, normalizeOpts } from './commands/build';
 
 import type execa from 'execa';
@@ -239,7 +235,7 @@ prog
       await cleanDistFolder();
     }
 
-    await cleanOldJS();
+    // await cleanOldJS();
 
     type Killer = execa.ExecaChildProcess | null;
 

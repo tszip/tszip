@@ -7,7 +7,6 @@ import { ModuleFormat, NormalizedOpts, WatchOpts } from '../types';
 import { resolveApp } from '../utils';
 import {
   cleanDistFolder,
-  cleanOldJS,
   getAppPackageJson,
   isDir,
   jsOrTs,
@@ -97,7 +96,7 @@ export const build = async (dirtyOpts: WatchOpts) => {
     /**
      * Remove old index.js.
      */
-    await cleanOldJS();
+    // await cleanOldJS();
   } catch (error) {
     logError(error);
     process.exit(1);

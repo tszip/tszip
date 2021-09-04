@@ -27,7 +27,7 @@ xdescribe('integration :: tszip build :: options', () => {
 
   it('should create errors/ dir with --extractErrors', () => {
     const output = execWithCache(
-      'node ../dist/index.mjs build  --extractErrors'
+      'node ../dist/index.js build  --extractErrors'
     );
 
     expect(shell.test('-f', 'errors/ErrorDev.js')).toBeTruthy();
@@ -39,7 +39,7 @@ xdescribe('integration :: tszip build :: options', () => {
 
   it('should have correct errors/codes.json', () => {
     const output = execWithCache(
-      'node ../dist/index.mjs build  --extractErrors'
+      'node ../dist/index.js build  --extractErrors'
     );
 
     const errors = require(`../../${stageName}/errors/codes.json`);
@@ -52,10 +52,10 @@ xdescribe('integration :: tszip build :: options', () => {
 
   it('should compile files into a dist directory', () => {
     const output = execWithCache(
-      'node ../dist/index.mjs build  --extractErrors'
+      'node ../dist/index.js build  --extractErrors'
     );
 
-    expect(shell.test('-f', 'dist/index.mjs')).toBeTruthy();
+    expect(shell.test('-f', 'dist/index.js')).toBeTruthy();
     expect(shell.test('-f', 'dist/index.d.ts')).toBeTruthy();
     expect(output.code).toBe(0);
   });

@@ -4,7 +4,6 @@ import { TszipOptions, NormalizedOpts } from './types';
 import { createRollupConfig } from './createRollupConfig';
 import { existsSync } from 'fs';
 import { extname } from 'path';
-import { renameExtension } from './utils/filesystem';
 
 const glob = require('glob-promise');
 
@@ -27,13 +26,12 @@ export async function createBuildConfigs(
     /^\.(css|js|jsx)/.test(extname(file))
   );
 
-  const inputs: TszipOptions[] = filesToOptimize.map((input) => ({
-    input,
-    output: renameExtension(input, '.mjs'),
-  }));
-
   const configs = await Promise.all(
-    inputs.map(async (options: TszipOptions) => {
+    filesToOptimize.map(async (input: string) => {
+      const options = {
+        input,
+        output: input,
+      };
       const config = await createRollupConfig(options);
       return exportTsConfig.rollup(config, options);
     })
@@ -41,18 +39,3 @@ export async function createBuildConfigs(
 
   return configs;
 }
-
-// function createAllFormats(
-//   opts: NormalizedOpts,
-//   input: string
-// ): [TszipOptions, ...TszipOptions[]] {
-//   return [
-//     {
-//       ...opts,
-//       input,
-//       output: renameExtension(input, '.mjs'),
-//       format: 'esm',
-//       env: 'production',
-//     },
-//   ];
-// }

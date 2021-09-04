@@ -7,15 +7,15 @@
   "license": "MIT",
   "homepage": "https://github.com/tszip/tszip",
   "exports": {
-    ".": "./dist/index.mjs",
-    "./*": "./dist/*.mjs"
+    ".": "./dist/index.js",
+    "./*": "./dist/*.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tszip/tszip"
   },
   "bin": {
-    "tszip": "./dist/index.mjs"
+    "tszip": "./dist/index.js"
   },
   "files": [
     "dist",
@@ -39,12 +39,12 @@
     "prebootstrap": "yarn clean && tsc -p tsconfig.bootstrap.json && yarn force-cjs",
     "bootstrap": "node dist/index.js build && yarn build",
     "prepare": "yarn bootstrap",
-    "dev": "yarn bootstrap && node dist/index.mjs watch",
-    "build": "node dist/index.mjs build",
+    "dev": "yarn bootstrap && node dist/index.js watch",
+    "build": "node dist/index.js build",
     "postbuild": "chmod +x dist/index.*js",
     "lint": "yarn build && yarn lint:post-build",
-    "lint:post-build": "node dist/index.mjs lint ./ --ignore-pattern 'test/e2e/fixtures/lint'",
-    "test": "yarn build && node dist/index.mjs test",
+    "lint:post-build": "node dist/index.js lint ./ --ignore-pattern 'test/e2e/fixtures/lint'",
+    "test": "yarn build && node dist/index.js test",
     "release": "np",
     "deduplicate": "yarn-deduplicate -s fewer yarn.lock",
     "deduplicate:check": "yarn-deduplicate -s fewer yarn.lock --list --fail"

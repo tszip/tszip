@@ -23,24 +23,24 @@ describe('tszip build :: exports', () => {
       expect(packageJson.exports).toBeTruthy();
     });
 
-    it('should export `my-package/path/to/module` as my-package/path/to/module.mjs', () => {
+    it('should export `my-package/path/to/module` as my-package/path/to/module.js', () => {
       const json = readFileSync(`package.json`, 'utf-8');
       const packageJson = JSON.parse(json);
-      expect(packageJson.exports['.']).toEqual('./dist/index.mjs');
-      expect(packageJson.exports['./*']).toEqual('./dist/*.mjs');
+      expect(packageJson.exports['.']).toEqual('./dist/index.js');
+      expect(packageJson.exports['./*']).toEqual('./dist/*.js');
     });
 
     it('should build the project', () => {
-      execWithCache('node ../dist/index.mjs build');
+      execWithCache('node ../dist/index.js build');
     });
 
     it('should export named members properly', () => {
-      const named = execWithCache(`node exports.named.mjs`);
+      const named = execWithCache(`node exports.named.js`);
       expect(named.code).toBe(0);
     });
 
     it('should export default members properly', () => {
-      const def = execWithCache(`node exports.default.mjs`);
+      const def = execWithCache(`node exports.default.js`);
       expect(def.code).toBe(0);
     });
   });
