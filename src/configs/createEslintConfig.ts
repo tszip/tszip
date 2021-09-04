@@ -1,6 +1,6 @@
 import { CLIEngine } from 'eslint';
 import fs from 'fs-extra';
-import { PackageJson } from './types';
+import { PackageJson } from '../types';
 // import { getReactVersion } from './utils';
 
 const path = require('path');

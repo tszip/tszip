@@ -1,7 +1,7 @@
 import { readFile, rmdir, stat, unlink } from 'fs/promises';
 import { extname, resolve, sep } from 'path';
 import { paths } from '../constants';
-import { createProgressEstimator } from '../createProgressEstimator';
+import { createProgressEstimator } from '../configs/createProgressEstimator';
 import { PackageJson } from '../types';
 import { resolveApp } from '.';
 

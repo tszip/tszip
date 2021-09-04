@@ -1,5 +1,5 @@
 import { RollupOptions } from 'rollup';
-import { TszipOptions } from './types';
+import { TszipOptions } from '../types';
 import { createConfig } from '@tszip/rollup-config';
 
 export const createRollupConfig = async (

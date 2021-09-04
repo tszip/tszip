@@ -1,7 +1,7 @@
 import { rollup, RollupOptions } from 'rollup';
-import { createBuildConfigs } from '../createBuildConfigs';
-import { createProgressEstimator } from '../createProgressEstimator';
-import logError from '../logError';
+import { createBuildConfigs } from '../configs/createBuildConfigs';
+import { createProgressEstimator } from '../configs/createProgressEstimator';
+import logError from '../log/error';
 import { runTsc } from '../plugins/simpleTs';
 import { ModuleFormat, NormalizedOpts, WatchOpts } from '../types';
 import { resolveApp } from '../utils';

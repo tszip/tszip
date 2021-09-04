@@ -18,7 +18,7 @@
 import { copy } from 'fs-extra';
 import { basename, extname, join } from 'path';
 import * as ts from 'typescript';
-import { createProgressEstimator } from '../createProgressEstimator';
+import { createProgressEstimator } from '../configs/createProgressEstimator';
 
 const glob = require('glob-promise');
 const execa = require('execa');

@@ -1,6 +1,6 @@
 import { RollupOptions } from 'rollup';
-import { paths } from './constants';
-import { TszipOptions, NormalizedOpts } from './types';
+import { paths } from '../constants';
+import { TszipOptions, NormalizedOpts } from '../types';
 import { createRollupConfig } from './createRollupConfig';
 import { existsSync } from 'fs';
 import { extname } from 'path';

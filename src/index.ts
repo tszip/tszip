@@ -1,20 +1,23 @@
 #!/usr/bin/env node
-import getInstallCmd from './getInstallCmd';
-import getInstallArgs from './getInstallArgs';
+import getInstallCmd from './install/getInstallCmd';
+import getInstallArgs from './install/getInstallArgs';
 import Input from 'enquirer/lib/prompts/input.js';
 import Select from 'enquirer/lib/prompts/select.js';
-import logError from './logError';
+import logError from './log/error';
 
 import { watch, RollupWatchOptions, WatcherOptions } from 'rollup';
 import { CLIEngine } from 'eslint';
 import { paths } from './constants';
-import { createBuildConfigs } from './createBuildConfigs';
-import { createJestConfig, JestConfigOptions } from './createJestConfig';
-import { createEslintConfig } from './createEslintConfig';
+import { createBuildConfigs } from './configs/createBuildConfigs';
+import {
+  createJestConfig,
+  JestConfigOptions,
+} from './configs/createJestConfig';
+import { createEslintConfig } from './configs/createEslintConfig';
 import { WatchOpts, TszipOptions } from './types';
 import { templates } from './templates';
 import { composePackageJson } from './templates/utils';
-import { indentLog } from './utils/log';
+import { indentLog } from './log';
 import {
   resolveApp,
   safePackageName,
@@ -22,7 +25,7 @@ import {
   getNodeEngineRequirement,
 } from './utils';
 
-import { incorrectNodeVersion, installing, start } from './messages';
+import { incorrectNodeVersion, installing, start } from './log/messages';
 import { moveTypes } from './deprecated';
 import { fileURLToPath } from 'url';
 import { cleanDistFolder, getAppPackageJson } from './utils/filesystem';
