@@ -1343,6 +1343,11 @@
   resolved "https://registry.yarnpkg.com/@trysound/sax/-/sax-0.1.1.tgz#3348564048e7a2d7398c935d466c0414ebb6a669"
   integrity sha512-Z6DoceYb/1xSg5+e+ZlPZ9v0N16ZvZ+wYMraFue4HYrE4ttONKtsvruIRf6t9TBR0YvSOfi1hUU0fJfBLCDYow==
 
+"@tszip/esm-require@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@tszip/esm-require/-/esm-require-0.0.1.tgz#0f0f67bb0d2156e74952a693de6508c8adb530b5"
+  integrity sha512-W50U1VTs3Ja6dKgakhXiOibJxHMaRWLxRIXk762R0nqLy3/jIka4vRy6/TKm9G2DT0K7zbA8YI+Q9OizckwVxg==
+
 "@tszip/legacy@^0.2.7":
   version "0.2.7"
   resolved "https://registry.yarnpkg.com/@tszip/legacy/-/legacy-0.2.7.tgz#2d74b1740bdb9bb7d8456af817087df3df9364a2"
@@ -1407,7 +1412,7 @@
     tslib "^2.3.0"
     typescript "^4.3.5"
 
-"@tszip/resolve-imports@^1.0.1":
+"@tszip/resolve-imports@latest":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@tszip/resolve-imports/-/resolve-imports-1.0.1.tgz#fbe005e6a1a6c5ccd9019dede234ba66732b6fdd"
   integrity sha512-mRv2h6hE5KHFQS6sVlo6Q2XHFKq+qLRrM1XrOmXo8FkI2eRa5EFTpwvb83E91+hRIAU9nermKh4WtLVctiBrBA==

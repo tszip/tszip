@@ -109,15 +109,13 @@ prog
       bootSpinner.start();
       // Copy template files
       void fileURLToPath;
+
+      // @todo Solve TS1343 error
       // const rootPath = fileURLToPath(import.meta.url);
       // const templateDir = path.resolve(rootPath, `../../templates/${template}`);
-      // await fs.copy(
-      //   templateDir,
-      //   projectPath,
-      //   {
-      //     overwrite: true,
-      //   }
-      // );
+      // await fs.copy(templateDir, projectPath, {
+      //   overwrite: true,
+      // });
       // // fix gitignore
       // await fs.move(
       //   path.resolve(projectPath, './gitignore'),

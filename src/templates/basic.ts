@@ -2,33 +2,13 @@ import { Template } from './template';
 
 const basicTemplate: Template = {
   name: 'basic',
-  dependencies: [
-    '@tszip/tszip',
-    'typescript',
-    'tslib',
-    'husky',
-    // 'size-limit',
-    // '@size-limit/preset-small-lib',
-  ],
+  dependencies: ['@tszip/tszip', 'typescript', 'tslib', 'husky'],
 
   // @todo Update for ESM
   packageJson: {
-    // name: safeName,
-    version: '0.1.0',
+    type: 'module',
+    version: '0.0.1',
     license: 'MIT',
-    // author: author,
-    main: './dist/index.cjs',
-    module: './dist/index.js',
-    exports: {
-      './package.json': './package.json',
-      '.': {
-        import: './dist/index.js',
-        require: './dist/index.cjs',
-      },
-    },
-    // module: `dist/${safeName}.mjs`,
-    typings: `dist/index.d.ts`,
-    files: ['dist', 'src'],
     engines: {
       node: '>=14',
     },
@@ -36,18 +16,27 @@ const basicTemplate: Template = {
       start: 'tszip watch',
       build: 'tszip build',
       test: 'tszip test',
-      posttest: 'node test/import.js && node test/require.cjs',
+      posttest: 'node test/import.js',
       lint: 'tszip lint',
       prepare: 'tszip build',
       // size: 'size-limit',
       // analyze: 'size-limit --why',
     },
-    peerDependencies: {},
-    husky: {
-      hooks: {
-        'pre-commit': 'tszip lint',
-      },
+    module: './dist/index.js',
+    exports: {
+      './package.json': './package.json',
+      '.': './dist/index.js',
+      './*': './dist/*.js',
     },
+    typings: `dist/index.d.ts`,
+    files: ['dist', 'src'],
+    peerDependencies: {},
+    // @todo Re-add Husky.
+    // husky: {
+    //   hooks: {
+    //     'pre-commit': 'tszip lint',
+    //   },
+    // },
     prettier: {
       printWidth: 80,
       semi: true,

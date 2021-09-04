@@ -62,6 +62,7 @@
     "@rollup/plugin-json": "^4.0.0",
     "@rollup/plugin-node-resolve": "^13.0.4",
     "@rollup/plugin-typescript": "^8.2.5",
+    "@tszip/esm-require": "^0.0.1",
     "@tszip/resolve-imports": "latest",
     "@types/jest": "^26.0.24",
     "@types/rollup-plugin-postcss": "^3.1.4",

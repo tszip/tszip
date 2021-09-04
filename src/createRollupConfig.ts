@@ -12,9 +12,7 @@ import postcss from 'rollup-plugin-postcss';
 import autoprefixer from 'autoprefixer';
 import cssnano from 'cssnano';
 
-const REQUIRE_SHIM =
-  `if(typeof require==='undefined')const require=await(async()=>{const{` +
-  `createRequire:t}=await import("module");return t(import.meta.url)})();`;
+const REQUIRE_SHIM = `import{require}from'@tszip/esm-require';`;
 
 const errorCodeOpts = {
   errorMapFilePath: paths.appErrorsJson,

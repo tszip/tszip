@@ -8,18 +8,18 @@ export const composePackageJson =
   (template: Template) =>
   ({ name, author }: ProjectArgs) => {
     return {
-      ...template.packageJson,
       name,
       author,
-      'size-limit': [
-        {
-          path: `dist/${name}.cjs`,
-          limit: '10 KB',
-        },
-        {
-          path: `dist/${name}.js`,
-          limit: '10 KB',
-        },
-      ],
+      ...template.packageJson,
+      // 'size-limit': [
+      //   {
+      //     path: `dist/${name}.cjs`,
+      //     limit: '10 KB',
+      //   },
+      //   {
+      //     path: `dist/${name}.js`,
+      //     limit: '10 KB',
+      //   },
+      // ],
     };
   };
