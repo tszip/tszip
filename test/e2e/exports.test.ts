@@ -1,4 +1,5 @@
 import { readFile } from 'fs/promises';
+import { join, resolve } from 'path';
 import * as shell from 'shelljs';
 import * as util from '../utils/fixture';
 import { execWithCache } from '../utils/shell';
@@ -8,6 +9,7 @@ shell.config.silent = false;
 const testDir = 'e2e';
 const fixtureName = 'build-exports';
 const stageName = `stage-${fixtureName}`;
+const stageDir = resolve(process.cwd(), stageName);
 
 describe('tsdx build :: exports', () => {
   beforeAll(() => {
@@ -20,19 +22,11 @@ describe('tsdx build :: exports', () => {
 
     expect(shell.test('-f', 'dist/index.mjs')).toBeTruthy();
     expect(shell.test('-f', 'dist/index.d.ts')).toBeTruthy();
-
     expect(output.code).toBe(0);
   });
 
-  /**
-   * Directory resolution does not make sense here. readFile looks for
-   * ./stageName, but node is run in ../stageName, yet they are both apparently
-   * the same directory.
-   *
-   * @todo Make less stupid.
-   */
   describe('library exports', () => {
-    let json = readFile(`./${stageName}/package.json`, 'utf-8');
+    let json = readFile(join(stageDir, 'package.json'), 'utf-8');
 
     it('should set package.json `exports` field', async () => {
       const packageJson = JSON.parse(await json);
@@ -46,12 +40,14 @@ describe('tsdx build :: exports', () => {
     });
 
     it('should export named members properly', () => {
-      const output = execWithCache(`node ../${stageName}/exports.named.mjs`);
+      const mjs = join(stageDir, 'exports.named.mjs');
+      const output = execWithCache(`node ${mjs}`);
       expect(output.code).toBe(0);
     });
 
     it('should export default members properly', () => {
-      const output = execWithCache(`node ../${stageName}/exports.default.mjs`);
+      const mjs = join(stageDir, 'exports.default.mjs');
+      const output = execWithCache(`node ${mjs}`);
       expect(output.code).toBe(0);
     });
   });
