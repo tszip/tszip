@@ -36,7 +36,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "prebootstrap": "yarn clean",
-    "bootstrap": "tsc && rollup -c --silent && yarn build",
+    "bootstrap": "tsc && rollup -c --silent && yarn build && yarn build",
     "prepare": "yarn bootstrap",
     "dev": "yarn bootstrap && node dist/index.js watch",
     "build": "node dist/index.js build",
