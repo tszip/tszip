@@ -3,8 +3,8 @@ import logError from '../log/error';
 import { RollupOptions, rollup } from 'rollup';
 import { TszipOptions } from '../types';
 import { cleanDistFolder } from '../lib/filesystem';
-import { createBuildConfigs } from '../configs/createBuildConfigs';
-import { createProgressEstimator } from '../configs/createProgressEstimator';
+import { createBuildConfigs } from '../config/createRollupConfigs';
+import { createProgressEstimator } from '../config/createProgressEstimator';
 import { runTsc } from './tsc';
 
 export const build = async (opts: TszipOptions) => {

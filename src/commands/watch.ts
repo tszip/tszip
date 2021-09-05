@@ -6,7 +6,7 @@ import ora from 'ora';
 import { RollupWatchOptions, watch as rollupWatch } from 'rollup';
 import { WatchOpts } from '../types';
 import { clearConsole } from '../lib/utils';
-import { createBuildConfigs } from '../configs/createBuildConfigs';
+import { createBuildConfigs } from '../config/createRollupConfigs';
 import { moveTypes } from '../lib/deprecated';
 
 export const watch = async (opts: WatchOpts) => {
