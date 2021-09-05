@@ -5,10 +5,10 @@ import {
   createJestConfig,
 } from '../configs/createJestConfig';
 import { dirname, resolve } from 'path';
-import { getAppPackageJson } from '../utils/filesystem';
+import { getAppPackageJson } from '../lib/filesystem';
 import { pathExists } from 'fs-extra';
 import { paths } from '../constants';
-import { resolveApp } from '../utils';
+import { resolveApp } from '../lib';
 
 export const test = async (opts: { config?: string }) => {
   // Do this as the first thing so that any code reading it knows the right env.

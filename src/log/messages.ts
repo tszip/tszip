@@ -2,7 +2,7 @@ import * as Output from './output';
 
 import chalk from 'chalk';
 
-import { getInstallCmd } from '../utils/installDeps';
+import { getInstallCmd } from '../lib/installDeps';
 import { indentString } from '.';
 
 // This was copied from Razzle. Lots of unused stuff.

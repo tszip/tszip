@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import { CLIEngine } from 'eslint';
 import { createEslintConfig } from '../configs/createEslintConfig';
 import { existsSync } from 'fs';
-import { getAppPackageJson } from '../utils/filesystem';
+import { getAppPackageJson } from '../lib/filesystem';
 import { paths } from '../constants';
 import { writeFile } from 'fs/promises';
 

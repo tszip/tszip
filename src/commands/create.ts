@@ -8,9 +8,9 @@ import logError from '../log/error';
 import ora from 'ora';
 import semver from 'semver';
 
-import { getAuthorName, setAuthorName } from '../utils/filesystem';
-import { getInstallArgs, getInstallCmd } from '../utils/installDeps';
-import { getNodeEngineRequirement, safePackageName } from '../utils';
+import { getAuthorName, setAuthorName } from '../lib/filesystem';
+import { getInstallArgs, getInstallCmd } from '../lib/installDeps';
+import { getNodeEngineRequirement, safePackageName } from '../lib';
 import { incorrectNodeVersion, installing, start } from '../log/messages';
 
 import { TszipOptions } from '../types';
