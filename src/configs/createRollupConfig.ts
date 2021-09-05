@@ -24,7 +24,7 @@ export const createRollupConfig = async (
     watch: !opts.watch
       ? false
       : {
-          include: ['dist/**'],
+          include: ['src/**'],
           exclude: ['node_modules/**'],
         },
   };
