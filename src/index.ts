@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-import getInstallCmd from './install/getInstallCmd';
-import getInstallArgs from './install/getInstallArgs';
+import { getInstallCmd, getInstallArgs } from './utils/installDeps';
 import Input from 'enquirer/lib/prompts/input.js';
 import Select from 'enquirer/lib/prompts/select.js';
 import logError from './log/error';

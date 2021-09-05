@@ -1,6 +1,7 @@
 import * as Output from './output';
-import getInstallCmd from '../install/getInstallCmd';
+
 import { indentString } from '.';
+import { getInstallCmd } from '../utils/installDeps';
 
 const chalk = require('chalk');
 
