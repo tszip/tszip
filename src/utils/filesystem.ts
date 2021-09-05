@@ -102,5 +102,5 @@ export const getAuthorName = () => {
 };
 
 export const setAuthorName = (author: string) => {
-  shell.exec(`npm config set init-author-name "${author}"`, { silent: true });
+  shell.exec(`git config --global add user.name "${author}"`, { silent: true });
 };
