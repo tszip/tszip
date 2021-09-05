@@ -5,27 +5,21 @@ import { createConfig } from '@tszip/rollup-config';
 export const createRollupConfig = async (
   opts: TszipOptions
 ): Promise<RollupOptions> => {
-  const minify = !opts.transpileOnly && !opts.noMinify;
-  const { input } = opts;
-  const config =
-    opts.env === 'development' || opts.noMinify
-      ? createConfig({
-          input,
-          env: 'dev',
-        })
-      : createConfig({
-          input,
-          minify,
-          env: 'production',
-        });
+  const { input, env } = opts;
+  const minify = env !== 'development' && !opts.transpileOnly && !opts.noMinify;
+  const config = opts.watch
+    ? createConfig({
+        input,
+        minify: false,
+        // env: 'dev',
+        action: 'watch',
+      })
+    : createConfig({
+        input,
+        minify,
+        // env: 'dev',
+        action: 'build',
+      });
 
-  return {
-    ...config,
-    watch: !opts.watch
-      ? false
-      : {
-          include: ['src/**'],
-          exclude: ['node_modules/**'],
-        },
-  };
+  return config;
 };

@@ -25,20 +25,22 @@ export const createBuildConfigs = async ({
   env: 'development' | 'production';
   watch: boolean;
 }) => {
-  const distFiles: string[] = await glob('./dist/**/*', { nodir: true });
+  const filePattern = watch ? /^\.(css|[jt]sx?)/ : /^\.(css|jsx?)/;
+  const filesToCheck = watch ? './src/**/*' : './dist/**/*';
+  const distFiles: string[] = await glob(filesToCheck, { nodir: true });
   const filesToOptimize = distFiles.filter((file: string) =>
-    /^\.(css|js|jsx)/.test(extname(file))
+    filePattern.test(extname(file))
   );
 
   const configs = await Promise.all(
     filesToOptimize.map(async (input: string) => {
       const options = {
         input,
-        output: input,
         env,
         watch,
       };
       const config = await createRollupConfig(options);
+      // console.log(config);
       return exportTsConfig.rollup(config, options);
     })
   );

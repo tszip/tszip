@@ -37,7 +37,7 @@ export interface TszipOptions extends SharedOpts {
   // path to file
   input: string;
   // output
-  output: string;
+  output?: string;
   // Name of package
   name?: string;
   watch: boolean;
