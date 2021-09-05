@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import fs from 'fs-extra';
 
-import { getInstallCmd, getInstallArgs } from '../utils/installDeps';
+import { getInstallArgs, getInstallCmd } from '../utils/installDeps';
 import { incorrectNodeVersion, installing, start } from '../log/messages';
 import { fileURLToPath } from 'url';
 import { indentLog } from '../log';

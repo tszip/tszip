@@ -1,6 +1,6 @@
 // @ts-ignore
 import { Meta, Story } from '@storybook/react';
-import { Thing, Props } from '../src';
+import { Props, Thing } from '../src';
 
 const meta: Meta = {
   title: 'Welcome',

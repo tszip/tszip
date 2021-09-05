@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 import logError from './log/error';
 
-import { watch, RollupWatchOptions, WatcherOptions } from 'rollup';
+import { RollupWatchOptions, WatcherOptions, watch } from 'rollup';
 import { CLIEngine } from 'eslint';
 import { paths } from './constants';
 import { createBuildConfigs } from './configs/createBuildConfigs';
 import {
-  createJestConfig,
   JestConfigOptions,
+  createJestConfig,
 } from './configs/createJestConfig';
 import { createEslintConfig } from './configs/createEslintConfig';
 import { WatchOpts } from './types';
 import { templates } from './templates';
-import { resolveApp, clearConsole } from './utils';
+import { clearConsole, resolveApp } from './utils';
 import { moveTypes } from './deprecated';
 import { cleanDistFolder, getAppPackageJson } from './utils/filesystem';
 import { build, normalizeOpts } from './commands/build';

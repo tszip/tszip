@@ -1,4 +1,4 @@
-import { rollup, RollupOptions } from 'rollup';
+import { RollupOptions, rollup } from 'rollup';
 import { createBuildConfigs } from '../configs/createBuildConfigs';
 import { createProgressEstimator } from '../configs/createProgressEstimator';
 import logError from '../log/error';
