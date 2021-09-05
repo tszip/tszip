@@ -1,5 +1,5 @@
-import { readFileSync } from 'fs';
 import { execWithCache } from '../utils/shell';
+import { readFileSync } from 'fs';
 
 import * as shell from 'shelljs';
 import * as util from '../utils/fixture';
