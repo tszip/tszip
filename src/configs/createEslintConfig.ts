@@ -21,6 +21,9 @@ const CONFIG = {
     'prettier/@typescript-eslint',
     'plugin:prettier/recommended',
   ],
+  rules: {
+    'sort-imports': ['error', { allowSeparatedGroups: true }],
+  },
 };
 
 export async function createEslintConfig({
@@ -28,22 +31,6 @@ export async function createEslintConfig({
   rootDir,
   writeFile,
 }: CreateEslintConfigArgs): Promise<CLIEngine.Options['baseConfig'] | void> {
-  // const isReactLibrary = Boolean(getReactVersion(pkg));
-
-  // const config = {
-  //   extends: [
-  //     'react-app',
-  //     'prettier/@typescript-eslint',
-  //     'plugin:prettier/recommended',
-  //   ],
-  //   settings: {
-  //     react: {
-  //       // Fix for https://github.com/jaredpalmer/tsdx/issues/279
-  //       version: isReactLibrary ? 'detect' : '999.999.999',
-  //     },
-  //   },
-  // };
-
   if (!writeFile) {
     return CONFIG;
   }
