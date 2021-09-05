@@ -1423,10 +1423,10 @@
     fs-extra "^10.0.0"
     resolve "^1.20.0"
 
-"@tszip/rollup-config@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@tszip/rollup-config/-/rollup-config-0.2.0.tgz#2eddbf000e1b60783df230181d9471cd5613020f"
-  integrity sha512-3jhmJKWRw59X4c9R1dkeMKwoBlbrUZZQi+qaU3E6RLKnBHiD9+qSOfq/PDlIvr4gWQKPx3E+2Wd0PreItlrLaQ==
+"@tszip/rollup-config@^0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@tszip/rollup-config/-/rollup-config-0.2.2.tgz#eec1228c02baf753fff30a75b377f4db5907a4c5"
+  integrity sha512-dQ4pnbvVwGQ4fqZZXiZ3R/EhDS5oE+lo9aP5JeFg8j1gDbEIkNipwNB35PbB+YiS5WD5LKygAU7iMiEuy3n1TQ==
   dependencies:
     "@babel/helper-module-imports" "^7.15.4"
     "@rollup/plugin-typescript" "^8.2.5"
