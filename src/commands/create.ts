@@ -77,12 +77,8 @@ export const create = async (pkg: string, opts: TszipOptions) => {
     }
 
     bootSpinner.start();
-    // Copy template files
-    void fileURLToPath;
-
-    // @todo Solve TS1343 error
     const rootPath = fileURLToPath(import.meta.url);
-    const templateDir = resolve(rootPath, `../../templates/${template}`);
+    const templateDir = resolve(rootPath, `../../../templates/${template}`);
     await fs.copy(templateDir, projectPath, {
       overwrite: true,
     });
