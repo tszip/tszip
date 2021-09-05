@@ -43,10 +43,12 @@ export const lint = async (opts: {
     fix: opts.fix,
     ignorePattern: opts['ignore-pattern'],
   });
+
   const report = cli.executeOnFiles(opts['_']);
   if (opts.fix) {
     CLIEngine.outputFixes(report);
   }
+
   console.log(cli.getFormatter()(report.results));
   if (opts['report-file']) {
     await writeFile(
@@ -54,9 +56,11 @@ export const lint = async (opts: {
       cli.getFormatter('json')(report.results)
     );
   }
+
   if (report.errorCount) {
     process.exit(1);
   }
+
   if (report.warningCount > opts['max-warnings']) {
     process.exit(1);
   }
