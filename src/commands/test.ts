@@ -8,7 +8,7 @@ import { dirname, resolve } from 'path';
 import { getAppPackageJson } from '../lib/filesystem';
 import { pathExists } from 'fs-extra';
 import { paths } from '../constants';
-import { resolveApp } from '../lib';
+import { resolveApp } from '../lib/utils';
 
 export const test = async (opts: { config?: string }) => {
   // Do this as the first thing so that any code reading it knows the right env.

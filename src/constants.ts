@@ -1,4 +1,4 @@
-import { resolveApp } from './lib';
+import { resolveApp } from './lib/utils';
 
 export const paths = {
   appPackageJson: resolveApp('package.json'),

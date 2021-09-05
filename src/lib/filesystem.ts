@@ -6,7 +6,7 @@ import { readFile, rmdir, stat, unlink } from 'fs/promises';
 import { PackageJson } from '../types';
 import { createProgressEstimator } from '../configs/createProgressEstimator';
 import { paths } from '../constants';
-import { resolveApp } from '.';
+import { resolveApp } from './utils';
 
 export const generateImportPattern = (importSource: string) =>
   new RegExp(

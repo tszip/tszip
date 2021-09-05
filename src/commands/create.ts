@@ -10,7 +10,7 @@ import semver from 'semver';
 
 import { getAuthorName, setAuthorName } from '../lib/filesystem';
 import { getInstallArgs, getInstallCmd } from '../lib/installDeps';
-import { getNodeEngineRequirement, safePackageName } from '../lib';
+import { getNodeEngineRequirement, safePackageName } from '../lib/utils';
 import { incorrectNodeVersion, installing, start } from '../log/messages';
 
 import { TszipOptions } from '../types';

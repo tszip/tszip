@@ -5,7 +5,7 @@ import ora from 'ora';
 
 import { RollupWatchOptions, watch as rollupWatch } from 'rollup';
 import { WatchOpts } from '../types';
-import { clearConsole } from '../lib';
+import { clearConsole } from '../lib/utils';
 import { createBuildConfigs } from '../configs/createBuildConfigs';
 import { moveTypes } from '../deprecated';
 
