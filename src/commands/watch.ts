@@ -5,16 +5,13 @@ import ora from 'ora';
 
 import { RollupWatchOptions, watch as rollupWatch } from 'rollup';
 import { WatchOpts } from '../types';
-// import { cleanDistFolder } from '../utils/filesystem';
 import { clearConsole } from '../utils';
 import { createBuildConfigs } from '../configs/createBuildConfigs';
 import { moveTypes } from '../deprecated';
-// import { runTsc } from '../plugins/simpleTs';
 
 export const watch = async (opts: WatchOpts) => {
   const buildConfigs: RollupWatchOptions[] = await createBuildConfigs({
     watch: true,
-    env: 'development',
   });
 
   type Killer = execa.ExecaChildProcess | null;

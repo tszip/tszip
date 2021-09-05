@@ -19,10 +19,8 @@ if (existsSync(paths.appConfig)) {
 }
 
 export const createBuildConfigs = async ({
-  env = 'development',
   watch = false,
 }: {
-  env: 'development' | 'production';
   watch: boolean;
 }) => {
   const filePattern = watch ? /^\.(css|[jt]sx?)/ : /^\.(css|jsx?)/;
@@ -36,7 +34,6 @@ export const createBuildConfigs = async ({
     filesToOptimize.map(async (input: string) => {
       const options = {
         input,
-        env,
         watch,
       };
       const config = await createRollupConfig(options);

@@ -16,12 +16,8 @@ export const build = async (opts: TszipOptions) => {
     transpileOnly: opts.transpileOnly,
   });
 
-  const dev = opts.noMinify || opts.transpileOnly;
-
   const buildConfigs = await createBuildConfigs({
-    ...opts,
     watch: false,
-    env: dev ? 'development' : 'production',
   });
 
   try {
