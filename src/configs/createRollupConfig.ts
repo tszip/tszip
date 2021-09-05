@@ -1,13 +1,16 @@
 import { RollupOptions } from 'rollup';
-import { TszipOptions } from '../types';
 import { createConfig } from '@tszip/rollup-config';
 
-export const createRollupConfig = async (
-  opts: TszipOptions
-): Promise<RollupOptions> => {
-  const { input } = opts;
-  const minify = !opts.transpileOnly && !opts.noMinify;
-  const config = opts.watch
+export const createRollupConfig = async ({
+  input,
+  minify,
+  watch,
+}: {
+  input: string;
+  minify: boolean;
+  watch: boolean;
+}): Promise<RollupOptions> => {
+  const config = watch
     ? createConfig({
         input,
         minify: false,

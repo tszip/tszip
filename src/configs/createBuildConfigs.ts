@@ -19,9 +19,11 @@ if (existsSync(paths.appConfig)) {
 }
 
 export const createBuildConfigs = async ({
-  watch = false,
+  watch,
+  minify = false,
 }: {
   watch: boolean;
+  minify?: boolean;
 }) => {
   const filePattern = watch ? /^\.(css|[jt]sx?)/ : /^\.(css|jsx?)/;
   const filesToCheck = watch ? './src/**/*' : './dist/**/*';
@@ -35,6 +37,7 @@ export const createBuildConfigs = async ({
       const options = {
         input,
         watch,
+        minify,
       };
       const config = await createRollupConfig(options);
       // console.log(config);
