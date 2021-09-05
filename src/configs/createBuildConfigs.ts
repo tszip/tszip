@@ -2,7 +2,7 @@ import glob from 'glob-promise';
 
 import { RollupOptions } from 'rollup';
 import { TszipOptions } from '../types';
-import { createRollupConfig } from './createRollupConfig';
+import { createConfig } from '@tszip/rollup-config';
 import { existsSync } from 'fs';
 import { extname } from 'path';
 import { paths } from '../lib/constants';
@@ -25,11 +25,16 @@ export const createBuildConfigs = async ({
   watch: boolean;
   minify?: boolean;
 }) => {
-  const filePattern = watch ? /^\.(css|[jt]sx?)/ : /^\.(css|jsx?)/;
-  const filesToCheck = watch ? './src/**/*' : './dist/**/*';
-  const distFiles: string[] = await glob(filesToCheck, { nodir: true });
-  const filesToOptimize = distFiles.filter((file: string) =>
-    filePattern.test(extname(file))
+  const filePattern = watch ? /^\.(css|[jt]sx?)$/ : /^\.(css|jsx?)$/;
+  const filesToCheck = watch ? './src/index.ts' : './dist/**/*';
+  const files: string[] = await glob(filesToCheck, { nodir: true });
+  const filesToOptimize = files.filter(
+    (file: string) =>
+      /**
+       * Do not feed .d.ts to Rollup directly. Only compile files we can consume
+       * (JS, TS, CSS).
+       */
+      !file.endsWith('.d.ts') && filePattern.test(extname(file))
   );
 
   const configs = await Promise.all(
@@ -39,8 +44,21 @@ export const createBuildConfigs = async ({
         watch,
         minify,
       };
-      const config = await createRollupConfig(options);
-      // console.log(config);
+
+      const config = createConfig(
+        watch
+          ? {
+              input,
+              minify: false,
+              action: 'watch',
+            }
+          : {
+              input,
+              minify,
+              action: 'build',
+            }
+      );
+
       return exportTsConfig.rollup(config, options);
     })
   );
