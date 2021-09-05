@@ -48,6 +48,7 @@ export function getReactVersion({
   );
 }
 
+// @todo Force to Node 14+.
 export function getNodeEngineRequirement({ engines }: PackageJson) {
   return engines && engines.node;
 }

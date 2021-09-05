@@ -1,7 +1,4 @@
 #!/usr/bin/env node
-import { getInstallCmd, getInstallArgs } from './utils/installDeps';
-import Input from 'enquirer/lib/prompts/input.js';
-import Select from 'enquirer/lib/prompts/select.js';
 import logError from './log/error';
 
 import { watch, RollupWatchOptions, WatcherOptions } from 'rollup';
@@ -13,26 +10,16 @@ import {
   JestConfigOptions,
 } from './configs/createJestConfig';
 import { createEslintConfig } from './configs/createEslintConfig';
-import { WatchOpts, TszipOptions } from './types';
+import { WatchOpts } from './types';
 import { templates } from './templates';
-import { composePackageJson } from './templates/utils';
-import { indentLog } from './log';
-import {
-  resolveApp,
-  safePackageName,
-  clearConsole,
-  getNodeEngineRequirement,
-} from './utils';
-
-import { incorrectNodeVersion, installing, start } from './log/messages';
+import { resolveApp, clearConsole } from './utils';
 import { moveTypes } from './deprecated';
-import { fileURLToPath } from 'url';
 import { cleanDistFolder, getAppPackageJson } from './utils/filesystem';
 import { build, normalizeOpts } from './commands/build';
+import { create } from './commands/create';
 
 import type execa from 'execa';
 import jest from 'jest';
-import shell from 'shelljs';
 
 const sade = require('sade');
 const chalk = require('chalk');
@@ -40,7 +27,6 @@ const chalk = require('chalk');
 const path = require('path');
 const execaProcess = require('execa');
 const ora = require('ora');
-const semver = require('semver');
 const fs = require('fs-extra');
 const prog = sade('tszip');
 
@@ -55,150 +41,7 @@ prog
     )}]`
   )
   .example('create --template react mypackage')
-  .action(async (pkg: string, opts: TszipOptions) => {
-    console.log();
-    indentLog(chalk.bgBlue(`tszip`), 2);
-    console.log();
-
-    pkg = safePackageName(pkg);
-
-    const bootSpinner = ora(`Creating ${chalk.bold.green(pkg)}...`);
-    let template: any;
-    // Helper fn to prompt the user for a different
-    // folder name if one already exists
-    async function getProjectPath(projectPath: string): Promise<string> {
-      const exists = await fs.pathExists(projectPath);
-      if (!exists) {
-        return projectPath;
-      }
-
-      bootSpinner.fail(`Failed to create ${chalk.bold.red(pkg)}`);
-      const prompt = new Input({
-        message: `A folder named ${chalk.bold.red(
-          pkg
-        )} already exists! ${chalk.bold('Choose a different name')}`,
-        initial: pkg + '-1',
-        result: (v: string) => v.trim(),
-      });
-
-      pkg = await prompt.run();
-
-      const realPath = await fs.realpath(process.cwd());
-      projectPath = realPath + '/' + pkg;
-
-      bootSpinner.start(`Creating ${chalk.bold.green(pkg)}...`);
-      return await getProjectPath(projectPath); // recursion!
-    }
-
-    try {
-      // get the project path
-      const realPath = await fs.realpath(process.cwd());
-      let projectPath = await getProjectPath(realPath + '/' + pkg);
-
-      const prompt = new Select({
-        message: 'Choose a template',
-        choices: Object.keys(templates),
-      });
-
-      if (opts.template) {
-        template = opts.template.trim();
-        if (!prompt.choices.includes(template)) {
-          bootSpinner.fail(`Invalid template ${chalk.bold.red(template)}`);
-          template = await prompt.run();
-        }
-      } else {
-        template = await prompt.run();
-      }
-
-      bootSpinner.start();
-      // Copy template files
-      void fileURLToPath;
-
-      // @todo Solve TS1343 error
-      const rootPath = fileURLToPath(import.meta.url);
-      const templateDir = path.resolve(rootPath, `../../templates/${template}`);
-      await fs.copy(templateDir, projectPath, {
-        overwrite: true,
-      });
-      // fix gitignore
-      await fs.move(
-        path.resolve(projectPath, './gitignore'),
-        path.resolve(projectPath, './.gitignore')
-      );
-
-      // update license year and author
-      let license: string = await fs.readFile(
-        path.resolve(projectPath, 'LICENSE'),
-        { encoding: 'utf-8' }
-      );
-
-      license = license.replace(/<year>/, `${new Date().getFullYear()}`);
-
-      // attempt to automatically derive author name
-      let author = getAuthorName();
-
-      if (!author) {
-        bootSpinner.stop();
-        const licenseInput = new Input({
-          name: 'author',
-          message: 'Who is the package author?',
-        });
-        author = await licenseInput.run();
-        setAuthorName(author);
-        bootSpinner.start();
-      }
-
-      license = license.replace(/<author>/, author.trim());
-
-      await fs.writeFile(path.resolve(projectPath, 'LICENSE'), license, {
-        encoding: 'utf-8',
-      });
-
-      const templateConfig = templates[template as keyof typeof templates];
-      const generatePackageJson = composePackageJson(templateConfig);
-
-      // Install deps
-      process.chdir(projectPath);
-      const safeName = safePackageName(pkg);
-      const pkgJson = generatePackageJson({ name: safeName, author });
-
-      const nodeVersionReq = getNodeEngineRequirement(pkgJson);
-      if (
-        nodeVersionReq &&
-        !semver.satisfies(process.version, nodeVersionReq)
-      ) {
-        bootSpinner.fail(incorrectNodeVersion(nodeVersionReq));
-        process.exit(1);
-      }
-
-      await fs.outputJSON(path.resolve(projectPath, 'package.json'), pkgJson);
-      bootSpinner.succeed(`Created ${chalk.bold.green(pkg)}`);
-      await start(pkg);
-    } catch (error) {
-      bootSpinner.fail(`Failed to create ${chalk.bold.red(pkg)}`);
-      logError(error);
-      process.exit(1);
-    }
-
-    const templateConfig = templates[template as keyof typeof templates];
-    const { dependencies: deps } = templateConfig;
-
-    const installSpinner = ora(installing(deps.sort())).start();
-    try {
-      const cmd = await getInstallCmd();
-      await execaProcess(cmd, getInstallArgs(cmd, deps));
-      installSpinner.succeed('Installed dependencies');
-
-      indentLog('Initializing git repo.');
-      await execaProcess('git', ['init']);
-
-      console.log(await start(pkg));
-    } catch (error) {
-      installSpinner.fail('Failed to install dependencies');
-      logError(error);
-      process.exit(1);
-    }
-  });
+  .action(create);
 
 prog
   .command('watch')
@@ -331,39 +174,6 @@ prog
     'build --extractErrors=https://reactjs.org/docs/error-decoder.html?invariant='
   )
   .action(build);
-
-function getAuthorName() {
-  let author = '';
-
-  author = shell
-    .exec('npm config get init-author-name', { silent: true })
-    .stdout.trim();
-  if (author) return author;
-
-  author = shell
-    .exec('git config --global user.name', { silent: true })
-    .stdout.trim();
-  if (author) {
-    setAuthorName(author);
-    return author;
-  }
-
-  author = shell
-    .exec('npm config get init-author-email', { silent: true })
-    .stdout.trim();
-  if (author) return author;
-
-  author = shell
-    .exec('git config --global user.email', { silent: true })
-    .stdout.trim();
-  if (author) return author;
-
-  return author;
-}
-
-function setAuthorName(author: string) {
-  shell.exec(`npm config set init-author-name "${author}"`, { silent: true });
-}
 
 prog
   .command('test')

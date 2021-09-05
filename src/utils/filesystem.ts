@@ -1,3 +1,5 @@
+import shell from 'shelljs';
+
 import { readFile, rmdir, stat, unlink } from 'fs/promises';
 import { extname, resolve, sep } from 'path';
 import { paths } from '../constants';
@@ -86,4 +88,37 @@ export const getAppPackageJson = async () => {
     console.log(e);
     throw new Error('No package.json found in project directory.');
   }
+};
+
+export const getAuthorName = () => {
+  let author = '';
+
+  author = shell
+    .exec('npm config get init-author-name', { silent: true })
+    .stdout.trim();
+  if (author) return author;
+
+  author = shell
+    .exec('git config --global user.name', { silent: true })
+    .stdout.trim();
+  if (author) {
+    setAuthorName(author);
+    return author;
+  }
+
+  author = shell
+    .exec('npm config get init-author-email', { silent: true })
+    .stdout.trim();
+  if (author) return author;
+
+  author = shell
+    .exec('git config --global user.email', { silent: true })
+    .stdout.trim();
+  if (author) return author;
+
+  return author;
+};
+
+export const setAuthorName = (author: string) => {
+  shell.exec(`npm config set init-author-name "${author}"`, { silent: true });
 };
