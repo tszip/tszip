@@ -1,6 +1,6 @@
+import chalk from 'chalk';
 import escapes from 'ansi-escapes';
-const chalk = require('chalk');
-const ora = require('ora');
+import ora from 'ora';
 
 // This was copied from Razzle. Lots of unused stuff.
 export const info = (msg: string) => {

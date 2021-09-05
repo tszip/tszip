@@ -1,9 +1,9 @@
 import * as Output from './output';
 
+import chalk from 'chalk';
+
 import { getInstallCmd } from '../utils/installDeps';
 import { indentString } from '.';
-
-const chalk = require('chalk');
 
 // This was copied from Razzle. Lots of unused stuff.
 const program = {

@@ -1,3 +1,6 @@
+import glob from 'glob-promise';
+import logError from '../log/error';
+
 import { ModuleFormat, NormalizedOpts, WatchOpts } from '../types';
 import { RollupOptions, rollup } from 'rollup';
 import {
@@ -8,11 +11,8 @@ import {
 } from '../utils/filesystem';
 import { createBuildConfigs } from '../configs/createBuildConfigs';
 import { createProgressEstimator } from '../configs/createProgressEstimator';
-import logError from '../log/error';
 import { resolveApp } from '../utils';
 import { runTsc } from '../plugins/simpleTs';
-
-const glob = require('glob-promise');
 
 async function getInputs(
   entries?: string | string[],

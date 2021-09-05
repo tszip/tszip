@@ -2,9 +2,7 @@ import { CLIEngine } from 'eslint';
 import { PackageJson } from '../types';
 
 import fs from 'fs-extra';
-// import { getReactVersion } from './utils';
-
-const path = require('path');
+import { join } from 'path';
 interface CreateEslintConfigArgs {
   pkg: PackageJson;
   rootDir: string;
@@ -35,7 +33,7 @@ export async function createEslintConfig({
     return CONFIG;
   }
 
-  const file = path.join(rootDir, '.eslintrc');
+  const file = join(rootDir, '.eslintrc');
   try {
     await fs.writeFile(file, JSON.stringify(CONFIG, null, 2), { flag: 'wx' });
   } catch (e: any) {

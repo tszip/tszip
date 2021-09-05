@@ -16,12 +16,12 @@
 
 import * as ts from 'typescript';
 
+import execa from 'execa';
+import glob from 'glob-promise';
+
 import { basename, extname, join } from 'path';
 import { copy } from 'fs-extra';
 import { createProgressEstimator } from '../configs/createProgressEstimator';
-
-const glob = require('glob-promise');
-const execa = require('execa');
 
 export function loadConfig() {
   const fileName = ts.findConfigFile('.', ts.sys.fileExists);

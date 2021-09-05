@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import type execa from 'execa';
+import execa from 'execa';
 import logError from '../log/error';
 import ora from 'ora';
 
@@ -14,8 +14,6 @@ import { clearConsole } from '../utils';
 import { createBuildConfigs } from '../configs/createBuildConfigs';
 import { moveTypes } from '../deprecated';
 import { normalizeOpts } from './build';
-
-const execaProcess = require('execa');
 
 export const watch = async (dirtyOpts: WatchOpts) => {
   const opts = await normalizeOpts(dirtyOpts);
@@ -38,7 +36,7 @@ export const watch = async (dirtyOpts: WatchOpts) => {
     }
 
     const [exec, ...args] = command.split(' ');
-    return execaProcess(exec, args, {
+    return execa(exec, args, {
       stdio: 'inherit',
     });
   }

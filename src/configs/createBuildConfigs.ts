@@ -1,11 +1,11 @@
+import glob from 'glob-promise';
+
 import { NormalizedOpts, TszipOptions } from '../types';
 import { RollupOptions } from 'rollup';
 import { createRollupConfig } from './createRollupConfig';
 import { existsSync } from 'fs';
 import { extname } from 'path';
 import { paths } from '../constants';
-
-const glob = require('glob-promise');
 
 // check for custom tszip.config.js
 let exportTsConfig = {

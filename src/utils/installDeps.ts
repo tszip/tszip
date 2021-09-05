@@ -1,4 +1,4 @@
-const execa = require('execa');
+import execa from 'execa';
 let cmd: InstallCommand;
 
 export type InstallCommand = 'yarn' | 'npm';

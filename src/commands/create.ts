@@ -2,9 +2,11 @@ import Input from 'enquirer/lib/prompts/input.js';
 import Select from 'enquirer/lib/prompts/select.js';
 
 import chalk from 'chalk';
+import execa from 'execa';
 import fs from 'fs-extra';
 import logError from '../log/error';
 import ora from 'ora';
+import semver from 'semver';
 
 import { getAuthorName, setAuthorName } from '../utils/filesystem';
 import { getInstallArgs, getInstallCmd } from '../utils/installDeps';
@@ -18,9 +20,6 @@ import { templates } from '../templates';
 
 import { fileURLToPath } from 'url';
 import { resolve } from 'path';
-
-const semver = require('semver');
-const execaProcess = require('execa');
 
 export const create = async (pkg: string, opts: TszipOptions) => {
   console.log();
@@ -149,11 +148,11 @@ export const create = async (pkg: string, opts: TszipOptions) => {
   const installSpinner = ora(installing(deps.sort())).start();
   try {
     const cmd = await getInstallCmd();
-    await execaProcess(cmd, getInstallArgs(cmd, deps));
+    await execa(cmd, getInstallArgs(cmd, deps));
     installSpinner.succeed('Installed dependencies');
 
     indentLog('Initializing git repo.');
-    await execaProcess('git', ['init']);
+    await execa('git', ['init']);
 
     console.log(await start(pkg));
   } catch (error) {

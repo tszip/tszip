@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import sade from 'sade';
+
 import { build } from './commands/build';
 import { create } from './commands/create';
 import { lint } from './commands/lint';
@@ -6,7 +8,6 @@ import { templates } from './templates';
 import { test } from './commands/test';
 import { watch } from './commands/watch';
 
-const sade = require('sade');
 const prog = sade('tszip');
 
 prog

@@ -1,3 +1,4 @@
+import glob from 'glob-promise';
 import shell from 'shelljs';
 
 import { extname, resolve, sep } from 'path';
@@ -6,8 +7,6 @@ import { PackageJson } from '../types';
 import { createProgressEstimator } from '../configs/createProgressEstimator';
 import { paths } from '../constants';
 import { resolveApp } from '.';
-
-const glob = require('glob-promise');
 
 export const generateImportPattern = (importSource: string) =>
   new RegExp(
