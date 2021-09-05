@@ -1,18 +1,12 @@
 #!/usr/bin/env node
-import { CLIEngine } from 'eslint';
 import { build } from './commands/build';
 import { create } from './commands/create';
-import { createEslintConfig } from './configs/createEslintConfig';
-import { getAppPackageJson } from './utils/filesystem';
-import { paths } from './constants';
+import { lint } from './commands/lint';
 import { templates } from './templates';
 import { test } from './commands/test';
 import { watch } from './commands/watch';
 
 const sade = require('sade');
-const chalk = require('chalk');
-
-const fs = require('fs-extra');
 const prog = sade('tszip');
 
 prog
@@ -107,61 +101,6 @@ prog
   .example('lint --write-file')
   .option('--report-file', 'Write JSON report to file locally')
   .example('lint --report-file eslint-report.json')
-  .action(
-    async (opts: {
-      fix: boolean;
-      'ignore-pattern': string;
-      'write-file': boolean;
-      'report-file': string;
-      'max-warnings': number;
-      _: string[];
-    }) => {
-      if (opts['_'].length === 0 && !opts['write-file']) {
-        const defaultInputs = ['src', 'test'].filter(fs.existsSync);
-        opts['_'] = defaultInputs;
-        console.log(
-          chalk.yellow(
-            `Defaulting to "tszip lint ${defaultInputs.join(' ')}"`,
-            '\nYou can override this in the package.json scripts, like "lint": "tszip lint src otherDir"'
-          )
-        );
-      }
-
-      const appPackageJson = await getAppPackageJson();
-
-      const config = await createEslintConfig({
-        pkg: appPackageJson,
-        rootDir: paths.appRoot,
-        writeFile: opts['write-file'],
-      });
-
-      const cli = new CLIEngine({
-        baseConfig: {
-          ...config,
-          ...appPackageJson.eslint,
-        },
-        extensions: ['.ts', '.tsx', '.js', '.jsx'],
-        fix: opts.fix,
-        ignorePattern: opts['ignore-pattern'],
-      });
-      const report = cli.executeOnFiles(opts['_']);
-      if (opts.fix) {
-        CLIEngine.outputFixes(report);
-      }
-      console.log(cli.getFormatter()(report.results));
-      if (opts['report-file']) {
-        await fs.outputFile(
-          opts['report-file'],
-          cli.getFormatter('json')(report.results)
-        );
-      }
-      if (report.errorCount) {
-        process.exit(1);
-      }
-      if (report.warningCount > opts['max-warnings']) {
-        process.exit(1);
-      }
-    }
-  );
+  .action(lint);
 
 prog.parse(process.argv);
