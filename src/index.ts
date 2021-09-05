@@ -1,22 +1,22 @@
 #!/usr/bin/env node
 import logError from './log/error';
 
-import { RollupWatchOptions, WatcherOptions, watch } from 'rollup';
-import { CLIEngine } from 'eslint';
-import { paths } from './constants';
-import { createBuildConfigs } from './configs/createBuildConfigs';
 import {
   JestConfigOptions,
   createJestConfig,
 } from './configs/createJestConfig';
-import { createEslintConfig } from './configs/createEslintConfig';
-import { WatchOpts } from './types';
-import { templates } from './templates';
-import { clearConsole, resolveApp } from './utils';
-import { moveTypes } from './deprecated';
-import { cleanDistFolder, getAppPackageJson } from './utils/filesystem';
+import { RollupWatchOptions, WatcherOptions, watch } from 'rollup';
 import { build, normalizeOpts } from './commands/build';
+import { cleanDistFolder, getAppPackageJson } from './utils/filesystem';
+import { clearConsole, resolveApp } from './utils';
+import { CLIEngine } from 'eslint';
+import { WatchOpts } from './types';
 import { create } from './commands/create';
+import { createBuildConfigs } from './configs/createBuildConfigs';
+import { createEslintConfig } from './configs/createEslintConfig';
+import { moveTypes } from './deprecated';
+import { paths } from './constants';
+import { templates } from './templates';
 
 import type execa from 'execa';
 import jest from 'jest';

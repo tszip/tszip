@@ -1,10 +1,10 @@
 import shell from 'shelljs';
 
-import { readFile, rmdir, stat, unlink } from 'fs/promises';
 import { extname, resolve, sep } from 'path';
-import { paths } from '../constants';
-import { createProgressEstimator } from '../configs/createProgressEstimator';
+import { readFile, rmdir, stat, unlink } from 'fs/promises';
 import { PackageJson } from '../types';
+import { createProgressEstimator } from '../configs/createProgressEstimator';
+import { paths } from '../constants';
 import { resolveApp } from '.';
 
 const glob = require('glob-promise');
