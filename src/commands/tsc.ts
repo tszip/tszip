@@ -21,7 +21,7 @@ import glob from 'glob-promise';
 
 import { basename, extname, join } from 'path';
 import { copy } from 'fs-extra';
-import { createProgressEstimator } from '../configs/createProgressEstimator';
+import { createProgressEstimator } from '../config/createProgressEstimator';
 
 export function loadConfig() {
   const fileName = ts.findConfigFile('.', ts.sys.fileExists);

@@ -3,7 +3,7 @@ import jest from 'jest';
 import {
   JestConfigOptions,
   createJestConfig,
-} from '../configs/createJestConfig';
+} from '../config/createJestConfig';
 import { dirname, resolve } from 'path';
 import { getAppPackageJson } from '../lib/filesystem';
 import { pathExists } from 'fs-extra';

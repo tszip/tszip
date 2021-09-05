@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 
 import { CLIEngine } from 'eslint';
-import { createEslintConfig } from '../configs/createEslintConfig';
+import { createEslintConfig } from '../config/createEslintConfig';
 import { existsSync } from 'fs';
 import { getAppPackageJson } from '../lib/filesystem';
 import { paths } from '../lib/constants';
