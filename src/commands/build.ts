@@ -5,7 +5,7 @@ import { TszipOptions } from '../types';
 import { cleanDistFolder } from '../lib/filesystem';
 import { createBuildConfigs } from '../configs/createBuildConfigs';
 import { createProgressEstimator } from '../configs/createProgressEstimator';
-import { runTsc } from '../plugins/simpleTs';
+import { runTsc } from '../plugins/tsc';
 
 export const build = async (opts: TszipOptions) => {
   const progressIndicator = await createProgressEstimator();
