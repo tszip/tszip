@@ -37,31 +37,29 @@ export const createBuildConfigs = async ({
       !file.endsWith('.d.ts') && filePattern.test(extname(file))
   );
 
-  const configs = await Promise.all(
-    filesToOptimize.map(async (input: string) => {
-      const options = {
-        input,
-        watch,
-        minify,
-      };
+  const configs = filesToOptimize.map((input: string) => {
+    const options = {
+      input,
+      watch,
+      minify,
+    };
 
-      const config = createConfig(
-        watch
-          ? {
-              input,
-              minify: false,
-              action: 'watch',
-            }
-          : {
-              input,
-              minify,
-              action: 'build',
-            }
-      );
+    const config = createConfig(
+      watch
+        ? {
+            input,
+            minify: false,
+            action: 'watch',
+          }
+        : {
+            input,
+            minify,
+            action: 'build',
+          }
+    );
 
-      return exportTsConfig.rollup(config, options);
-    })
-  );
+    return exportTsConfig.rollup(config, options);
+  });
 
   return configs;
 };
