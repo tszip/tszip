@@ -1,5 +1,5 @@
-import shebang from 'rollup-plugin-preserve-shebang';
 import { resolveImports } from '@tszip/resolve-imports';
+import shebang from 'rollup-plugin-preserve-shebang';
 
 const glob = require('glob-promise');
 

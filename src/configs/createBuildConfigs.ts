@@ -1,9 +1,9 @@
-import { RollupOptions } from 'rollup';
-import { paths } from '../constants';
 import { NormalizedOpts, TszipOptions } from '../types';
+import { RollupOptions } from 'rollup';
 import { createRollupConfig } from './createRollupConfig';
 import { existsSync } from 'fs';
 import { extname } from 'path';
+import { paths } from '../constants';
 
 const glob = require('glob-promise');
 

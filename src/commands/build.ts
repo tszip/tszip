@@ -1,16 +1,16 @@
-import { RollupOptions, rollup } from 'rollup';
-import { createBuildConfigs } from '../configs/createBuildConfigs';
-import { createProgressEstimator } from '../configs/createProgressEstimator';
-import logError from '../log/error';
-import { runTsc } from '../plugins/simpleTs';
 import { ModuleFormat, NormalizedOpts, WatchOpts } from '../types';
-import { resolveApp } from '../utils';
+import { RollupOptions, rollup } from 'rollup';
 import {
   cleanDistFolder,
   getAppPackageJson,
   isDir,
   jsOrTs,
 } from '../utils/filesystem';
+import { createBuildConfigs } from '../configs/createBuildConfigs';
+import { createProgressEstimator } from '../configs/createProgressEstimator';
+import logError from '../log/error';
+import { resolveApp } from '../utils';
+import { runTsc } from '../plugins/simpleTs';
 
 const glob = require('glob-promise');
 

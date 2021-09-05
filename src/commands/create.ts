@@ -1,20 +1,23 @@
 import Input from 'enquirer/lib/prompts/input.js';
 import Select from 'enquirer/lib/prompts/select.js';
-import chalk from 'chalk';
-import ora from 'ora';
-import fs from 'fs-extra';
 
-import { getInstallArgs, getInstallCmd } from '../utils/installDeps';
-import { incorrectNodeVersion, installing, start } from '../log/messages';
-import { fileURLToPath } from 'url';
-import { indentLog } from '../log';
-import { getNodeEngineRequirement, safePackageName } from '../utils';
-import { TszipOptions } from '../types';
-import { resolve } from 'path';
-import { templates } from '../templates';
-import { getAuthorName, setAuthorName } from '../utils/filesystem';
-import { composePackageJson } from '../templates/utils';
+import chalk from 'chalk';
+import fs from 'fs-extra';
 import logError from '../log/error';
+import ora from 'ora';
+
+import { getAuthorName, setAuthorName } from '../utils/filesystem';
+import { getInstallArgs, getInstallCmd } from '../utils/installDeps';
+import { getNodeEngineRequirement, safePackageName } from '../utils';
+import { incorrectNodeVersion, installing, start } from '../log/messages';
+
+import { TszipOptions } from '../types';
+import { composePackageJson } from '../templates/utils';
+import { indentLog } from '../log';
+import { templates } from '../templates';
+
+import { fileURLToPath } from 'url';
+import { resolve } from 'path';
 
 const semver = require('semver');
 const execaProcess = require('execa');
