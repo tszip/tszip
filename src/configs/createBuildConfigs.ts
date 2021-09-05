@@ -5,7 +5,7 @@ import { TszipOptions } from '../types';
 import { createRollupConfig } from './createRollupConfig';
 import { existsSync } from 'fs';
 import { extname } from 'path';
-import { paths } from '../constants';
+import { paths } from '../lib/constants';
 
 // check for custom tszip.config.js
 let exportTsConfig = {

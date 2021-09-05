@@ -1,5 +1,5 @@
 import * as fs from 'fs-extra';
-import { paths } from '../constants';
+import { paths } from '../lib/constants';
 
 import progressEstimator from 'progress-estimator';
 

@@ -7,7 +7,7 @@ import {
 import { dirname, resolve } from 'path';
 import { getAppPackageJson } from '../lib/filesystem';
 import { pathExists } from 'fs-extra';
-import { paths } from '../constants';
+import { paths } from '../lib/constants';
 import { resolveApp } from '../lib/utils';
 
 export const test = async (opts: { config?: string }) => {

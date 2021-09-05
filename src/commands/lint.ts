@@ -4,7 +4,7 @@ import { CLIEngine } from 'eslint';
 import { createEslintConfig } from '../configs/createEslintConfig';
 import { existsSync } from 'fs';
 import { getAppPackageJson } from '../lib/filesystem';
-import { paths } from '../constants';
+import { paths } from '../lib/constants';
 import { writeFile } from 'fs/promises';
 
 export const lint = async (opts: {

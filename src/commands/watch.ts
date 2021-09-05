@@ -7,7 +7,7 @@ import { RollupWatchOptions, watch as rollupWatch } from 'rollup';
 import { WatchOpts } from '../types';
 import { clearConsole } from '../lib/utils';
 import { createBuildConfigs } from '../configs/createBuildConfigs';
-import { moveTypes } from '../deprecated';
+import { moveTypes } from '../lib/deprecated';
 
 export const watch = async (opts: WatchOpts) => {
   const buildConfigs: RollupWatchOptions[] = await createBuildConfigs({
