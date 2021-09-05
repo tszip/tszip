@@ -1,32 +1,24 @@
 #!/usr/bin/env node
-import logError from './log/error';
-
 import {
   JestConfigOptions,
   createJestConfig,
 } from './configs/createJestConfig';
-import { RollupWatchOptions, WatcherOptions, watch } from 'rollup';
-import { build, normalizeOpts } from './commands/build';
-import { cleanDistFolder, getAppPackageJson } from './utils/filesystem';
-import { clearConsole, resolveApp } from './utils';
 import { CLIEngine } from 'eslint';
-import { WatchOpts } from './types';
+import { build } from './commands/build';
 import { create } from './commands/create';
-import { createBuildConfigs } from './configs/createBuildConfigs';
 import { createEslintConfig } from './configs/createEslintConfig';
-import { moveTypes } from './deprecated';
+import { getAppPackageJson } from './utils/filesystem';
 import { paths } from './constants';
+import { resolveApp } from './utils';
 import { templates } from './templates';
 
-import type execa from 'execa';
 import jest from 'jest';
+import { watch } from './commands/watch';
 
 const sade = require('sade');
 const chalk = require('chalk');
 
 const path = require('path');
-const execaProcess = require('execa');
-const ora = require('ora');
 const fs = require('fs-extra');
 const prog = sade('tszip');
 
@@ -73,83 +65,7 @@ prog
   .example('watch --transpileOnly')
   .option('--extractErrors', 'Extract invariant errors to ./errors/codes.json.')
   .example('watch --extractErrors')
-  .action(async (dirtyOpts: WatchOpts) => {
-    const opts = await normalizeOpts(dirtyOpts);
-    const buildConfigs = await createBuildConfigs(opts);
-    if (!opts.noClean) {
-      await cleanDistFolder();
-    }
-
-    // await cleanOldJS();
-
-    type Killer = execa.ExecaChildProcess | null;
-
-    let firstTime = true;
-    let successKiller: Killer = null;
-    let failureKiller: Killer = null;
-
-    function run(command?: string) {
-      if (!command) {
-        return null;
-      }
-
-      const [exec, ...args] = command.split(' ');
-      return execaProcess(exec, args, {
-        stdio: 'inherit',
-      });
-    }
-
-    function killHooks() {
-      return Promise.all([
-        successKiller ? successKiller.kill('SIGTERM') : null,
-        failureKiller ? failureKiller.kill('SIGTERM') : null,
-      ]);
-    }
-
-    const spinner = ora().start();
-    watch(
-      (buildConfigs as RollupWatchOptions[]).map((inputOptions) => ({
-        watch: {
-          silent: true,
-          include: ['src/**'],
-          exclude: ['node_modules/**'],
-        } as WatcherOptions,
-        ...inputOptions,
-      }))
-    ).on('event', async (event) => {
-      // clear previous onSuccess/onFailure hook processes so they don't pile up
-      await killHooks();
-
-      if (event.code === 'START') {
-        if (!opts.verbose) {
-          clearConsole();
-        }
-        spinner.start(chalk.bold.cyan('Compiling modules...'));
-      }
-      if (event.code === 'ERROR') {
-        spinner.fail(chalk.bold.red('Failed to compile'));
-        logError(event.error);
-        failureKiller = run(opts.onFailure);
-      }
-      if (event.code === 'END') {
-        spinner.succeed(chalk.bold.green('Compiled successfully'));
-        console.log(`
-  ${chalk.dim('Watching for changes')}
-`);
-
-        try {
-          await moveTypes();
-
-          if (firstTime && opts.onFirstSuccess) {
-            firstTime = false;
-            run(opts.onFirstSuccess);
-          } else {
-            successKiller = run(opts.onSuccess);
-          }
-        } catch (_error) {}
-      }
-    });
-  });
+  .action(watch);
 
 prog
   .command('build')
