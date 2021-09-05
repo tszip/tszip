@@ -14,15 +14,14 @@
  * @see https://twitter.com/jaffathecake/status/1145979217852678144
  */
 
-// import { spawn } from 'child_process';
-import { copy } from 'fs-extra';
-import { basename, extname, join } from 'path';
 import * as ts from 'typescript';
+
+import { basename, extname, join } from 'path';
+import { copy } from 'fs-extra';
 import { createProgressEstimator } from '../configs/createProgressEstimator';
 
 const glob = require('glob-promise');
 const execa = require('execa');
-// const extRe = /\.tsx?$/;
 
 export function loadConfig() {
   const fileName = ts.findConfigFile('.', ts.sys.fileExists);
