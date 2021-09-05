@@ -8,7 +8,7 @@ export const createRollupConfig = async (
   const minify = !opts.transpileOnly && !opts.noMinify;
   const { input } = opts;
   const config =
-    opts.env === 'development'
+    opts.env === 'development' || opts.noMinify
       ? createConfig({
           input,
           env: 'dev',
@@ -19,5 +19,13 @@ export const createRollupConfig = async (
           env: 'production',
         });
 
-  return config;
+  return {
+    ...config,
+    watch: !opts.watch
+      ? false
+      : {
+          include: ['dist/**'],
+          exclude: ['node_modules/**'],
+        },
+  };
 };

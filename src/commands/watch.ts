@@ -3,26 +3,19 @@ import execa from 'execa';
 import logError from '../log/error';
 import ora from 'ora';
 
-import {
-  RollupWatchOptions,
-  WatcherOptions,
-  watch as rollupWatch,
-} from 'rollup';
+import { RollupWatchOptions, watch as rollupWatch } from 'rollup';
 import { WatchOpts } from '../types';
-import { cleanDistFolder } from '../utils/filesystem';
+// import { cleanDistFolder } from '../utils/filesystem';
 import { clearConsole } from '../utils';
 import { createBuildConfigs } from '../configs/createBuildConfigs';
 import { moveTypes } from '../deprecated';
-import { normalizeOpts } from './build';
+// import { runTsc } from '../plugins/simpleTs';
 
-export const watch = async (dirtyOpts: WatchOpts) => {
-  const opts = await normalizeOpts(dirtyOpts);
-  const buildConfigs = await createBuildConfigs(opts);
-  if (!opts.noClean) {
-    await cleanDistFolder();
-  }
-
-  // await cleanOldJS();
+export const watch = async (opts: WatchOpts) => {
+  const buildConfigs: RollupWatchOptions[] = await createBuildConfigs({
+    watch: true,
+    env: 'development',
+  });
 
   type Killer = execa.ExecaChildProcess | null;
 
@@ -49,16 +42,7 @@ export const watch = async (dirtyOpts: WatchOpts) => {
   }
 
   const spinner = ora().start();
-  rollupWatch(
-    (buildConfigs as RollupWatchOptions[]).map((inputOptions) => ({
-      watch: {
-        silent: true,
-        include: ['src/**'],
-        exclude: ['node_modules/**'],
-      } as WatcherOptions,
-      ...inputOptions,
-    }))
-  ).on('event', async (event) => {
+  rollupWatch(buildConfigs).on('event', async (event) => {
     // clear previous onSuccess/onFailure hook processes so they don't pile up
     await killHooks();
 
@@ -75,9 +59,7 @@ export const watch = async (dirtyOpts: WatchOpts) => {
     }
     if (event.code === 'END') {
       spinner.succeed(chalk.bold.green('Compiled successfully'));
-      console.log(`
-  ${chalk.dim('Watching for changes')}
-`);
+      console.log(`${chalk.dim('Watching for changes')}`);
 
       try {
         await moveTypes();

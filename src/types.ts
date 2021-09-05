@@ -40,6 +40,7 @@ export interface TszipOptions extends SharedOpts {
   output: string;
   // Name of package
   name?: string;
+  watch: boolean;
   // Environment
   env?: 'development' | 'production';
   // Module format

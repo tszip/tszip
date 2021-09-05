@@ -136,7 +136,9 @@ export async function runTsc({
   );
 
   if (watch) {
-    await execa('tsc', [...parsedArgs, '--watch', '--preserveWatchOutput']);
+    const watchArgs = [...parsedArgs, '--watch', '--preserveWatchOutput'];
+    console.log('Calling tsc:', watchArgs);
+    await execa('tsc', watchArgs);
   }
 }
 
