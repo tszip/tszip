@@ -1,19 +1,13 @@
 import TscWatchClient from 'tsc-watch/client';
-// import { runRollup } from './rollup';
-// import { runTsc } from './tsc';
+import { runRollup } from './rollup';
 
 export const watch = () => {
   const watcher = new TscWatchClient();
 
-  watcher.on('first_success', async () => {
-    console.log('First success!');
-  });
-
   watcher.on('success', async () => {
-    console.log('Running...', Date.now());
-    // await runTsc();
-    // await runRollup('dev', false);
-    console.log('Success!', Date.now());
+    console.log('Finalizing imports...');
+    await runRollup('dev', false);
+    console.log('Success!');
   });
 
   watcher.on('compile_errors', async () => {
