@@ -19,7 +19,7 @@ export const build = async (opts: TszipOptions) => {
   const minify = !opts.transpileOnly && !opts.noMinify;
 
   const buildConfigs = await createBuildConfigs({
-    watch: false,
+    action: 'build',
     minify,
   });
 

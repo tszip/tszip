@@ -11,7 +11,7 @@ import { moveTypes } from '../lib/deprecated';
 
 export const watch = async (opts: WatchOpts) => {
   const buildConfigs: RollupWatchOptions[] = await createBuildConfigs({
-    watch: true,
+    action: 'dev',
   });
 
   type Killer = execa.ExecaChildProcess | null;
