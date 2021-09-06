@@ -7,6 +7,7 @@
   "license": "MIT",
   "homepage": "https://github.com/tszip/tszip",
   "exports": {
+    "./package.json": "./package.json",
     ".": "./dist/index.js",
     "./*": "./dist/*/index.js"
   },

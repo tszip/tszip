@@ -4,32 +4,35 @@ const basicTemplate: Template = {
   name: 'basic',
   dependencies: ['@tszip/tszip', 'typescript', 'tslib', 'husky'],
 
-  // @todo Update for ESM
   packageJson: {
+    /**
+     * Force ESM.
+     */
     type: 'module',
     version: '0.0.1',
     license: 'MIT',
+    /**
+     * Only support Node 14+.
+     */
     engines: {
       node: '>=14',
     },
     scripts: {
       start: 'tszip watch',
-      build: 'tszip build',
+      dev: 'tszip dev',
       test: 'tszip test',
       posttest: 'node test/import.js',
       lint: 'tszip lint',
       prepare: 'tszip build',
-      // size: 'size-limit',
-      // analyze: 'size-limit --why',
     },
     module: './dist/index.js',
     exports: {
       './package.json': './package.json',
       '.': './dist/index.js',
-      './*': './dist/*.js',
+      './*': './dist/*/index.js',
     },
-    typings: `dist/index.d.ts`,
-    files: ['dist', 'src'],
+    typings: 'dist/index.d.ts',
+    files: ['dist'],
     peerDependencies: {},
     // @todo Re-add Husky.
     // husky: {
