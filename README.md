@@ -1,5 +1,4 @@
-# tszip
-
+# 🛠 tszip [WIP]
 <!-- ![tsdx](https://user-images.githubusercontent.com/4060187/56918426-fc747600-6a8b-11e9-806d-2da0b49e89e4.png) -->
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All
@@ -9,26 +8,13 @@ Contributors](https://img.shields.io/badge/all_contributors-101-orange.svg?style
 *TypeScript to ES Module compiler.*
 
 Use tszip to compile TypeScript libraries, including React components, to 100%
-tree-shakeable ESM (**not bundles**).
+tree-shakeable ES module packages (*not* bundles). Please see the **Usage**
+section for an overview of how this works.
 
 The [legacy fork](https://npmjs.com/package/@tszip/legacy), which aimed to
 guarantee backwards compatibility if that is your goal, is now deprecated
 (before ever having been released). If you need CJS interop, which you never
 would at the upstream library level, please use that package.
-
-<!-- *Backwards-compatible compiler for TypeScript libraries.*
-
-Use tszip to compile TypeScript libraries, including React components, to 100%
-backwards-compatible output. An iteration on
-[TSDX](https://github.com/formium/tsdx), tszip output is meant to be lightweight
-and, more importantly, *always work* when imported on Node 14+.
-
-This is accomplished largely by: 
-  1. emitting `.mjs` and `.cjs` entry-points
-  2. emitting a modern ES featureset by default
-  3. resolving relative imports in output
-
-Your exports should *just work* out of the box in both ESM and CJS contexts. -->
 
 ## Table of Contents
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -57,41 +43,113 @@ Your exports should *just work* out of the box in both ESM and CJS contexts. -->
 - [Contributing](#contributing)
 - [License](#license)
 
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-## Features
-
-tszip comes with the "battery-pack included" and is part of a complete
-TypeScript breakfast:
-
-- Bundles your code with [Rollup](https://github.com/rollup/rollup) and outputs
-  multiple module formats (CJS & ESM by default, and also UMD if you want) plus
-  development and production builds
-- Comes with treeshaking, ready-to-rock lodash optimizations, and
-  minification/compression
-- Live reload / watch-mode
-- Works with React
-- Human readable error messages (and in VSCode-friendly format)
-- Bundle size snapshots
-- Opt-in to extract `invariant` error codes
-- Jest test runner setup with sensible defaults via `tszip test`
-- ESLint with Prettier setup with sensible defaults via `tszip lint`
-- Zero-config, single dependency
-- Escape hatches for customization via `.babelrc.js`, `jest.config.mjs`,
-  `.eslintrc`, and `tszip.config.mjs`
-
 ## Quick Start
 
 ```bash
-# install tszip and run `tszip create ...`
-npx tszip create --template react mylib
-cd mylib && yarn start
+# install tszip globally
+yarn global add tszip
+
+# create a package
+tszip create $PACKAGE_NAME
+
+# enter package
+cd $PACKAGE_NAME
+
+# start watching
+tszip dev
+
+# when finished developing, build final bundle
+tszip build
 ```
 
-That's it. You don't need to worry about setting up TypeScript or Rollup or Jest
-or other plumbing. Just start editing `src/index.ts` and go!
+## Usage
 
-Below is a list of commands you will probably find useful:
+This tool is used to compile TS and JS libraries, i.e. it bundles modules and
+exposes them for import by others downstream.
+
+### ESNext, ESM input
+
+tszip projects are able to use the full range of features offered by ESNext,
+including top-level `await` and `import`¹. For backwards compatibility,
+`require` is shimmed use `createRequire(import.meta.url)`².
+
+TypeScript's `esModuleInterop` logic cannot map named imports for some CJS
+modules (e.g., `chalk`), in which case you may rely on synthetic default
+imports:
+
+```ts
+// fails at runtime
+import { green } from 'chalk'
+console.log(green('hello world'))
+
+// use synthetic default for CJS modules
+import chalk from 'chalk'
+console.log(chalk.green('hello world'))
+```
+
+### Internal vs External entry points
+
+**An import from `your-package/path/to/submodule` only works if
+`src/path/to/submodule` is a folder with an `index` file.**
+
+tszip projects leverage package.json `exports` logic to automatically resolve
+subdir imports for your package, which mimics something like an optimized
+version of legacy `resolve()` logic.
+
+Consider the following typical project structure:
+
+```none
+src/
+├── a
+│   ├── index.ts
+│   └── utils.ts
+├── b
+│   ├── index.ts
+│   └── utils.ts
+├── c
+│   ├── index.ts
+│   └── utils.ts
+├── constants.ts
+├── index.ts
+└── utils.ts
+```
+
+tszip will build each of these files to output in `dist/`, like
+`dist/a/index.js`, `dist/a/utils.js` etc.  The exports configuration provides
+for the following behavior:
+
+  - `index` files (`index`, `a/index`, `path/to/index`, etc.) will be resolved
+    via native ESM import logic *without* a file extension.
+  - non-`index` files (`a/utils`, `b/utils`, etc.) cannot be imported, though
+    can still be exposed by re-exporting at an index.
+
+The main result is that `index` files are said to be **external** in that you
+can import them from another ES module, and non-`index` files are **internal**
+in that they are emitted as output, but cannot be imported without re-exporting
+at an index.
+
+See the following examples, where `your-package` is the name of the package in package.json:
+
+```ts
+/** This is a downstream module importing your package. */
+
+// your-package is always exported as the root index
+import { whatever } from 'your-package'
+
+// your-package/a is an index file, and is exported
+import { whatever } from 'your-package/a'
+
+// error! this entry point is not an index, and is not exported
+import { whatever } from 'your-package/a/utils'
+```
+
+This logic is an efficient compromise given the way Node.js resolves the
+`exports` field (see [this issue](https://github.com/nodejs/node/issues/39994)).
+See the [Node.js
+docs](https://nodejs.org/api/packages.html#packages_subpath_patterns) for more
+info about conditional exports.
+
+## Commands
 
 ### `yarn start`
 
@@ -348,6 +406,21 @@ Examples
 ## Contributing
 
 Please see the [Contributing Guidelines](./CONTRIBUTING.md).
+
+## Footnotes
+
+¹ Because of multiple competing standards (CJS, ESM, etc.), eventually, consumers
+of packages may need to transpile code to older featuresets (even pre-ES2015) in
+order for them to work in certain contexts.
+
+However, there is no need for this to be done upstream, nor to develop modern
+packages on anything other than ESNext to take full advantage of new
+improvements in the language and ES module resolution.
+
+² This works identically to legacy behavior only because each entry point is
+mapped to a transpiled version of itself. Default Rollup behavior of compiling
+all code to a single output bundle would break this assumption and make shimming
+`require` impossible.
 
 ## License
 
