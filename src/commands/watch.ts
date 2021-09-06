@@ -1,73 +1,36 @@
+import TscWatchClient from 'tsc-watch/client';
 import chalk from 'chalk';
-import execa from 'execa';
-import logError from '../log/error';
-import ora from 'ora';
 
-import { RollupWatchOptions, watch as rollupWatch } from 'rollup';
-import { WatchOpts } from '../types';
-import { clearConsole } from '../lib/utils';
-import { createBuildConfigs } from '../config/createRollupConfigs';
-import { moveTypes } from '../lib/deprecated';
+import { createProgressEstimator } from '../config/createProgressEstimator';
+import { runRollup } from './rollup';
 
-export const watch = async (opts: WatchOpts) => {
-  const buildConfigs: RollupWatchOptions[] = await createBuildConfigs({
-    action: 'dev',
+const CONSIDER_LEAVING_A_COMMENT = `
+If you want to help make tszip faster, consider leaving a comment in support
+of TypeScript natively resolving file extensions for ESM output:
+
+${chalk.blue('https://github.com/microsoft/TypeScript/issues/42151')}
+`;
+
+export const watch = () => {
+  const watcher = new TscWatchClient();
+
+  watcher.on('success', async () => {
+    console.log();
+    const progressEstimator = await createProgressEstimator();
+
+    await progressEstimator(
+      runRollup('dev', false),
+      'Resolving imports in compiled TypeScript...'
+    );
+
+    console.log(chalk.dim(CONSIDER_LEAVING_A_COMMENT));
+    console.log(chalk.bold(chalk.green('Compiled successfully.')));
   });
 
-  type Killer = execa.ExecaChildProcess | null;
-
-  let firstTime = true;
-  let successKiller: Killer = null;
-  let failureKiller: Killer = null;
-
-  function run(command?: string) {
-    if (!command) {
-      return null;
-    }
-
-    const [exec, ...args] = command.split(' ');
-    return execa(exec, args, {
-      stdio: 'inherit',
-    });
-  }
-
-  function killHooks() {
-    return Promise.all([
-      successKiller ? successKiller.kill('SIGTERM') : null,
-      failureKiller ? failureKiller.kill('SIGTERM') : null,
-    ]);
-  }
-
-  const spinner = ora().start();
-  rollupWatch(buildConfigs).on('event', async (event) => {
-    // clear previous onSuccess/onFailure hook processes so they don't pile up
-    await killHooks();
-
-    if (event.code === 'START') {
-      if (!opts.verbose) {
-        clearConsole();
-      }
-      spinner.start(chalk.bold.cyan('Compiling modules...'));
-    }
-    if (event.code === 'ERROR') {
-      spinner.fail(chalk.bold.red('Failed to compile'));
-      logError(event.error);
-      failureKiller = run(opts.onFailure);
-    }
-    if (event.code === 'END') {
-      spinner.succeed(chalk.bold.green('Compiled successfully'));
-      console.log(`${chalk.dim('Watching for changes')}`);
-
-      try {
-        await moveTypes();
-
-        if (firstTime && opts.onFirstSuccess) {
-          firstTime = false;
-          run(opts.onFirstSuccess);
-        } else {
-          successKiller = run(opts.onSuccess);
-        }
-      } catch (_error) {}
-    }
+  watcher.on('compile_errors', async () => {
+    console.log();
+    console.log(chalk.bold(chalk.red('Failed to compile.')));
   });
+
+  watcher.start();
 };

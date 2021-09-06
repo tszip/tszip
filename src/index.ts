@@ -6,7 +6,7 @@ import { create } from './commands/create';
 import { lint } from './commands/lint';
 import { templates } from './templates';
 import { test } from './commands/test';
-import { watch } from './commands/watchTest';
+import { watch } from './commands/watch';
 
 const prog = sade('tszip');
 
