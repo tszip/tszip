@@ -20,8 +20,11 @@ would at the upstream library level, please use that package.
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [Features](#features)
 - [Quick Start](#quick-start)
+- [Usage](#usage)
+  - [ESNext, ESM input](#esnext-esm-input)
+  - [Internal vs External entry points](#internal-vs-external-entry-points)
+- [Commands](#commands)
   - [`yarn start`](#yarn-start)
   - [`yarn build`](#yarn-build)
   - [`yarn test`](#yarn-test)
@@ -41,7 +44,11 @@ would at the upstream library level, please use that package.
   - [`tszip test`](#tszip-test)
   - [`tszip lint`](#tszip-lint)
 - [Contributing](#contributing)
+- [Footnotes](#footnotes)
 - [License](#license)
+- [Attribution](#attribution)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Quick Start
 
