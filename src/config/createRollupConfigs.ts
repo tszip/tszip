@@ -1,4 +1,4 @@
-import glob from 'glob-promise';
+import glob from 'fast-glob';
 
 import { createConfig } from '@tszip/rollup-config';
 import { extname } from 'path';
@@ -12,7 +12,7 @@ export const createBuildConfigs = async ({
 }) => {
   const filePattern = /^\.jsx?$/;
   const filesToCheck = './dist/**/*';
-  const files = await glob(filesToCheck, { nodir: true });
+  const files = await glob(filesToCheck);
   const filesToOptimize = files.filter(
     (file: string) =>
       /**

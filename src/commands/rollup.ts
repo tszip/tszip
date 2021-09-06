@@ -1,7 +1,35 @@
-// import { RollupOptions } from 'rollup';
-// import { TszipOptions } from '../types';
-// import { existsSync } from 'fs';
-// import { paths } from '../lib/constants';
+import glob from 'fast-glob';
+
+import { createConfig } from '@tszip/rollup-config';
+import { rollup } from 'rollup';
+
+export const runRollup = async (action: 'build' | 'dev', minify = false) => {
+  const filesToCheck = './dist/**/*.js';
+  const files = await glob(filesToCheck);
+
+  const configs = files.map((input: string) => {
+    return createConfig({
+      action,
+      input,
+      minify,
+    });
+  });
+
+  await Promise.all(
+    configs.map(async (config) => {
+      const bundle = await rollup(config);
+      if (config.output) {
+        if (Array.isArray(config.output)) {
+          await Promise.all(
+            config.output.map(async (output) => await bundle.write(output))
+          );
+        } else {
+          await bundle.write(config.output);
+        }
+      }
+    })
+  );
+};
 
 /** @todo implement */
 
@@ -20,7 +48,3 @@
 //   action: 'build' | 'dev';
 //   minify: string;
 // }
-
-// export const runRollup = (config: RollupOptions, options: RollupPassArgs) => {
-//   return exportTsConfig.rollup(config, options);
-// };

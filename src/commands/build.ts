@@ -1,10 +1,9 @@
 import logError from '../log/error';
 
-import { RollupOptions, rollup } from 'rollup';
 import { TszipOptions } from '../types';
 import { cleanDistFolder } from '../lib/filesystem';
-import { createBuildConfigs } from '../config/createRollupConfigs';
 import { createProgressEstimator } from '../config/createProgressEstimator';
+import { runRollup } from './rollup';
 import { runTsc } from './tsc';
 
 export const build = async (opts: TszipOptions) => {
@@ -18,30 +17,9 @@ export const build = async (opts: TszipOptions) => {
 
   const minify = !opts.transpileOnly && !opts.noMinify;
 
-  const buildConfigs = await createBuildConfigs({
-    action: 'build',
-    minify,
-  });
-
   try {
     await progressIndicator(
-      Promise.all(
-        buildConfigs.map(async (buildConfig) => {
-          if (buildConfig.output) {
-            const outputs: RollupOptions[] = Array.isArray(buildConfig.output)
-              ? buildConfig.output
-              : [buildConfig.output];
-
-            return await Promise.all(
-              outputs.map(async (output) => {
-                const bundle = await rollup(buildConfig);
-                return await bundle.write(output);
-              })
-            );
-          }
-          return null;
-        })
-      ),
+      runRollup('build', minify),
       'JS ➡ JS: Resolving imports and minifying.'
     );
     /**
