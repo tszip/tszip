@@ -1,13 +1,15 @@
 import TscWatchClient from 'tsc-watch/client';
+import { runRollup } from './rollup';
 const watcher = new TscWatchClient();
 
-export const watch = async () => {
+export const watch = () => {
   watcher.on('first_success', () => {
     console.log('First success!');
   });
 
-  watcher.on('success', () => {
+  watcher.on('success', async () => {
     console.log('Success!');
+    await runRollup('dev', false);
   });
 
   watcher.on('compile_errors', () => {
@@ -16,5 +18,3 @@ export const watch = async () => {
 
   watcher.start();
 };
-
-watch();
