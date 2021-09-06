@@ -18,8 +18,8 @@ const basicTemplate: Template = {
       node: '>=14',
     },
     scripts: {
-      start: 'tszip watch',
       dev: 'tszip dev',
+      build: 'tszip build',
       test: 'tszip test',
       posttest: 'node test/import.js',
       lint: 'tszip lint',
