@@ -26,7 +26,7 @@ export const createBuildConfigs = async ({
   minify?: boolean;
 }) => {
   const filePattern = watch ? /^\.(css|[jt]sx?)$/ : /^\.(css|jsx?)$/;
-  const filesToCheck = watch ? './src/index.ts' : './dist/**/*';
+  const filesToCheck = watch ? './src/**/*' : './dist/**/*';
   const files: string[] = await glob(filesToCheck, { nodir: true });
   const filesToOptimize = files.filter(
     (file: string) =>

@@ -106,7 +106,6 @@ export async function runTsc({
   }
 
   const progressIndicator = await createProgressEstimator();
-
   await progressIndicator(
     (async () => {
       try {
