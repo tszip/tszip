@@ -6,7 +6,7 @@ import { rollup } from 'rollup';
 export const runRollup = async (action: 'build' | 'dev', minify = false) => {
   const filesToCheck = './dist/**/*.js';
   const files = await glob(filesToCheck);
-  console.log({ files }, Date.now());
+  // console.log({ files }, Date.now());
 
   const configs = files.map((input: string) => {
     return createConfig({
