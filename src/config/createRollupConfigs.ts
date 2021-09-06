@@ -1,22 +1,7 @@
 import glob from 'glob-promise';
 
-import { createBuildConfig, createDevConfig } from '@tszip/rollup-config';
-import { RollupOptions } from 'rollup';
-import { TszipOptions } from '../types';
-import { existsSync } from 'fs';
+import { createConfig } from '@tszip/rollup-config';
 import { extname } from 'path';
-import { paths } from '../lib/constants';
-
-// check for custom tszip.config.js
-let exportTsConfig = {
-  rollup(config: RollupOptions, _options: TszipOptions): RollupOptions {
-    return config;
-  },
-};
-
-if (existsSync(paths.appConfig)) {
-  exportTsConfig = require(paths.appConfig);
-}
 
 export const createBuildConfigs = async ({
   action,
@@ -38,20 +23,11 @@ export const createBuildConfigs = async ({
   );
 
   const configs = filesToOptimize.map((input: string) => {
-    const options = {
+    return createConfig({
+      action,
       input,
       minify,
-    };
-
-    const config =
-      action === 'build'
-        ? createBuildConfig({
-            input,
-            minify,
-          })
-        : createDevConfig({ input });
-
-    return exportTsConfig.rollup(config, options);
+    });
   });
 
   return configs;
