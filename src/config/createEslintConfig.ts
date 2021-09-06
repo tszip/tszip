@@ -25,7 +25,6 @@ export async function createEslintConfig({
   rootDir,
   writeFile,
 }: CreateEslintConfigArgs) {
-  console.log({ writeFile })
   if (writeFile) {
     const file = join(rootDir, '.eslintrc');
     try {
