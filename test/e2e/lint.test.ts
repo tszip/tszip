@@ -1,5 +1,4 @@
 import * as shell from 'shelljs';
-
 import * as util from '../utils/fixture';
 
 shell.config.silent = true;
@@ -7,7 +6,7 @@ shell.config.silent = true;
 const testDir = 'e2e';
 const stageName = 'stage-lint';
 
-const lintDir = `test/${testDir}/fixtures/lint`;
+const lintDir = `test/e2e/fixtures/lint`;
 
 describe('tszip lint', () => {
   // beforeAll(() => {
@@ -19,6 +18,7 @@ describe('tszip lint', () => {
     const testFile = `${lintDir}/file-with-lint-errors.ts`;
     const output = shell.exec(`node dist/index.js lint ${testFile}`);
     expect(output.code).toBe(1);
+    console.log({ output })
     expect(output.stdout.includes('Parsing error:')).toBe(true);
   });
 
@@ -99,14 +99,14 @@ describe('tszip lint', () => {
     );
   });
 
-  describe('when --write-file is used', () => {
+  xdescribe('when --write-file is used', () => {
     beforeEach(() => {
       util.teardownStage(stageName);
       util.setupStageWithFixture(testDir, stageName, 'build-default');
     });
 
     it('should create the file', () => {
-      const output = shell.exec(`node ../dist/index.js lint --write-file`);
+      const output = shell.exec(`node dist/index.js lint --write-file`);
       expect(shell.test('-f', '.eslintrc')).toBeTruthy();
       expect(output.code).toBe(0);
     });

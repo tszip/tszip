@@ -5,7 +5,7 @@
   },
   "extends": [
     "react-app",
-    "prettier/@typescript-eslint",
+    "prettier",
     "plugin:prettier/recommended"
   ],
   "rules": {

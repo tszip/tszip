@@ -1,0 +1,164 @@
+yarn run v1.22.5
+$ yarn build && node dist/index.js test test/e2e/lint.test.ts
+$ node dist/index.js build
+✓ Cleaning dist/. 4 ms
+⠙ TS ➡ JS: Compiling with tsc.  3%                  0.1s, estimated 3.1s
+[2K[1A[2K[G⠹ TS ➡ JS: Compiling with tsc.  5%                  0.2s, estimated 3.1s
+[2K[1A[2K[G⠸ TS ➡ JS: Compiling with tsc.  8%                  0.2s, estimated 3.1s
+[2K[1A[2K[G⠼ TS ➡ JS: Compiling with tsc.  11%                 0.3s, estimated 3.1s
+[2K[1A[2K[G⠴ TS ➡ JS: Compiling with tsc.  13%                 0.4s, estimated 3.1s
+[2K[1A[2K[G⠦ TS ➡ JS: Compiling with tsc.  16%                 0.5s, estimated 3.1s
+[2K[1A[2K[G⠧ TS ➡ JS: Compiling with tsc.  18%                 0.6s, estimated 3.1s
+[2K[1A[2K[G⠇ TS ➡ JS: Compiling with tsc.  21%                 0.6s, estimated 3.1s
+[2K[1A[2K[G⠏ TS ➡ JS: Compiling with tsc.  24%                 0.7s, estimated 3.1s
+[2K[1A[2K[G⠋ TS ➡ JS: Compiling with tsc.  26%                 0.8s, estimated 3.1s
+[2K[1A[2K[G⠙ TS ➡ JS: Compiling with tsc.  29%                 0.9s, estimated 3.1s
+[2K[1A[2K[G⠹ TS ➡ JS: Compiling with tsc.  31%                 1.0s, estimated 3.1s
+[2K[1A[2K[G⠸ TS ➡ JS: Compiling with tsc.  34%                 1.0s, estimated 3.1s
+[2K[1A[2K[G⠼ TS ➡ JS: Compiling with tsc.  37%                 1.1s, estimated 3.1s
+[2K[1A[2K[G⠴ TS ➡ JS: Compiling with tsc.  39%                 1.2s, estimated 3.1s
+[2K[1A[2K[G⠦ TS ➡ JS: Compiling with tsc.  42%                 1.3s, estimated 3.1s
+[2K[1A[2K[G⠧ TS ➡ JS: Compiling with tsc.  45%                 1.4s, estimated 3.1s
+[2K[1A[2K[G⠇ TS ➡ JS: Compiling with tsc.  47%                 1.4s, estimated 3.1s
+[2K[1A[2K[G⠏ TS ➡ JS: Compiling with tsc.  50%                 1.5s, estimated 3.1s
+[2K[1A[2K[G⠋ TS ➡ JS: Compiling with tsc.  52%                 1.6s, estimated 3.1s
+[2K[1A[2K[G⠙ TS ➡ JS: Compiling with tsc.  55%                 1.7s, estimated 3.1s
+[2K[1A[2K[G⠹ TS ➡ JS: Compiling with tsc.  58%                 1.8s, estimated 3.1s
+[2K[1A[2K[G⠸ TS ➡ JS: Compiling with tsc.  60%                 1.8s, estimated 3.1s
+[2K[1A[2K[G⠼ TS ➡ JS: Compiling with tsc.  63%                 1.9s, estimated 3.1s
+[2K[1A[2K[G⠴ TS ➡ JS: Compiling with tsc.  66%                 2.0s, estimated 3.1s
+[2K[1A[2K[G⠦ TS ➡ JS: Compiling with tsc.  68%                 2.1s, estimated 3.1s
+[2K[1A[2K[G⠧ TS ➡ JS: Compiling with tsc.  71%                 2.2s, estimated 3.1s
+[2K[1A[2K[G⠇ TS ➡ JS: Compiling with tsc.  73%                 2.2s, estimated 3.1s
+[2K[1A[2K[G⠏ TS ➡ JS: Compiling with tsc.  76%                 2.3s, estimated 3.1s
+[2K[1A[2K[G⠋ TS ➡ JS: Compiling with tsc.  79%                 2.4s, estimated 3.1s
+[2K[1A[2K[G⠙ TS ➡ JS: Compiling with tsc.  81%                 2.5s, estimated 3.1s
+[2K[1A[2K[G⠹ TS ➡ JS: Compiling with tsc.  84%                 2.6s, estimated 3.1s
+[2K[1A[2K[G⠸ TS ➡ JS: Compiling with tsc.  87%                 2.6s, estimated 3.1s
+[2K[1A[2K[G⠼ TS ➡ JS: Compiling with tsc.  89%                 2.7s, estimated 3.1s
+[2K[1A[2K[G⠴ TS ➡ JS: Compiling with tsc.  92%                 2.8s, estimated 3.1s
+[2K[1A[2K[G⠦ TS ➡ JS: Compiling with tsc.  94%                 2.9s, estimated 3.1s
+[2K[1A[2K[G⠧ TS ➡ JS: Compiling with tsc.  97%                 3.0s, estimated 3.1s
+[2K[1A[2K[G⠇ TS ➡ JS: Compiling with tsc.  99%                 3.0s, estimated 3.1s
+[2K[1A[2K[G⠏ TS ➡ JS: Compiling with tsc.  99%                 3.1s, estimated 3.1s
+[2K[1A[2K[G⠋ TS ➡ JS: Compiling with tsc.  99%                 3.2s, estimated 3.1s
+[2K[1A[2K[G✓ TS ➡ JS: Compiling with tsc. 3.2 secs
+✓ Copying all non-TS and non-JS files to dist/. 0 ms
+⠙ JS ➡ JS: Resolving imports and minifying.  16%                 0.7s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G⠹ JS ➡ JS: Resolving imports and minifying.  19%                 0.9s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G⠸ JS ➡ JS: Resolving imports and minifying.  21%                 1.0s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G⠼ JS ➡ JS: Resolving imports and minifying.  30%                 1.4s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G⠴ JS ➡ JS: Resolving imports and minifying.  32%                 1.5s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G⠦ JS ➡ JS: Resolving imports and minifying.  39%                 1.9s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G⠧ JS ➡ JS: Resolving imports and minifying.  44%                 2.1s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G⠇ JS ➡ JS: Resolving imports and minifying.  49%                 2.4s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G⠏ JS ➡ JS: Resolving imports and minifying.  53%                 2.5s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G⠋ JS ➡ JS: Resolving imports and minifying.  56%                 2.7s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G⠙ JS ➡ JS: Resolving imports and minifying.  59%                 2.8s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G⠹ JS ➡ JS: Resolving imports and minifying.  66%                 3.2s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G⠸ JS ➡ JS: Resolving imports and minifying.  71%                 3.4s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G⠼ JS ➡ JS: Resolving imports and minifying.  74%                 3.6s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G⠴ JS ➡ JS: Resolving imports and minifying.  81%                 3.9s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G⠦ JS ➡ JS: Resolving imports and minifying.  83%                 4.0s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G⠧ JS ➡ JS: Resolving imports and minifying.  86%                 4.1s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G⠇ JS ➡ JS: Resolving imports and minifying.  89%                 4.3s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G⠏ JS ➡ JS: Resolving imports and minifying.  91%                 4.4s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G⠋ JS ➡ JS: Resolving imports and minifying.  93%                 4.5s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G⠙ JS ➡ JS: Resolving imports and minifying.  95%                 4.6s, estimated
+ 4.8s
+[2K[1A[2K[1A[2K[G✓ JS ➡ JS: Resolving imports and minifying. 4.6 secs
+$ chmod +x dist/index.*js
+FAIL test/e2e/lint.test.ts (25.351 s)
+  tszip lint
+    ✓ should fail to lint a ts file with errors (1793 ms)
+    ✓ should succeed linting a ts file without errors (2085 ms)
+    ✓ should fail to lint a ts file with prettier errors (2025 ms)
+    ✓ should fail to lint a tsx file with errors (1721 ms)
+    ✓ should succeed linting a tsx file without errors (2070 ms)
+    ✓ should succeed linting a ts file with warnings when --max-warnings is not used (2052 ms)
+    ✓ should succeed linting a ts file with fewer warnings than --max-warnings (2047 ms)
+    ✓ should succeed linting a ts file with same number of warnings as --max-warnings (2053 ms)
+    ✓ should fail to lint a ts file with more warnings than --max-warnings (2049 ms)
+    ✓ should not lint (3698 ms)
+    when --write-file is used
+      ✕ should create the file (169 ms)
+
+  ● tszip lint › when --write-file is used › should create the file
+
+    expect(received).toBeTruthy()
+
+    Received: false
+
+      111 |     it('should create the file', () => {
+      112 |       const output = shell.exec(`node dist/index.js lint --write-file`);
+    > 113 |       expect(shell.test('-f', '.eslintrc')).toBeTruthy();
+          |                                             ^
+      114 |       expect(output.code).toBe(0);
+      115 |     });
+      116 |
+
+      at Object.<anonymous> (test/e2e/lint.test.ts:113:45)
+
+  console.log
+    TESTFILE /home/christian/PersonalProjects/tszip/test/e2e/fixtures/lint/file-with-lint-errors.ts
+
+      at Object.<anonymous> (test/e2e/lint.test.ts:21:13)
+
+  console.log
+    {
+      output: [String: '\n' +
+        '/home/christian/PersonalProjects/tszip/test/e2e/fixtures/lint/file-with-lint-errors.ts\n' +
+        "  1:17  error  Parsing error: ',' expected\n" +
+        '\n' +
+        '✖ 1 problem (1 error, 0 warnings)\n' +
+        '\n'] {
+        stdout: '\n' +
+          '/home/christian/PersonalProjects/tszip/test/e2e/fixtures/lint/file-with-lint-errors.ts\n' +
+          "  1:17  error  Parsing error: ',' expected\n" +
+          '\n' +
+          '✖ 1 problem (1 error, 0 warnings)\n' +
+          '\n',
+        stderr: '',
+        code: 1,
+        cat: [Function: bound ],
+        exec: [Function: bound ],
+        grep: [Function: bound ],
+        head: [Function: bound ],
+        sed: [Function: bound ],
+        sort: [Function: bound ],
+        tail: [Function: bound ],
+        to: [Function: bound ],
+        toEnd: [Function: bound ],
+        uniq: [Function: bound ]
+      }
+    }
+
+      at Object.<anonymous> (test/e2e/lint.test.ts:24:13)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 10 passed, 11 total
+Snapshots:   0 total
+Time:        25.403 s
+Ran all test suites matching /test\/e2e\/lint.test.ts/i.
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
