@@ -11,7 +11,7 @@ of TypeScript natively resolving file extensions for ESM output:
 ${chalk.blue('https://github.com/microsoft/TypeScript/issues/42151')}
 `;
 
-export const watch = () => {
+export const dev = () => {
   const watcher = new TscWatchClient();
 
   watcher.on('success', async () => {
