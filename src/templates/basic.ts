@@ -3,7 +3,6 @@ import { Template } from './template';
 const basicTemplate: Template = {
   name: 'basic',
   dependencies: ['@tszip/tszip', 'typescript', 'tslib', 'husky'],
-
   packageJson: {
     /**
      * Force ESM.
@@ -21,7 +20,6 @@ const basicTemplate: Template = {
       dev: 'tszip dev',
       build: 'tszip build',
       test: 'tszip test',
-      posttest: 'node test/import.js',
       lint: 'tszip lint',
       prepare: 'tszip build',
     },
