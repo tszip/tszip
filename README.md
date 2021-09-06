@@ -125,10 +125,22 @@ tszip will build each of these files to output in `dist/`, like
 `dist/a/index.js`, `dist/a/utils.js` etc.  The exports configuration provides
 for the following behavior:
 
-  - `index` files (`index`, `a/index`, `path/to/index`, etc.) will be resolved
-    via native ESM import logic *without* a file extension.
-  - non-`index` files (`a/utils`, `b/utils`, etc.) cannot be imported, though
-    can still be exposed by re-exporting at an index.
+  - modules at `index` files:
+      - `my-package/index.js`
+      - `my-package/a/index.js`
+      - `my-package/b/index.js`, etc.
+    
+    can be imported easily via:
+      - `my-package`
+      - `my-package/a`
+      - `my-package/b`, etc.
+
+  - whereas non-`index` files:
+      - `my-package/constants.js`
+      - `my-package/a/utils.js`
+      - `my-package/b/utils.js`, etc.
+      
+    cannot be imported, though can still be exposed by re-exporting at an index.
 
 The main result is that `index` files are said to be **external** in that you
 can import them from another ES module, and non-`index` files are **internal**
@@ -151,10 +163,11 @@ import { whatever } from 'your-package/a/utils'
 ```
 
 This logic is an efficient compromise given the way Node.js resolves the
-`exports` field (see [this issue](https://github.com/nodejs/node/issues/39994)).
-See the [Node.js
-docs](https://nodejs.org/api/packages.html#packages_subpath_patterns) for more
-info about conditional exports.
+`exports` field:
+https://github.com/nodejs/node/issues/39994
+
+See the Node.js docs for more info about conditional exports:
+https://nodejs.org/api/packages.html#packages_subpath_patterns
 
 ## Commands
 
