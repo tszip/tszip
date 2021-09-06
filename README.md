@@ -352,3 +352,8 @@ Please see the [Contributing Guidelines](./CONTRIBUTING.md).
 ## License
 
 Released under the MIT License.
+
+## Attribution
+
+Emojis thanks to [Twemoji by Twitter](https://twemoji.twitter.com/). See
+[twitter/twemoji](https://github.com/twitter/twemoji) for the full source code.
