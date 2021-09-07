@@ -78,7 +78,7 @@ interface TscArgs {
 export async function runTsc({
   tsconfig = null,
   transpileOnly = false,
-  watch = false,
+  watch: _ = false,
 }: TscArgs = {}) {
   /**
    * Force src/ rootDir, dist/ outDir, and override noEmit.
@@ -109,7 +109,16 @@ export async function runTsc({
   await progressIndicator(
     (async () => {
       try {
-        await execa('tsc', parsedArgs);
+        /**
+         * Must resolve to the local TSC, otherwise it will sometimes resolve to
+         * the globally installed typescript package.
+         *
+         * @see https://github.com/gilamran/tsc-watch/blob/3449aa1c95bd975c22a9ef7b700fac01e777929b/lib/args-manager.js#L59
+         */
+        const compiler = require.resolve('typescript/bin/tsc', {
+          paths: [process.cwd()],
+        });
+        await execa(compiler);
       } catch (error: any) {
         if (!transpileOnly) {
           console.error(error.toString());
@@ -134,9 +143,9 @@ export async function runTsc({
     'Copying all non-TS and non-JS files to dist/.'
   );
 
-  if (watch) {
-    const watchArgs = [...parsedArgs, '--watch', '--preserveWatchOutput'];
-    console.log('Calling tsc:', watchArgs);
-    await execa('tsc', watchArgs);
-  }
+  // if (watch) {
+  //   const watchArgs = [...parsedArgs, '--watch', '--preserveWatchOutput'];
+  //   console.log('Calling tsc:', watchArgs);
+  //   await execa('tsc', watchArgs);
+  // }
 }

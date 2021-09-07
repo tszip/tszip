@@ -1,7 +1,7 @@
 {
   "name": "@tszip/tszip",
   "type": "module",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "author": "C. Lewis <ctj.lewis@icloud.com>",
   "description": "Backwards-compatible compiler for TypeScript libraries.",
   "license": "MIT",
@@ -39,7 +39,7 @@
     "prebootstrap": "yarn clean",
     "bootstrap": "tsc && rollup -c --silent && yarn build && yarn build",
     "prepare": "yarn bootstrap",
-    "dev": "yarn bootstrap && node dist/index.js watch",
+    "dev": "yarn bootstrap && node dist/index.js dev",
     "build": "node dist/index.js build",
     "postbuild": "chmod +x dist/index.*js",
     "lint": "yarn build && yarn lint:post-build",
