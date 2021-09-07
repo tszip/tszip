@@ -2,7 +2,13 @@ import { Template } from './template';
 
 const basicTemplate: Template = {
   name: 'basic',
-  dependencies: ['@tszip/tszip', 'typescript', 'tslib', 'husky'],
+  dependencies: [
+    '@tszip/tszip',
+    'typescript',
+    'tslib',
+    'husky',
+    'yarn-deduplicate',
+  ],
   packageJson: {
     /**
      * Force ESM.
@@ -37,12 +43,6 @@ const basicTemplate: Template = {
     typings: 'dist/index.d.ts',
     files: ['dist'],
     peerDependencies: {},
-    // @todo Re-add Husky.
-    // husky: {
-    //   hooks: {
-    //     'pre-commit': 'tszip lint',
-    //   },
-    // },
     prettier: {
       printWidth: 80,
       semi: true,
