@@ -9,7 +9,13 @@
   <span style="font-weight: normal;padding: 12px 0;font-size: 1.5rem;">(Preview)</span>
 </h1> -->
 
-![](/.github/TS.svg)
+<h1>
+<img src="https://github.com/tszip/tszip/raw/develop/.github/TS.svg" alt="" style="max-width: 100%;">
+<i>zip</i>
+</h1>
+
+### *Preview*
+
 
 <!-- ![tsdx](https://user-images.githubusercontent.com/4060187/56918426-fc747600-6a8b-11e9-806d-2da0b49e89e4.png) -->
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
