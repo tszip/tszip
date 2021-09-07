@@ -3,6 +3,9 @@ import glob from 'fast-glob';
 import { createConfig } from '@tszip/rollup-config';
 import { rollup } from 'rollup';
 
+/**
+ * @todo Do not use a separate repo to generate Rollup configs.
+ */
 export const runRollup = async (action: 'build' | 'dev', minify = false) => {
   const filesToCheck = './dist/**/*.js';
   const files = await glob(filesToCheck);
