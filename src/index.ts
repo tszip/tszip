@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// import '@tszip/esm-require';
 import sade from 'sade';
 
 import { build } from './commands/build';
