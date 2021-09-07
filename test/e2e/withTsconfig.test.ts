@@ -28,11 +28,10 @@ describe('tszip build :: build with custom tsconfig.json options', () => {
 
   it('should read custom --tsconfig path', () => {
     const output = execWithCache(
-      'node ../dist/index.js build  --format cjs --tsconfig ./src/tsconfig.json'
+      'node ../dist/index.js build --tsconfig ./src/tsconfig.json'
     );
 
     expect(shell.test('-f', 'dist/index.js')).toBeTruthy();
-
     expect(shell.test('-f', 'dist/index.d.ts')).toBeFalsy();
     expect(shell.test('-f', 'typingsCustom/index.d.ts')).toBeTruthy();
     expect(shell.test('-f', 'typingsCustom/index.d.ts.map')).toBeTruthy();
