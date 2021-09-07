@@ -103,12 +103,12 @@ console.log(chalk.green('hello world'))
 
 ### Internal vs. external entry points
 
-**An import from `your-package/path/to/submodule` only works if
-`src/path/to/submodule` is a folder with an `index` file.**
-
 tszip projects leverage package.json `exports` logic to automatically resolve
 subdir imports for your package, which mimics something like an optimized
 version of legacy `resolve()` logic.
+
+**An import from `your-package/path/to/submodule` only works if
+`src/path/to/submodule` is a folder with an `index` file.**
 
 Consider the following typical project structure:
 
