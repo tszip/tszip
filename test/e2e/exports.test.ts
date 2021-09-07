@@ -27,7 +27,7 @@ describe('tszip build :: exports', () => {
       const json = readFileSync(`package.json`, 'utf-8');
       const packageJson = JSON.parse(json);
       expect(packageJson.exports['.']).toEqual('./dist/index.js');
-      expect(packageJson.exports['./*']).toEqual('./dist/*.js');
+      expect(packageJson.exports['./*']).toEqual('./dist/*/index.js');
     });
 
     it('should build the project', () => {
@@ -45,7 +45,7 @@ describe('tszip build :: exports', () => {
     });
   });
 
-  afterAll(() => {
-    util.teardownStage(stageName);
-  });
+  // afterAll(() => {
+  //   util.teardownStage(stageName);
+  // });
 });

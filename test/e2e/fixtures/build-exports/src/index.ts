@@ -1,7 +1,7 @@
 import './syntax/jsx-import/JSX-import-JSX';
 
 export { testNullishCoalescing } from './syntax/nullish-coalescing';
-export { testOptionalChaining } from './syntax/optional-chaining';
+export { testOptionalChaining } from './syntax/optionalChaining';
 
 export { testGenerator } from './syntax/generator';
 export { testAsync } from './syntax/async';

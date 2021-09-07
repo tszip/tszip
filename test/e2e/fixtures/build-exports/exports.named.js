@@ -1,2 +1,2 @@
-import { returnsTrue } from 'build-exports/returnsTrue';
-console.log({ returnsTrue });
+import { testOptionalChaining } from 'build-exports/syntax/optionalChaining';
+console.log({ testOptionalChaining });

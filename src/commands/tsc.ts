@@ -14,51 +14,12 @@
  * @see https://twitter.com/jaffathecake/status/1145979217852678144
  */
 
-import * as ts from 'typescript';
-
 import execa from 'execa';
 import glob from 'glob-promise';
 
-import { basename, extname, join } from 'path';
+import { extname, join, relative } from 'path';
 import { copy } from 'fs-extra';
 import { createProgressEstimator } from '../config/createProgressEstimator';
-
-export function loadConfig() {
-  const fileName = ts.findConfigFile('.', ts.sys.fileExists);
-  if (!fileName) throw Error('tsconfig not found');
-  const text = ts.sys.readFile(fileName) ?? '';
-  const loadedConfig = ts.parseConfigFileTextToJson(fileName, text).config;
-  const parsedTsConfig = ts.parseJsonConfigFileContent(
-    loadedConfig,
-    ts.sys,
-    process.cwd(),
-    undefined,
-    fileName
-  );
-  return parsedTsConfig;
-}
-
-export function resolveId(id: string, importer = '') {
-  const config = loadConfig();
-
-  // If there isn't an importer, it's an entry point, so we don't need to resolve it relative
-  // to something.
-  if (!importer) return null;
-
-  const tsResolve = ts.resolveModuleName(id, importer, config.options, ts.sys);
-
-  if (
-    // It didn't find anything
-    !tsResolve.resolvedModule ||
-    // Or if it's linking to a definition file, it's something in node_modules,
-    // or something local like css.d.ts
-    tsResolve.resolvedModule.extension === '.d.ts'
-  ) {
-    return null;
-  }
-
-  return tsResolve.resolvedModule.resolvedFileName;
-}
 
 const parseArgs = (options: { [key: string]: any }) => {
   const args: string[] = [];
@@ -118,7 +79,7 @@ export async function runTsc({
         const compiler = require.resolve('typescript/bin/tsc', {
           paths: [process.cwd()],
         });
-        await execa(compiler, ['--noEmit', 'false']);
+        await execa(compiler, parsedArgs);
       } catch (error: any) {
         if (!transpileOnly) {
           console.error(error.toString());
@@ -137,7 +98,8 @@ export async function runTsc({
           (file: string) => !/^\.(ts|tsx|js|jsx|json)$/.test(extname(file))
         )
         .map(
-          async (file: string) => await copy(file, join('dist', basename(file)))
+          async (file: string) =>
+            await copy(file, join('dist', relative('src', file)))
         )
     ),
     'Copying all non-TS and non-JS files to dist/.'

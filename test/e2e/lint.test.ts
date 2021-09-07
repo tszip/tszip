@@ -18,7 +18,6 @@ describe('tszip lint', () => {
     const testFile = `${lintDir}/file-with-lint-errors.ts`;
     const output = shell.exec(`node dist/index.js lint ${testFile}`);
     expect(output.code).toBe(1);
-    console.log({ output });
     expect(output.stdout.includes('Parsing error:')).toBe(true);
   });
 
