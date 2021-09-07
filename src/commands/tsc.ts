@@ -118,7 +118,7 @@ export async function runTsc({
         const compiler = require.resolve('typescript/bin/tsc', {
           paths: [process.cwd()],
         });
-        await execa(compiler);
+        await execa(compiler, ['--noEmit', 'false']);
       } catch (error: any) {
         if (!transpileOnly) {
           console.error(error.toString());
