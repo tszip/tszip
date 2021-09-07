@@ -55,7 +55,7 @@ export async function runTsc({
     noEmit: false,
     allowJs: true,
     declaration: true,
-    sourceMap: true,
+    sourceMap: false,
     esModuleInterop: true,
     allowSyntheticDefaultImports: true,
     resolveJsonModule: true,
