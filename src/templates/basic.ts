@@ -23,6 +23,8 @@ const basicTemplate: Template = {
       dev: 'tszip dev',
       build: 'tszip build',
       test: 'tszip test',
+      'test:watch': 'tszip test --watch',
+      'test:coverage': 'tszip test --coverage',
       lint: 'tszip lint',
       prepare: 'tszip build',
     },

@@ -32,6 +32,8 @@ prog
 prog
   .command('build')
   .describe('Create the release build for the package.')
+  .option('--noMinify', 'Do not minify output.')
+  .option('--transpileOnly', 'Only transpile TS, do not typecheck.')
   .action(build);
 
 prog

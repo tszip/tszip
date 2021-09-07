@@ -22,8 +22,9 @@ would at the upstream library level, please use that package.
 
 - [Quick Start](#quick-start)
 - [Usage](#usage)
-  - [ESNext, ESM input](#esnext-esm-input)
-  - [Internal vs External entry points](#internal-vs-external-entry-points)
+  - [ESNext input](#esnext-input)
+    - [Note regarding CJS](#note-regarding-cjs)
+  - [Internal vs. external entry points](#internal-vs-external-entry-points)
 - [Commands](#commands)
   - [`yarn start`](#yarn-start)
   - [`yarn build`](#yarn-build)
@@ -74,11 +75,13 @@ tszip build
 This tool is used to compile TS and JS libraries, i.e. it bundles modules and
 exposes them for import by others downstream.
 
-### ESNext, ESM input
+### ESNext input
 
 tszip projects are able to use the full range of features offered by ESNext,
 including top-level `await` and `import`¹. For backwards compatibility,
-`require` is shimmed use `createRequire(import.meta.url)`².
+`require` is shimmed using `createRequire(import.meta.url)`².
+
+#### Note regarding CJS interop
 
 TypeScript's `esModuleInterop` logic cannot map named imports for some CJS
 modules (e.g., `chalk`), in which case you may rely on synthetic default
@@ -94,7 +97,7 @@ import chalk from 'chalk'
 console.log(chalk.green('hello world'))
 ```
 
-### Internal vs External entry points
+### Internal vs. external entry points
 
 **An import from `your-package/path/to/submodule` only works if
 `src/path/to/submodule` is a folder with an `index` file.**
@@ -106,7 +109,7 @@ version of legacy `resolve()` logic.
 Consider the following typical project structure:
 
 ```none
-src/
+src
 ├── a
 │   ├── index.ts
 │   └── utils.ts
@@ -115,39 +118,64 @@ src/
 │   └── utils.ts
 ├── c
 │   ├── index.ts
+│   ├── subpath
+│   │   └── index.ts
 │   └── utils.ts
 ├── constants.ts
 ├── index.ts
 └── utils.ts
+
 ```
 
-tszip will build each of these files to output in `dist/`, like
-`dist/a/index.js`, `dist/a/utils.js` etc.  The exports configuration provides
-for the following behavior:
+tszip will build this same project structure in `dist/` (at  `dist/a/index.js`,
+`dist/a/utils.js`, and so on).  The exports configuration provides for the
+following behavior:
 
   - modules at `index` files:
-      - `my-package/index.js`
-      - `my-package/a/index.js`
-      - `my-package/b/index.js`, etc.
-    
+      - `your-package/index.js`
+      - `your-package/a/index.js`
+      - `your-package/b/index.js`, etc.
+
     can be imported easily via:
-      - `my-package`
-      - `my-package/a`
-      - `my-package/b`, etc.
+      - `your-package`
+      - `your-package/a`
+      - `your-package/b`, etc.
 
   - whereas non-`index` files:
-      - `my-package/constants.js`
-      - `my-package/a/utils.js`
-      - `my-package/b/utils.js`, etc.
-      
+      - `your-package/constants.js`
+      - `your-package/a/utils.js`
+      - `your-package/b/utils.js`, etc.
+
     cannot be imported, though can still be exposed by re-exporting at an index.
+
+Output in `dist/` takes the following form and maps to the following import
+specifiers (type declarations and sourcemaps omitted):
+
+```none
+dist
+├── a
+│   ├── index.js      ➞  your-package/a
+│   └── utils.js
+├── b
+│   ├── index.js      ➞  your-package/b
+│   └── utils.js
+├── c
+│   ├── index.js      ➞  your-package/c
+│   ├── subpath
+│   │   └── index.js      ➞  your-package/c/subpath
+│   └── utils.js
+├── constants.js
+├── index.js          ➞  your-package
+└── utils.js
+```
 
 The main result is that `index` files are said to be **external** in that you
 can import them from another ES module, and non-`index` files are **internal**
 in that they are emitted as output, but cannot be imported without re-exporting
 at an index.
 
-See the following examples, where `your-package` is the name of the package in package.json:
+See the following examples, where `your-package` is the name of the package in
+package.json:
 
 ```ts
 /** This is a downstream module importing your package. */
@@ -163,30 +191,27 @@ import { whatever } from 'your-package/a/utils'
 ```
 
 This logic is an efficient compromise given the way Node.js resolves the
-`exports` field:
-https://github.com/nodejs/node/issues/39994
+`exports` field: https://github.com/nodejs/node/issues/39994
 
 See the Node.js docs for more info about conditional exports:
 https://nodejs.org/api/packages.html#packages_subpath_patterns
 
 ## Commands
 
-### `yarn start`
+### `yarn boot`
 
-Runs the project in development/watch mode. Your project will be rebuilt upon
-changes. tszip has a special logger for your convenience. Error messages are
-pretty printed and formatted for compatibility VS Code's Problems tab.
+This is an escape hatch to build an executable (but unoptimized) version of your
+project without using tszip involved (only TSC and Rollup). Can be used for
+debugging if there are errors in the output emitted by `tszip build`.
 
-<!-- <img
-src="https://user-images.githubusercontent.com/4060187/52168303-574d3a00-26f6-11e9-9f3b-71dbec9ebfcb.gif"
-width="600" /> -->
+### `yarn dev`
 
-Your library will be rebuilt if you make edits.
+Runs the project in development/watch mode, automatically compiling and
+refreshing on changes.
 
 ### `yarn build`
 
-Bundles the package to the `dist` folder. The package is optimized and bundled
-with Rollup into multiple formats (CommonJS, UMD, and ES Module).
+Runs the release build process and compiles optimized output to `dist/`.
 
 <!-- <img src="https://user-images.githubusercontent.com/4060187/52168322-a98e5b00-26f6-11e9-8cf6-222d716b75ef.gif" width="600" /> -->
 
@@ -203,102 +228,28 @@ you can add an `eslint` block to your package.json, or you can run `yarn lint
 ### `prepare` script
 
 Bundles and packages to the `dist` folder. Runs automatically when you run
-either `yarn publish`. The `prepare` script will run the
-equivalent of `npm run build` or `yarn build`. It will also be run if your
-module is installed as a git dependency (ie: `"mymodule":
-"github:myuser/mymodule#some-branch"`) so it can be depended on without checking
-the transpiled code into git.
+either `yarn publish`. The `prepare` script will run the equivalent of `npm run
+build` or `yarn build`. It will also be run if your module is installed as a git
+dependency (ie: `"mymodule": "github:myuser/mymodule#some-branch"`) so it can be
+depended on without checking the transpiled code into git.
 
 ## Customization
-
-### Rollup
-
-> **❗⚠️❗ Warning**: <br>
-> These modifications will override the default behavior and configuration of
-> tszip. As such they can invalidate internal guarantees and assumptions. These
-> types of changes can break internal behavior and can be very fragile against
-> updates. Use with discretion!
-
-tszip uses Rollup under the hood. The defaults are solid for most packages
-(Formik uses the defaults!). However, if you do wish to alter the rollup
-configuration, you can do so by creating a file called `tszip.config.mjs` at the
-root of your project like so:
-
-```js
-// Override the Rollup config.
-const tszipConfig = {
-  rollup(config, options) {
-    return config;
-  },
-};
-
-export default tszipConfig;
-```
-
-### CLI Options
-```tsx
-export interface TsdxOptions {
-  // Override the tsconfig location.
-  tsconfig?: string;
-  // If true, extract errors.
-  extractErrors?: boolean;
-  // If true, do not minify.
-  noMinify?: boolean;
-  // If true, do not type-check.
-  transpileOnly?: boolean;
-}
-```
-
-#### Example: Adding Postcss
-
-```js
-const postcss = require('rollup-plugin-postcss');
-const autoprefixer = require('autoprefixer');
-const cssnano = require('cssnano');
-
-module.exports = {
-  rollup(config, options) {
-    config.plugins.push(
-      postcss({
-        plugins: [
-          autoprefixer(),
-          cssnano({
-            preset: 'default',
-          }),
-        ],
-        inject: false,
-        // only write out CSS for the first bundle (avoids pointless extra files):
-        extract: !!options.writeMeta,
-      })
-    );
-    return config;
-  },
-};
-```
-
 ### Jest
 
-You can add your own `jest.config.mjs` to the root of your project and tszip will
-**shallow merge** it with [its own Jest config](./src/createJestConfig.ts).
+You can add your own `jest.config.js` to the root of your project and tszip
+will **shallow merge** it with [its own Jest config](./src/createJestConfig.ts).
 
 ### ESLint
 
 You can add your own `.eslintrc` to the root of your project and tszip will
 **deep merge** it with [its own ESLint config](./src/createEslintConfig.ts).
 
-### `patch-package`
-
-If you still need more customizations, we recommend using
-[`patch-package`](https://github.com/ds300/patch-package) so you don't need to
-fork. Keep in mind that these types of changes may be quite fragile against
-version updates.
-
 ## Inspiration
 
-tszip is an iteration on [TSDX](https://github.com/formium/tsdx), which was originally ripped out of
-[Formik's](https://github.com/jaredpalmer/formik) build tooling. See
-[@developit/microbundle](https://github.com/developit/microbundle) for related
-work.
+tszip is an iteration on [TSDX](https://github.com/formium/tsdx), which was
+originally ripped out of [Formik's](https://github.com/jaredpalmer/formik) build
+tooling. See [@developit/microbundle](https://github.com/developit/microbundle)
+for related work.
 
 <!-- ### Comparison with Microbundle
 
@@ -315,87 +266,38 @@ Some key differences include:
 
 ## API Reference
 
-### `tszip watch`
+### `tszip dev`
 
 ```none
 Description
-  Rebuilds on any change
+  Compile package and listen for changes.
 
 Usage
-  $ tszip watch [options]
+  $ tszip dev [options]
 
 Options
-  -i, --entry           Entry module
-  --target              Specify your target environment  (default web)
-  --name                Specify name exposed in UMD builds
-  --format              Specify module format(s)  (default cjs,esm)
-  --tsconfig            Specify your custom tsconfig path (default <root-folder>/tsconfig.json)
-  --verbose             Keep outdated console output in watch mode instead of clearing the screen
-  --onFirstSuccess      Run a command on the first successful build
-  --onSuccess           Run a command on a successful build
-  --onFailure           Run a command on a failed build
-  --noClean             Don't clean the dist folder
-  --transpileOnly       Skip type checking
-  -h, --help            Displays this message
-
-Examples
-  $ tszip watch --entry src/foo.tsx
-  $ tszip watch --target node
-  $ tszip watch --name Foo
-  $ tszip watch --format cjs,esm,umd
-  $ tszip watch --tsconfig ./tsconfig.foo.json
-  $ tszip watch --noClean
-  $ tszip watch --onFirstSuccess "echo The first successful build!"
-  $ tszip watch --onSuccess "echo Successful build!"
-  $ tszip watch --onFailure "echo The build failed!"
-  $ tszip watch --transpileOnly
+  -h, --help    Displays this message
 ```
 
 ### `tszip build`
 
 ```none
 Description
-  Build your project once and exit
+  Create the release build for the package.
 
 Usage
   $ tszip build [options]
 
 Options
-  -i, --entry           Entry module
-  --target              Specify your target environment  (default web)
-  --name                Specify name exposed in UMD builds
-  --format              Specify module format(s)  (default cjs,esm)
-  --extractErrors       Opt-in to extracting invariant error codes
-  --tsconfig            Specify your custom tsconfig path (default <root-folder>/tsconfig.json)
-  --transpileOnly       Skip type checking
-  -h, --help            Displays this message
-
-Examples
-  $ tszip build --entry src/foo.tsx
-  $ tszip build --target node
-  $ tszip build --name Foo
-  $ tszip build --format cjs,esm,umd
-  $ tszip build --extractErrors
-  $ tszip build --tsconfig ./tsconfig.foo.json
-  $ tszip build --transpileOnly
+  --noMinify         Do not minify output.
+  --transpileOnly    Only transpile TS, do not typecheck.
+  -h, --help         Displays this message
 ```
 
 ### `tszip test`
 
 This runs Jest, forwarding all CLI flags to it. See
-[https://jestjs.io](https://jestjs.io) for options. For example, if you would
-like to run in watch mode, you can run `tszip test --watch`. So you could set up
-your `package.json` `scripts` like:
-
-```json
-{
-  "scripts": {
-    "test": "tszip test",
-    "test:watch": "tszip test --watch",
-    "test:coverage": "tszip test --coverage"
-  }
-}
-```
+[https://jestjs.io](https://jestjs.io) for options. 
 
 ### `tszip lint`
 
@@ -427,21 +329,6 @@ Examples
 
 Please see the [Contributing Guidelines](./CONTRIBUTING.md).
 
-## Footnotes
-
-¹ Because of multiple competing standards (CJS, ESM, etc.), eventually, consumers
-of packages may need to transpile code to older featuresets (even pre-ES2015) in
-order for them to work in certain contexts.
-
-However, there is no need for this to be done upstream, nor to develop modern
-packages on anything other than ESNext to take full advantage of new
-improvements in the language and ES module resolution.
-
-² This works identically to legacy behavior only because each entry point is
-mapped to a transpiled version of itself. Default Rollup behavior of compiling
-all code to a single output bundle would break this assumption and make shimming
-`require` impossible.
-
 ## License
 
 Released under the MIT License.
@@ -450,3 +337,24 @@ Released under the MIT License.
 
 Emojis thanks to [Twemoji by Twitter](https://twemoji.twitter.com/). See
 [twitter/twemoji](https://github.com/twitter/twemoji) for the full source code.
+
+---
+
+## Footnotes
+
+¹ Because of multiple competing standards (CJS, ESM, etc.), eventually,
+consumers of packages may need to transpile code to older featuresets (even
+pre-ES2015) in order for them to work in certain contexts.
+
+However, there is no need for this to be done upstream, nor to develop modern
+packages on anything other than ESNext to take full advantage of new
+improvements in the language and ES module resolution logic.
+
+² This works identically to legacy behavior only because each entry point is
+mapped to a transpiled version of itself. Default Rollup behavior of compiling
+all code to a single output bundle would break this assumption and make shimming
+`require` impossible.
+
+*Note (9/7/2021): `require` is now shimmed only for the Rollup process, rather
+than once per-file, but this documentation may be needed in the future in case
+this logic is re-implemented.*
