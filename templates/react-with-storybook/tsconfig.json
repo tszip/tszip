@@ -19,9 +19,9 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "incremental": false,
     "declaration": true,
     "sourceMap": true,
-    "checkJs": true
+    "checkJs": true,
+    "noEmit": false
   }
 }

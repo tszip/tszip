@@ -17,6 +17,9 @@ const basicTemplate: Template = {
       node: '>=14',
     },
     scripts: {
+      preboot: 'yarn clean',
+      boot: 'tsc && rollup -c --silent',
+      bootstrap: 'yarn boot && yarn build',
       dev: 'tszip dev',
       build: 'tszip build',
       test: 'tszip test',
