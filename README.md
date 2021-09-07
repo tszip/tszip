@@ -1,6 +1,6 @@
 <h1>
   <img src="https://github.com/tszip/tszip/raw/develop/.github/TS.svg" alt="" style="max-width: 100%;">
-  <i>zip</i>
+  <i>ᶻᶦᵖ</i>
 </h1>
 
 ##### Preview Release
