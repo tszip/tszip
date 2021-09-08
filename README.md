@@ -229,14 +229,6 @@ Runs Eslint with Prettier on .ts and .tsx files. If you want to customize eslint
 you can add an `eslint` block to your package.json, or you can run `yarn lint
 --write-file` and edit the generated `.eslintrc` file.
 
-### `prepare` script
-
-Bundles and packages to the `dist` folder. Runs automatically when you run
-either `yarn publish`. The `prepare` script will run the equivalent of `npm run
-build` or `yarn build`. It will also be run if your module is installed as a git
-dependency (ie: `"mymodule": "github:myuser/mymodule#some-branch"`) so it can be
-depended on without checking the transpiled code into git.
-
 ## Customization
 ### Jest
 
@@ -247,26 +239,6 @@ will **shallow merge** it with [its own Jest config](./src/createJestConfig.ts).
 
 You can add your own `.eslintrc` to the root of your project and tszip will
 **deep merge** it with [its own ESLint config](./src/createEslintConfig.ts).
-
-## Inspiration
-
-tszip is an iteration on [TSDX](https://github.com/formium/tsdx), which was
-originally ripped out of [Formik's](https://github.com/jaredpalmer/formik) build
-tooling. See [@developit/microbundle](https://github.com/developit/microbundle)
-for related work.
-
-<!-- ### Comparison with Microbundle
-
-Some key differences include:
-
-- tszip includes out-of-the-box test running via Jest
-- tszip includes out-of-the-box linting and formatting via ESLint and Prettier
-- tszip includes a bootstrap command with a few package templates
-- tszip allows for some lightweight customization
-- tszip is TypeScript focused, but also supports plain JavaScript
-- tszip outputs distinct development and production builds (like React does) for
-  CJS and UMD builds. This means you can include rich error messages and other
-  dev-friendly goodies without sacrificing final bundle size. -->
 
 ## API Reference
 
@@ -329,13 +301,20 @@ Examples
   $ tszip lint src --report-file report.json
 ```
 
+## Inspiration
+
+tszip is an iteration on [TSDX](https://github.com/formium/tsdx), which was
+originally ripped out of [Formik's](https://github.com/jaredpalmer/formik) build
+tooling. See [@developit/microbundle](https://github.com/developit/microbundle)
+for related work.
+
 ## Contributing
 
 Please see the [Contributing Guidelines](./CONTRIBUTING.md).
 
 ## License
 
-Released under the MIT License.
+Released under the [MIT License](/LICENSE).
 
 ## Attribution
 
@@ -351,7 +330,7 @@ consumers of packages may need to transpile code to older featuresets (even
 pre-ES2015) in order for them to work in certain contexts.
 
 However, there is no need for this to be done upstream, nor to develop modern
-packages on anything other than ESNext to take full advantage of new
+packages on anything other than ESNext (to take full advantage of new
 improvements in the language and ES module resolution logic.
 
 ² This works identically to legacy behavior only because each entry point is
