@@ -322,13 +322,22 @@ Emojis thanks to [Twemoji by Twitter](https://twemoji.twitter.com/). See
 
 ## Footnotes
 
-¹ Because of multiple competing standards (CJS, ESM, etc.), eventually,
-consumers of packages may need to transpile code to older featuresets (even
-pre-ES2015) in order for them to work in certain contexts.
+¹ Because of multiple competing standards, consumers of packages may need to
+transpile code to older featuresets (i.e. pre-ES2015) in order for them to work
+in certain contexts. However, there is no need for this to be done upstream, as
+is currently done now, but only before bundling for the client (and even then,
+only if needed).
 
-However, there is no need for this to be done upstream, nor to develop modern
-packages on anything other than ESNext (to take full advantage of new
-improvements in the language and ES module resolution logic.
+Developers should be able to specify modules in ESNext to take full advantage of
+new syntax and ES module resolution benefits, which is what tszip aims to
+enable. At the upstream library level, we can ship code without polyfills, using
+the latest syntax and module resolution, and leave it up to the consumer to
+transpile it down if necessary as part of their build pipeline.
+
+With this approach, newer contexts that support newer features can take direct
+advantage of them by default rather than being locked into a legacy system, e.g.
+by being forced to consume polyfilled library code or an ESM wrapper around
+legacy CJS modules.
 
 ² This works identically to legacy behavior only because each entry point is
 mapped to a transpiled version of itself. Default Rollup behavior of compiling
