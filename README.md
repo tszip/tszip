@@ -45,6 +45,7 @@ out-of-the-box, please use that package.
 - [Inspiration](#inspiration)
 - [License](#license)
 - [Footnotes](#footnotes)
+      - [More examples regarding subdir import specifiers](#more-examples-regarding-subdir-import-specifiers)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -161,10 +162,11 @@ dist
 └── utils.js
 ```
 
-The main result is that `index` files are said to be **external** in that you
-can import them from another ES module, and non-`index` files are **internal**
-in that they are emitted as output, but cannot be imported without re-exporting
-at an `index` file.
+The main result is that `index` modules (`your-package/a`, `your-package/b`,
+etc.) are said to be **external** in that you can import them from another ES
+module, and non-`index` modules (`constants.js`, `utils.js`, `a/utils.js`, etc.)
+are **internal** in that they are emitted as output, but cannot be imported
+without re-exporting at an `index`.
 
 See the following examples, where `your-package` is the name of the package in
 package.json:
@@ -182,14 +184,8 @@ import { whatever } from 'your-package/a'
 import { whatever } from 'your-package/a/utils'
 ```
 
-See [**Footnotes** > More examples regarding subdir import specifiers](More_examples_regarding_subdir_import_specifiers) for more
-examples.
-
-This logic is an efficient compromise given the way Node.js resolves the
-`exports` field: https://github.com/nodejs/node/issues/39994
-
-See the Node.js docs for more info about conditional exports:
-https://nodejs.org/api/packages.html#packages_subpath_patterns
+Additional examples are available under [**Footnotes** > More examples regarding
+subdir import specifiers](More_examples_regarding_subdir_import_specifiers).
 
 ## Commands
 
