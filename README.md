@@ -1,10 +1,6 @@
-<h1>
-  <img src="https://github.com/tszip/tszip/raw/develop/.github/TS.svg" alt="" style="max-width: 100%;">
-  <i>ᶻᶦᵖ</i>
-</h1>
+![](/.github/tszip-banner.png)
 
 ##### Preview Release
-
 
 <!-- ![tsdx](https://user-images.githubusercontent.com/4060187/56918426-fc747600-6a8b-11e9-806d-2da0b49e89e4.png) -->
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
@@ -20,8 +16,8 @@ the [**Usage**](#Usage) section for an overview of how this works.
 
 The [legacy fork](https://npmjs.com/package/@tszip/legacy), which aimed to
 guarantee backwards compatibility if that is your goal, is now deprecated
-(before ever having been released). If you need CJS interop, which you never
-would at the upstream library level, please use that package.
+(before ever having been released). If you need CJS interop at the library level
+out-of-the-box, please use that package.
 
 ## Table of Contents
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
