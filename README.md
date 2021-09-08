@@ -75,25 +75,27 @@ exposes them for import by others downstream.
 ### ESNext input
 
 tszip projects are able to use the full range of features offered by ESNext,
-including top-level `await` and `import`¹. For backwards compatibility,
-`require` is shimmed using `createRequire(import.meta.url)`².
+including top-level `await` and ES module syntax, which are left in the emitted
+output.¹
+
+`require` is shimmed using `createRequire(import.meta.url)` and can be used
+safely in your source code and dependencies without issue for legacy interop.²
 
 ### Importing CJS
 
-TypeScript's `esModuleInterop` logic will cover the majority of cases, but
-sometimes it is not possible to generate named imports for a CJS module (e.g.
-`chalk`). In this scenario, you may rely on synthetic default imports or `import
-*`:
+You can import legacy CJS modules at the default import by design, or use
+`require()` for named imports.
 
 ```ts
-// fails at runtime
+// breaks: chalk is a CJS module, no named imports
 import { green } from 'chalk'
-console.log(green('hello world'))
 
-// using synthetic default
+// success!
 import chalk from 'chalk'
-console.log(chalk.green('hello world'))
-// import * as chalk also works
+
+// using legacy require()
+const chalk = require('chalk')
+const { green } = require('chalk')
 ```
 
 ### Internal vs. external entry points
