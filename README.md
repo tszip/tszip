@@ -106,14 +106,21 @@ const { green } = require('chalk')
 
 ### Internal vs. external entry points
 
-tszip projects leverage package.json `exports` logic to automatically resolve
-subdir imports for your package, which mimics something like an optimized
-version of legacy `resolve()` logic.
+*Note: This behavior can be disabled by editing the `exports` field in your
+project's package.json.*
 
-**An import from `your-package/path/to/submodule` only works if
-`src/path/to/submodule` is a folder with an `index` file.**
+tszip projects leverage the package.json `exports` field to automatically
+resolve subpath imports for your package, which mimics something like an
+optimized version of legacy `require()` logic.
+  
+  - An import from `your-package/submodule` is an import from
+    `your-package/submodule/index.js`. 
 
-Consider the following typical project structure:
+  - Non-`index` endpoints are "internal" to the package and cannot be imported
+    directly without being re-exported at an `index` file.
+
+**In short, only `index` files are available for import downstream**.³ For more
+detail, consider the following typical project structure:
 
 ```none
 src
@@ -131,29 +138,7 @@ src
 ├── constants.ts
 ├── index.ts
 └── utils.ts
-
 ```
-
-tszip will build this same project structure in `dist/` (at  `dist/a/index.js`,
-`dist/a/utils.js`, and so on).  The exports configuration provides for the
-following behavior:
-
-  - modules at `index` files:
-      - `your-package/index.js`
-      - `your-package/a/index.js`
-      - `your-package/b/index.js`, etc.
-
-    can be imported easily via:
-      - `your-package`
-      - `your-package/a`
-      - `your-package/b`, etc.
-
-  - whereas non-`index` files:
-      - `your-package/constants.js`
-      - `your-package/a/utils.js`
-      - `your-package/b/utils.js`, etc.
-
-    cannot be imported, though can still be exposed by re-exporting at an index.
 
 Output in `dist/` takes the following form and maps to the following import
 specifiers (type declarations and sourcemaps omitted):
@@ -179,7 +164,7 @@ dist
 The main result is that `index` files are said to be **external** in that you
 can import them from another ES module, and non-`index` files are **internal**
 in that they are emitted as output, but cannot be imported without re-exporting
-at an index.
+at an `index` file.
 
 See the following examples, where `your-package` is the name of the package in
 package.json:
@@ -196,6 +181,9 @@ import { whatever } from 'your-package/a'
 // error! this entry point is not an index, and is not exported
 import { whatever } from 'your-package/a/utils'
 ```
+
+See [**Footnotes** > More examples regarding subdir import specifiers](More_examples_regarding_subdir_import_specifiers) for more
+examples.
 
 This logic is an efficient compromise given the way Node.js resolves the
 `exports` field: https://github.com/nodejs/node/issues/39994
@@ -342,3 +330,35 @@ all code to a single output bundle would break this assumption and make shimming
 *Note (9/7/2021): `require` is now shimmed only for the Rollup process, rather
 than once per-file, but this documentation may be needed in the future in case
 this logic is re-implemented.*
+
+³ This logic is an efficient compromise given the way Node.js resolves the
+`exports` field: https://github.com/nodejs/node/issues/39994
+
+See the Node.js docs for more info about conditional exports:
+https://nodejs.org/api/packages.html#packages_subpath_patterns
+
+##### More examples regarding subdir import specifiers
+
+tszip will build this same structure in `src/` to `dist/` when building the
+package.  As explained above, the exports configuration provides for the
+following behavior:
+
+  - Module specifiers, such as:
+      1. `your-package`
+      2. `your-package/a`
+      3. `your-package/b`
+      4. `your-package/c/subpath`, etc.
+
+    Are resolved to `index` files:
+      1. `your-package/index.js`
+      2. `your-package/a/index.js`
+      3. `your-package/b/index.js`,
+      4. `your-package/c/subpath/index.js`, etc.
+
+  - Whereas non-`index` files:
+      - `your-package/constants.js`
+      - `your-package/a/utils.js`
+      - `your-package/b/utils.js`, etc.
+
+    cannot be imported without being re-exporting at an index (e.g. `export *
+    from './utils'` in `index.ts`).
