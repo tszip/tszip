@@ -89,7 +89,7 @@ safely in your source code and dependencies without issue for legacy interop.²
 
 ### Importing CJS
 
-You can import CJS modules at default [by
+You can import CJS modules via `import pkg from 'pkg'` [by
 design](https://nodejs.org/api/esm.html#esm_interoperability_with_commonjs), or
 use `require()` for legacy functionality:
 
@@ -97,7 +97,7 @@ use `require()` for legacy functionality:
 // breaks: chalk is a CJS module, no named imports
 import { green } from 'chalk'
 
-// success!
+// success: default import
 import chalk from 'chalk'
 
 // using legacy require()
