@@ -50,20 +50,25 @@ out-of-the-box, please use that package.
 
 ## Quick Start
 
+Install tszip and create a new package:
+
 ```bash
 # install tszip globally
 yarn global add tszip
 
 # create a package
 tszip create $PACKAGE_NAME
+```
 
-# enter package
-cd $PACKAGE_NAME
+Enter the workspace and start developing, or build the release package:
 
-# start watching
+```bash
+# listen for changes
 tszip dev
 
-# when finished developing, build final bundle
+# -or-
+
+# build release
 tszip build
 ```
 
@@ -83,8 +88,9 @@ safely in your source code and dependencies without issue for legacy interop.²
 
 ### Importing CJS
 
-You can import legacy CJS modules at the default import by design, or use
-`require()` for named imports.
+You can import CJS modules at default [by
+design](https://nodejs.org/api/esm.html#esm_interoperability_with_commonjs), or
+use `require()` for legacy functionality:
 
 ```ts
 // breaks: chalk is a CJS module, no named imports
