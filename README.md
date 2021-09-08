@@ -38,16 +38,15 @@ would at the upstream library level, please use that package.
   - [`yarn build`](#yarn-build)
   - [`yarn test`](#yarn-test)
   - [`yarn lint`](#yarn-lint)
-  - [`prepare` script](#prepare-script)
 - [Customization](#customization)
   - [Jest](#jest)
   - [ESLint](#eslint)
-- [Inspiration](#inspiration)
 - [API Reference](#api-reference)
   - [`tszip dev`](#tszip-dev)
   - [`tszip build`](#tszip-build)
   - [`tszip test`](#tszip-test)
   - [`tszip lint`](#tszip-lint)
+- [Inspiration](#inspiration)
 - [Contributing](#contributing)
 - [License](#license)
 - [Attribution](#attribution)
@@ -166,7 +165,7 @@ dist
 ├── c
 │   ├── index.js      ➞  your-package/c
 │   ├── subpath
-│   │   └── index.js      ➞  your-package/c/subpath
+│   │   └── index.js  ➞  your-package/c/subpath
 │   └── utils.js
 ├── constants.js
 ├── index.js          ➞  your-package
@@ -320,8 +319,6 @@ Released under the [MIT License](/LICENSE).
 
 Emojis thanks to [Twemoji by Twitter](https://twemoji.twitter.com/). See
 [twitter/twemoji](https://github.com/twitter/twemoji) for the full source code.
-
----
 
 ## Footnotes
 
