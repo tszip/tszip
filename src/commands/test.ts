@@ -4,7 +4,7 @@ import {
   JestConfigOptions,
   createJestConfig,
 } from '../config/createJestConfig';
-import { dirname, resolve } from 'path';
+import { dirname } from 'path';
 import { getAppPackageJson } from '../lib/filesystem';
 import { pathExists } from 'fs-extra';
 import { paths } from '../lib/constants';
@@ -15,6 +15,7 @@ export const test = async (opts: { config?: string }) => {
   process.env.BABEL_ENV = 'test';
   process.env.NODE_ENV = 'test';
   // process.env.NODE_OPTIONS = '--experimental-vm-modules npx jest';
+  // console.log(process.env.NODE_OPTIONS);
   // Makes the script crash on unhandled rejections instead of silently
   // ignoring them. In the future, promise rejections that are not handled will
   // terminate the Node.js process with a non-zero exit code.
@@ -23,13 +24,12 @@ export const test = async (opts: { config?: string }) => {
   });
 
   const appPackageJson = await getAppPackageJson();
+  const dir = opts.config ? dirname(opts.config) : paths.appRoot;
 
   const argv = process.argv.slice(2);
+  const defaultJestConfig = await createJestConfig(dir);
   let jestConfig: JestConfigOptions = {
-    ...createJestConfig(
-      (relativePath) => resolve(__dirname, '..', relativePath),
-      opts.config ? dirname(opts.config) : paths.appRoot
-    ),
+    ...defaultJestConfig,
     ...appPackageJson.jest,
   };
 
@@ -58,12 +58,7 @@ export const test = async (opts: { config?: string }) => {
     }
   }
 
-  argv.push(
-    '--config',
-    JSON.stringify({
-      ...jestConfig,
-    })
-  );
+  argv.push('--config', JSON.stringify(jestConfig));
 
   const [, ...argsToPassToJestCli] = argv;
   jest.run(argsToPassToJestCli);

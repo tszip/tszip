@@ -1,20 +1,19 @@
 import { Config } from '@jest/types';
+// import tsJest from 'ts-jest';
 
 export type JestConfigOptions = Partial<Config.InitialOptions>;
 
-export function createJestConfig(
-  _: (relativePath: string) => void,
+export async function createJestConfig(
   rootDir: string
-): JestConfigOptions {
+): Promise<JestConfigOptions> {
   const config: JestConfigOptions = {
-    transform: {
-      '.(ts|tsx)$': require.resolve('ts-jest/dist'),
-      '.(js|jsx)$': require.resolve('babel-jest'), // jest's default
-    },
+    preset: 'ts-jest',
+    testEnvironment: 'node',
+    transform: {},
     transformIgnorePatterns: ['[/\\\\]node_modules[/\\\\].+\\.(js|jsx)$'],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
     collectCoverageFrom: ['src/**/*.{ts,tsx,js,jsx}'],
-    testMatch: ['<rootDir>/**/*.(spec|test).{ts,tsx,js,jsx}'],
+    roots: ['<rootDir>/test'],
     testURL: 'http://localhost',
     rootDir,
     watchPlugins: [

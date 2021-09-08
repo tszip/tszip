@@ -1,7 +1,7 @@
 {
   "name": "@tszip/tszip",
   "type": "module",
-  "version": "1.6.1",
+  "version": "1.7.0",
   "author": "C. Lewis <ctj.lewis@icloud.com>",
   "description": "Backwards-compatible compiler for TypeScript libraries.",
   "license": "MIT",
@@ -153,11 +153,6 @@
     "tiny-invariant": "^1.1.0",
     "tiny-warning": "^1.0.3",
     "yarn-deduplicate": "^3.1.0"
-  },
-  "jest": {
-    "extensionsToTreatAsEsm": [
-      ".ts"
-    ]
   },
   "husky": {
     "hooks": {
