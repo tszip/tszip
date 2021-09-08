@@ -26,7 +26,7 @@ out-of-the-box, please use that package.
 - [Quick Start](#quick-start)
 - [Usage](#usage)
   - [ESNext input](#esnext-input)
-    - [Note regarding CJS interop](#note-regarding-cjs-interop)
+  - [Importing CJS](#importing-cjs)
   - [Internal vs. external entry points](#internal-vs-external-entry-points)
 - [Commands](#commands)
   - [`yarn boot`](#yarn-boot)
@@ -40,12 +40,10 @@ out-of-the-box, please use that package.
 - [API Reference](#api-reference)
   - [`tszip dev`](#tszip-dev)
   - [`tszip build`](#tszip-build)
-  - [`tszip test`](#tszip-test)
   - [`tszip lint`](#tszip-lint)
+  - [`tszip test`](#tszip-test)
 - [Inspiration](#inspiration)
-- [Contributing](#contributing)
 - [License](#license)
-- [Attribution](#attribution)
 - [Footnotes](#footnotes)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -80,20 +78,22 @@ tszip projects are able to use the full range of features offered by ESNext,
 including top-level `await` and `import`¹. For backwards compatibility,
 `require` is shimmed using `createRequire(import.meta.url)`².
 
-#### Note regarding CJS interop
+### Importing CJS
 
-TypeScript's `esModuleInterop` logic cannot map named imports for some CJS
-modules (e.g., `chalk`), in which case you may rely on synthetic default
-imports:
+TypeScript's `esModuleInterop` logic will cover the majority of cases, but
+sometimes it is not possible to generate named imports for a CJS module (e.g.
+`chalk`). In this scenario, you may rely on synthetic default imports or `import
+*`:
 
 ```ts
 // fails at runtime
 import { green } from 'chalk'
 console.log(green('hello world'))
 
-// use synthetic default for CJS modules
+// using synthetic default
 import chalk from 'chalk'
 console.log(chalk.green('hello world'))
+// import * as chalk also works
 ```
 
 ### Internal vs. external entry points
@@ -265,11 +265,6 @@ Options
   -h, --help         Displays this message
 ```
 
-### `tszip test`
-
-This runs Jest, forwarding all CLI flags to it. See
-[https://jestjs.io](https://jestjs.io) for options. 
-
 ### `tszip lint`
 
 ```none
@@ -296,6 +291,11 @@ Examples
   $ tszip lint src --report-file report.json
 ```
 
+### `tszip test`
+
+This runs Jest, forwarding all CLI flags to it. See
+[https://jestjs.io](https://jestjs.io) for options. 
+
 ## Inspiration
 
 tszip is an iteration on [TSDX](https://github.com/formium/tsdx), which was
@@ -303,18 +303,9 @@ originally ripped out of [Formik's](https://github.com/jaredpalmer/formik) build
 tooling. See [@developit/microbundle](https://github.com/developit/microbundle)
 for related work.
 
-## Contributing
-
-Please see the [Contributing Guidelines](./CONTRIBUTING.md).
-
 ## License
 
 Released under the [MIT License](/LICENSE).
-
-## Attribution
-
-Emojis thanks to [Twemoji by Twitter](https://twemoji.twitter.com/). See
-[twitter/twemoji](https://github.com/twitter/twemoji) for the full source code.
 
 ## Footnotes
 
