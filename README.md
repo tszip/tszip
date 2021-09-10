@@ -45,7 +45,7 @@ out-of-the-box, please use that package.
 - [Inspiration](#inspiration)
 - [License](#license)
 - [Footnotes](#footnotes)
-      - [More examples regarding subdir import specifiers](#more-examples-regarding-subdir-import-specifiers)
+  - [More examples regarding subdir import specifiers](#more-examples-regarding-subdir-import-specifiers)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -185,7 +185,7 @@ import { whatever } from 'your-package/a/utils'
 ```
 
 Additional examples are available under [**Footnotes** > More examples regarding
-subdir import specifiers](More_examples_regarding_subdir_import_specifiers).
+subdir import specifiers](#more-examples-regarding-subdir-import-specifiers).
 
 ## Commands
 
@@ -333,7 +333,7 @@ this logic is re-implemented.*
 See the Node.js docs for more info about conditional exports:
 https://nodejs.org/api/packages.html#packages_subpath_patterns
 
-##### More examples regarding subdir import specifiers
+### More examples regarding subdir import specifiers
 
 tszip will build this same structure in `src/` to `dist/` when building the
 package.  As explained above, the exports configuration provides for the
