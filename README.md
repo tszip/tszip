@@ -92,8 +92,8 @@ safely in your source code and dependencies without issue for legacy interop.²
 You can import CJS modules via `import pkg from 'pkg'` [by
 design](https://nodejs.org/api/esm.html#esm_interoperability_with_commonjs).
 
-If you need `require()` for legacy functionality, either directly in your
-codebase or in CJS dependencies, you can import the
+If you need `require` for legacy functionality, either directly in your codebase
+or in CJS dependencies, you can import the
 [`@tszip/esm-require`](https://www.npmjs.com/package/@tszip/esm-require) package
 at the top of the relevant context:
 
