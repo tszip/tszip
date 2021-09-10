@@ -90,8 +90,12 @@ safely in your source code and dependencies without issue for legacy interop.²
 ### Importing CJS
 
 You can import CJS modules via `import pkg from 'pkg'` [by
-design](https://nodejs.org/api/esm.html#esm_interoperability_with_commonjs), or
-use `require()` for legacy functionality:
+design](https://nodejs.org/api/esm.html#esm_interoperability_with_commonjs).
+
+If you need `require()` for legacy functionality, either directly in your
+codebase or in CJS dependencies, you can import the
+[`@tszip/esm-require`](https://www.npmjs.com/package/@tszip/esm-require) package
+at the top of the relevant context:
 
 ```ts
 // breaks: chalk is a CJS module, no named imports
@@ -100,7 +104,8 @@ import { green } from 'chalk'
 // success: default import
 import chalk from 'chalk'
 
-// using legacy require()
+// `require` is now available
+import '@tszip/esm-require'
 const chalk = require('chalk')
 const { green } = require('chalk')
 ```
