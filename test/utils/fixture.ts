@@ -12,9 +12,6 @@ export function setupStageWithFixture(
 ): void {
   const stagePath = path.join(rootDir, stageName);
   shell.mkdir(stagePath);
-  console.log(
-    `cp -R ${rootDir}/test/${testDir}/fixtures/${fixtureName}/* ${stagePath}/`
-  );
   shell.exec(
     `cp -R ${rootDir}/test/${testDir}/fixtures/${fixtureName}/* ${stagePath}/`
   );

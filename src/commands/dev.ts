@@ -1,7 +1,7 @@
 import TscWatchClient from 'tsc-watch/client';
 import chalk from 'chalk';
 
-import { createProgressEstimator } from '../config/createProgressEstimator';
+import { createProgressEstimator } from '../log/progressEstimator';
 import { runRollup } from './rollup';
 
 const CONSIDER_LEAVING_A_COMMENT = `

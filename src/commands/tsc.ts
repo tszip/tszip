@@ -19,7 +19,7 @@ import glob from 'glob-promise';
 
 import { extname, join, relative } from 'path';
 import { copy } from 'fs-extra';
-import { createProgressEstimator } from '../config/createProgressEstimator';
+import { createProgressEstimator } from '../log/progressEstimator';
 
 const parseArgs = (options: { [key: string]: any }) => {
   const args: string[] = [];

@@ -1,6 +1,5 @@
 import * as fs from 'fs-extra';
-
-import { paths } from './constants';
+import { distPath } from './paths';
 
 /*
   This was originally needed because the default
@@ -11,7 +10,7 @@ import { paths } from './constants';
   that in for some time too.
 */
 export async function moveTypes() {
-  const appDistSrc = paths.appDist + '/src';
+  const appDistSrc = distPath + '/src';
 
   const pathExists = await fs.pathExists(appDistSrc);
   if (!pathExists) return;
@@ -27,7 +26,7 @@ export async function moveTypes() {
   );
 
   // Move the type declarations to the base of the ./dist folder
-  await fs.copy(appDistSrc, paths.appDist, {
+  await fs.copy(appDistSrc, distPath, {
     overwrite: true,
   });
   await fs.remove(appDistSrc);

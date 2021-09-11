@@ -1,10 +1,10 @@
 import chalk from 'chalk';
 
 import { CLIEngine } from 'eslint';
-import { createEslintConfig } from '../config/createEslintConfig';
+import { createEslintConfig } from '../config/eslint';
 import { existsSync } from 'fs';
 import { getAppPackageJson } from '../lib/filesystem';
-import { paths } from '../lib/constants';
+import { rootPath } from '../lib/paths';
 import { writeFile } from 'fs/promises';
 
 export const lint = async (opts: {
@@ -30,7 +30,7 @@ export const lint = async (opts: {
 
   const config = await createEslintConfig({
     pkg: appPackageJson,
-    rootDir: paths.appRoot,
+    rootDir: rootPath,
     writeFile: opts['write-file'],
   });
 

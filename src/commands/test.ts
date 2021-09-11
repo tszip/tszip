@@ -1,13 +1,10 @@
 import jest from 'jest';
 
-import {
-  JestConfigOptions,
-  createJestConfig,
-} from '../config/createJestConfig';
+import { JestConfigOptions, createJestConfig } from '../config/jest';
+import { jestConfigPath, rootPath } from '../lib/paths';
 import { dirname } from 'path';
 import { getAppPackageJson } from '../lib/filesystem';
 import { pathExists } from 'fs-extra';
-import { paths } from '../lib/constants';
 import { resolveApp } from '../lib/utils';
 
 export const test = async (opts: { config?: string }) => {
@@ -24,7 +21,7 @@ export const test = async (opts: { config?: string }) => {
   });
 
   const appPackageJson = await getAppPackageJson();
-  const dir = opts.config ? dirname(opts.config) : paths.appRoot;
+  const dir = opts.config ? dirname(opts.config) : rootPath;
 
   const argv = process.argv.slice(2);
   const defaultJestConfig = await createJestConfig(dir);
@@ -34,10 +31,10 @@ export const test = async (opts: { config?: string }) => {
   };
 
   // Allow overriding with jest.config
-  const defaultPathExists = await pathExists(paths.jestConfig);
+  const defaultPathExists = await pathExists(jestConfigPath);
   if (opts.config || defaultPathExists) {
-    const jestConfigPath = resolveApp(opts.config || paths.jestConfig);
-    const jestModule = await import(jestConfigPath);
+    const configPath = resolveApp(opts.config || jestConfigPath);
+    const jestModule = await import(configPath);
     const jestConfigContents: JestConfigOptions = jestModule.default;
     jestConfig = { ...jestConfig, ...jestConfigContents };
   }

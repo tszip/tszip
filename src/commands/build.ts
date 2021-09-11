@@ -2,7 +2,7 @@ import logError from '../log/error';
 
 import { TszipOptions } from '../types';
 import { cleanDistFolder } from '../lib/filesystem';
-import { createProgressEstimator } from '../config/createProgressEstimator';
+import { createProgressEstimator } from '../log/progressEstimator';
 import { runRollup } from './rollup';
 import { runTsc } from './tsc';
 

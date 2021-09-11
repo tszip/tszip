@@ -1,11 +1,11 @@
 import glob from 'glob-promise';
 import shell from 'shelljs';
 
+import { distPath, packageJsonPath } from './paths';
 import { extname, resolve, sep } from 'path';
 import { readFile, rmdir, stat, unlink } from 'fs/promises';
 import { PackageJson } from '../types';
-import { createProgressEstimator } from '../config/createProgressEstimator';
-import { paths } from './constants';
+import { createProgressEstimator } from '../log/progressEstimator';
 import { resolveApp } from './utils';
 
 export const generateImportPattern = (importSource: string) =>
@@ -43,7 +43,7 @@ export const renameExtension = (file: string, dotExtension: string) => {
 export const cleanOldJS = async () => {
   const progressIndicator = await createProgressEstimator();
 
-  const oldJS = await glob(`${paths.appDist}/**/*.js`);
+  const oldJS = await glob(`${distPath}/**/*.js`);
   // console.log({ oldJS });
   await progressIndicator(
     Promise.all(oldJS.map(async (file: string) => await unlink(file))),
@@ -52,7 +52,7 @@ export const cleanOldJS = async () => {
 };
 
 export const cleanDistFolder = async () => {
-  await rmdir(paths.appDist, { recursive: true });
+  await rmdir(distPath, { recursive: true });
 };
 
 export const isDir = async (name: string) => {
@@ -79,10 +79,10 @@ export const jsOrTs = async (filename: string) => {
 
 export const getAppPackageJson = async () => {
   try {
-    const appPackageJson: PackageJson = JSON.parse(
-      await readFile(paths.appPackageJson, 'utf-8')
+    const packageJson: PackageJson = JSON.parse(
+      await readFile(packageJsonPath, 'utf-8')
     );
-    return appPackageJson;
+    return packageJson;
   } catch (e) {
     console.log(e);
     throw new Error('No package.json found in project directory.');
