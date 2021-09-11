@@ -3,7 +3,7 @@ import { configPath } from '../lib/paths';
 import { resolveApp } from '../lib/utils';
 
 export interface TszipConfig {
-  rollup?: (config: RollupOptions) => RollupOptions;
+  rollup?: (config: RollupOptions) => RollupOptions | Promise<RollupOptions>;
 }
 
 export const getTszipConfig = async (): Promise<TszipConfig> => {

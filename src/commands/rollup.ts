@@ -30,7 +30,7 @@ export const runRollup = async (action: 'build' | 'dev', minify = false) => {
        * Use the modified config if a modifier is provided.
        */
       if (rollupModifier) {
-        config = rollupModifier(config);
+        config = await rollupModifier(config);
       }
       /**
        * Initialize Rollup and write the bundle(s).
