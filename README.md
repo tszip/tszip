@@ -84,8 +84,9 @@ tszip projects are able to use the full range of features offered by ESNext,
 including top-level `await` and ES module syntax, which are left in the emitted
 output.¹
 
-`require` is shimmed using `createRequire(import.meta.url)` and can be used
-safely in your source code and dependencies without issue for legacy interop.²
+`require` can be shimmed using `createRequire(import.meta.url)` and used safely
+in your source code and dependencies without issue for legacy interop (see
+**Importing CJS** below).²
 
 ### Importing CJS
 
