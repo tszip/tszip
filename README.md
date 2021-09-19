@@ -95,7 +95,7 @@ design](https://nodejs.org/api/esm.html#esm_interoperability_with_commonjs).
 
 If you need `require` for legacy functionality, either directly in your codebase
 or in CJS dependencies, you can import the
-[`@tszip/esm-require`](https://www.npmjs.com/package/@tszip/esm-require) package
+[`@tszip/cjs`](https://www.npmjs.com/package/@tszip/cjs) package
 at the top of the relevant context:
 
 ```ts
@@ -106,7 +106,7 @@ import { green } from 'chalk'
 import chalk from 'chalk'
 
 // `require` is now available
-import '@tszip/esm-require'
+import '@tszip/cjs'
 const chalk = require('chalk')
 const { green } = require('chalk')
 ```

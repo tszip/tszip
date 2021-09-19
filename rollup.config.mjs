@@ -38,7 +38,7 @@ export default configs;
 //      * Skip if the shim already exists, or if we're emitting this polyfill.
 //      */
 //     if (
-//       chunk.imports.includes('@tszip/esm-require') ||
+//       chunk.imports.includes('@tszip/cjs') ||
 //       chunk.facadeModuleId.endsWith('esm-require/dist/index.js')
 //     ) {
 //       return null;
