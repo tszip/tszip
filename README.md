@@ -55,7 +55,7 @@ Install tszip and create a new package:
 
 ```bash
 # install tszip globally
-yarn global add tszip
+yarn global add @tszip/tszip
 
 # create a package
 tszip create $PACKAGE_NAME
