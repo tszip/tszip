@@ -23,6 +23,7 @@ const basicTemplate: Template = {
       node: '>=14',
     },
     scripts: {
+      clean: 'rm -rf dist/',
       preboot: 'yarn clean',
       boot: 'tsc && rollup -c --silent',
       bootstrap: 'yarn boot && yarn build',
