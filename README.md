@@ -84,32 +84,16 @@ tszip projects are able to use the full range of features offered by ESNext,
 including top-level `await` and ES module syntax, which are left in the emitted
 output.¹
 
-`require` can be shimmed using `createRequire(import.meta.url)` and used safely
-in your source code and dependencies without issue for legacy interop (see
-**Importing CJS** below).²
-
 ### Importing CJS
 
-You can import CJS modules via `import pkg from 'pkg'` [by
-design](https://nodejs.org/api/esm.html#esm_interoperability_with_commonjs).
+As of December 2021, you can treat CJS modules as ES modules without thinking.
+Named, default, and star imports will all work as expected.
 
-If you need `require` for legacy functionality, either directly in your codebase
-or in CJS dependencies, you can import the
-[`@tszip/cjs`](https://www.npmjs.com/package/@tszip/cjs) package
-at the top of the relevant context:
-
-```ts
-// breaks: chalk is a CJS module, no named imports
-import { green } from 'chalk'
-
-// success: default import
-import chalk from 'chalk'
-
-// `require` is now available
-import '@tszip/cjs'
-const chalk = require('chalk')
-const { green } = require('chalk')
-```
+Under the hood, all `import` and `require` statements will be transpiled to
+dynamic `const ... = await import(...)` assignments. This comes at the minor
+trade-off of all imports occurring sequentially:  These could be transpiled to
+`Promise.all(...)` blocks in the future to prevent this, but for now there is
+more utility in seamless ESM-CJS interop.
 
 ### Internal vs. external entry points
 
