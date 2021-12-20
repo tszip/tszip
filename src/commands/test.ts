@@ -32,6 +32,7 @@ export const test = async (opts: { config?: string }) => {
 
   // Allow overriding with jest.config
   const defaultPathExists = await pathExists(jestConfigPath);
+
   if (opts.config || defaultPathExists) {
     const configPath = resolveApp(opts.config || jestConfigPath);
     const jestModule = await import(configPath);
@@ -58,5 +59,6 @@ export const test = async (opts: { config?: string }) => {
   argv.push('--config', JSON.stringify(jestConfig));
 
   const [, ...argsToPassToJestCli] = argv;
+  console.log({ argsToPassToJestCli });
   jest.run(argsToPassToJestCli);
 };
