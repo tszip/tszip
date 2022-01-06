@@ -79,6 +79,7 @@ export async function runTsc({
         const compiler = require.resolve('typescript/bin/tsc', {
           paths: [process.cwd()],
         });
+        console.log(`$ ${compiler} ${parsedArgs.join(' ')}`);
         await execa(compiler, parsedArgs);
       } catch (error: any) {
         if (!transpileOnly) {
