@@ -47,7 +47,6 @@ export async function runTsc({
    * @todo Leave sourceMaps and declarations in when splitting per-file.
    */
   const args: Record<string, any> = {
-    rootDir: 'src/',
     outDir: 'dist/',
     jsx: 'react-jsx',
     module: 'esnext',
@@ -79,7 +78,13 @@ export async function runTsc({
         const compiler = require.resolve('typescript/bin/tsc', {
           paths: [process.cwd()],
         });
-        console.log(`$ ${compiler} ${parsedArgs.join(' ')}`);
+        /**
+         * Execute on all src/** files. Do not use srcDir to prevent unexpected
+         * behavior, e.g. in a Next project with experimental: { externalDir:
+         * true }.
+         */
+        const execArgs = ['src/**', ...parsedArgs];
+        console.log(`$ ${compiler} ${execArgs.join(' ')}`);
         await execa(compiler, parsedArgs);
       } catch (error: any) {
         if (!transpileOnly) {
