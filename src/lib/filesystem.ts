@@ -3,7 +3,7 @@ import shell from 'shelljs';
 
 import { distPath, packageJsonPath } from './paths';
 import { extname, resolve, sep } from 'path';
-import { readFile, rmdir, stat, unlink } from 'fs/promises';
+import { readFile, rm, stat, unlink } from 'fs/promises';
 import { PackageJson } from '../types';
 import { createProgressEstimator } from '../log/progressEstimator';
 import { resolveApp } from './utils';
@@ -52,7 +52,7 @@ export const cleanOldJS = async () => {
 };
 
 export const cleanDistFolder = async () => {
-  await rmdir(distPath, { recursive: true });
+  await rm(distPath, { recursive: true });
 };
 
 export const isDir = async (name: string) => {
