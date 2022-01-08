@@ -14,6 +14,7 @@
  * @see https://twitter.com/jaffathecake/status/1145979217852678144
  */
 
+import chalk from 'chalk';
 import glob from 'glob-promise';
 
 import { extname, join, relative } from 'path';
@@ -84,7 +85,7 @@ export async function runTsc({
          * true }.
          */
         const execArgs = ['src/**', ...parsedArgs];
-        console.log(`$ ${compiler} ${execArgs.join(' ')}`);
+        console.log(chalk.gray(`$ ${compiler} ${execArgs.join(' ')}`));
         await execa(compiler, parsedArgs);
       } catch (error: any) {
         if (!transpileOnly) {
