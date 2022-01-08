@@ -2,7 +2,6 @@ import Input from 'enquirer/lib/prompts/input.js';
 import Select from 'enquirer/lib/prompts/select.js';
 
 import chalk from 'chalk';
-import execa from 'execa';
 import fs from 'fs-extra';
 import logError from '../log/error';
 import ora from 'ora';
@@ -18,6 +17,7 @@ import { composePackageJson } from '../templates/utils';
 import { indentLog } from '../log';
 import { templates } from '../templates';
 
+import { execa } from 'execa';
 import { fileURLToPath } from 'url';
 import { resolve } from 'path';
 

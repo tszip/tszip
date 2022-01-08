@@ -14,12 +14,12 @@
  * @see https://twitter.com/jaffathecake/status/1145979217852678144
  */
 
-import execa from 'execa';
 import glob from 'glob-promise';
 
 import { extname, join, relative } from 'path';
 import { copy } from 'fs-extra';
 import { createProgressEstimator } from '../log/progressEstimator';
+import { execa } from 'execa';
 
 const parseArgs = (options: { [key: string]: any }) => {
   const args: string[] = [];
