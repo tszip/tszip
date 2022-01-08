@@ -1,6 +1,7 @@
 import TscWatchClient from 'tsc-watch/client';
 import chalk from 'chalk';
 
+import { cleanDistFolder } from '../lib/filesystem';
 import { createProgressEstimator } from '../log/progressEstimator';
 import { runRollup } from './rollup';
 
@@ -11,7 +12,8 @@ of TypeScript natively resolving file extensions for ESM output:
 ${chalk.blue('https://github.com/microsoft/TypeScript/issues/42151')}
 `;
 
-export const dev = () => {
+export const dev = async () => {
+  await cleanDistFolder();
   const watcher = new TscWatchClient();
 
   watcher.on('success', async () => {
