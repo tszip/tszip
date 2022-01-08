@@ -2,6 +2,7 @@ import TscWatchClient from 'tsc-watch/client';
 import chalk from 'chalk';
 
 import { cleanDistFolder } from '../lib/filesystem';
+import { copyAssets } from '../lib/copyAssets';
 import { createProgressEstimator } from '../log/progressEstimator';
 import { runRollup } from './rollup';
 
@@ -24,6 +25,8 @@ export const dev = async () => {
       runRollup('dev', false),
       'Resolving imports in compiled TypeScript...'
     );
+
+    await copyAssets(progressEstimator);
 
     console.log(chalk.dim(CONSIDER_LEAVING_A_COMMENT));
     console.log(chalk.bold(chalk.green('Compiled successfully.')));

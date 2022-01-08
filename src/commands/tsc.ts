@@ -15,10 +15,8 @@
  */
 
 import chalk from 'chalk';
-import glob from 'glob-promise';
 
-import { extname, join, relative } from 'path';
-import { copy } from 'fs-extra';
+import { copyAssets } from '../lib/copyAssets';
 import { createProgressEstimator } from '../log/progressEstimator';
 import { execa } from 'execa';
 
@@ -97,20 +95,7 @@ export async function runTsc({
     `TS ➡ JS: Compiling with tsc.`
   );
 
-  const srcFiles = await glob('src/**/*', { nodir: true });
-  await progressIndicator(
-    Promise.all(
-      srcFiles
-        .filter(
-          (file: string) => !/^\.(ts|tsx|js|jsx|json)$/.test(extname(file))
-        )
-        .map(
-          async (file: string) =>
-            await copy(file, join('dist', relative('src', file)))
-        )
-    ),
-    'Copying all non-TS and non-JS files to dist/.'
-  );
+  await copyAssets(progressIndicator);
 
   // if (watch) {
   //   const watchArgs = [...parsedArgs, '--watch', '--preserveWatchOutput'];
