@@ -1,3 +1,4 @@
+import { debugLog } from '../log';
 import jest from 'jest';
 
 import { JestConfigOptions, createJestConfig } from '../config/jest';
@@ -59,6 +60,6 @@ export const test = async (opts: { config?: string }) => {
   argv.push('--config', JSON.stringify(jestConfig));
 
   const [, ...argsToPassToJestCli] = argv;
-  console.log({ argsToPassToJestCli });
+  debugLog({ argsToPassToJestCli });
   jest.run(argsToPassToJestCli);
 };

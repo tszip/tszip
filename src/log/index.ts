@@ -5,3 +5,9 @@ export const indentString = (msg: string, indent = 1) => {
 export const indentLog = (msg: string, indent = 1) => {
   console.log(indentString(msg, indent));
 };
+
+export const debugLog = (...msgs: any[]) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(...msgs);
+  }
+};
