@@ -1404,22 +1404,10 @@
     module "^1.2.5"
     url "^0.11.0"
 
-"@tszip/resolve-imports@2.6.2":
+"@tszip/resolve-imports@2.6.2", "@tszip/resolve-imports@^2.0.0":
   version "2.6.2"
   resolved "https://registry.yarnpkg.com/@tszip/resolve-imports/-/resolve-imports-2.6.2.tgz#72c4fe6fb2c788726b94c6a6813f481a1812409b"
   integrity sha512-NNRn+XUUNZ5D+TCtbOaI9p02XwCqW+dnyE1BdgAZlr48JBpgg3J4OnFXc5TIqVMDqokq0v4g8on8RMpqZAr35A==
-  dependencies:
-    "@tszip/cjs" "^1.5.0"
-    "@tszip/tszip" "^1.14.0"
-    "@types/fs-extra" "^9.0.12"
-    "@types/resolve" "^1.20.1"
-    fs-extra "^10.0.0"
-    resolve "^1.20.0"
-
-"@tszip/resolve-imports@2.7.0", "@tszip/resolve-imports@^2.0.0":
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/@tszip/resolve-imports/-/resolve-imports-2.7.0.tgz#beedb59ce71de2b723c67c31a81ad69c8838148a"
-  integrity sha512-1AtcWPdxJFWuNX8KLPpiaAp5dGTCySDOI/vdJ2oU175klVDi4RkUK2rvIuXUVjzLvtwiN27QpKrWBqz8HzImQw==
   dependencies:
     "@tszip/cjs" "^1.5.0"
     "@tszip/tszip" "^1.14.0"
