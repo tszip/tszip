@@ -52,7 +52,7 @@ export const cleanOldJS = async () => {
 };
 
 export const cleanDistFolder = async () => {
-  await rm(distPath, { recursive: true });
+  await rm(distPath, { recursive: true, force: true });
 };
 
 export const isDir = async (name: string) => {
