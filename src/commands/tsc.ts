@@ -46,7 +46,8 @@ export async function runTsc({
    * @todo Leave sourceMaps and declarations in when splitting per-file.
    */
   const args: Record<string, any> = {
-    outDir: 'dist/',
+    rootDir: 'src',
+    outDir: 'dist',
     jsx: 'react-jsx',
     module: 'esnext',
     target: 'esnext',
