@@ -1433,6 +1433,23 @@
     rollup-plugin-preserve-shebang "^1.0.1"
     rollup-plugin-terser "^7.0.2"
 
+"@tszip/rollup-config@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@tszip/rollup-config/-/rollup-config-2.0.0.tgz#a0c76faa2d6c450d363d50b219141557287fb0e3"
+  integrity sha512-jsO4GNHH79hs/H3ZMI7BZdCqRk7VpWr++6GwZZEchph5R3qa0yK+6hbfPSQZPie7Ld7GStvcYNgS5yNFC3JsDA==
+  dependencies:
+    "@babel/helper-module-imports" "^7.15.4"
+    "@rollup/plugin-typescript" "^8.3.0"
+    "@tszip/resolve-imports" "2.6.2"
+    autoprefixer "^10.4.2"
+    cssnano "^5.0.15"
+    fast-glob "^3.2.9"
+    fs-extra "^10.0.0"
+    rollup "^2.63.0"
+    rollup-plugin-postcss "^4.0.2"
+    rollup-plugin-preserve-shebang "^1.0.1"
+    rollup-plugin-terser "^7.0.2"
+
 "@tszip/tszip@^1.14.0":
   version "1.16.2"
   resolved "https://registry.yarnpkg.com/@tszip/tszip/-/tszip-1.16.2.tgz#26a6674741a2dd66bae076e39e881038d949187e"
@@ -3921,7 +3938,7 @@ fast-diff@^1.1.2:
   resolved "https://registry.yarnpkg.com/fast-diff/-/fast-diff-1.2.0.tgz#73ee11982d86caaf7959828d519cfe927fac5f03"
   integrity sha512-xJuoT5+L99XlZ8twedaRf6Ax2TgQVxvgZOYoPKqZufmJib0tL2tegPBOZb1pVNgIhlqDlA0eO0c3wBvQcmzx4w==
 
-fast-glob@^3.1.1, fast-glob@^3.2.7:
+fast-glob@^3.1.1, fast-glob@^3.2.7, fast-glob@^3.2.9:
   version "3.2.9"
   resolved "https://registry.yarnpkg.com/fast-glob/-/fast-glob-3.2.9.tgz#8f55f664b68a236bd29fa165817fc44f2b11faba"
   integrity sha512-MBwILhhD92sziIrMQwpqcuGERF+BH99ei2a3XsGJuqEKcSycAL+w0HWokFenZXona+kjFr82Lf71eTxNRC06XQ==
