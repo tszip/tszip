@@ -84,7 +84,7 @@ tszip projects are able to use the full range of features offered by ESNext,
 including top-level `await` and ES module syntax, which are left in the emitted
 output.¹
 
-
+<!--
 ### Importing CJS
 
 You can treat CJS modules as ES modules without thinking. Named, default, and
@@ -95,9 +95,9 @@ dynamic `const ... = await import(...)` assignments. This comes at the minor
 trade-off of all imports occurring sequentially:  These could be transpiled to
 `Promise.all(...)` blocks in the future to prevent this, but for now there is
 more utility in seamless ESM-CJS interop.
+-->
 
 
-<!--
 ### Importing CJS
 
 You can use `require()` statements to require CJS modules if necessary:
@@ -112,7 +112,7 @@ will be compiled to `await import()` statements:
 ```js
 import { namedImport } from "my-cjs-module"
 ```
--->
+
 
 However, this is currently delayed by [Next.js's late support for top-level
 await](https://github.com/vercel/next.js/issues/31054#issue-1046210941) which
