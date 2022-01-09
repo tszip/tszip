@@ -78,13 +78,8 @@ export async function runTsc({
         const compiler = require.resolve('typescript/bin/tsc', {
           paths: [process.cwd()],
         });
-        /**
-         * Execute on all src/** files. Do not use srcDir to prevent unexpected
-         * behavior, e.g. in a Next project with experimental: { externalDir:
-         * true }.
-         */
-        const execArgs = ['src/**', ...parsedArgs];
-        console.log(chalk.gray(`$ ${compiler} ${execArgs.join(' ')}`));
+
+        console.log(chalk.gray(`$ ${compiler} ${parsedArgs.join(' ')}`));
         await execa(compiler, parsedArgs);
       } catch (error: any) {
         if (!transpileOnly) {
