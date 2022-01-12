@@ -58,6 +58,7 @@ export async function runTsc({
     esModuleInterop: true,
     allowSyntheticDefaultImports: true,
     resolveJsonModule: true,
+    incremental: false,
   };
 
   const parsedArgs = parseArgs(args);
