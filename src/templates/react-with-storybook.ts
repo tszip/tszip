@@ -3,16 +3,16 @@ import { Template } from './template';
 import reactTemplate from './react';
 
 const storybookTemplate: Template = {
-  dependencies: [
-    ...reactTemplate.dependencies,
+  dependencies: [...reactTemplate.dependencies, 'react-is'],
+  devDependencies: [
+    ...reactTemplate.devDependencies,
+    'babel-loader',
     '@babel/core',
     '@storybook/addon-essentials',
     '@storybook/addon-links',
     '@storybook/addon-info',
     '@storybook/addons',
     '@storybook/react',
-    'react-is',
-    'babel-loader',
   ],
   name: 'react-with-storybook',
   packageJson: {

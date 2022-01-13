@@ -5,12 +5,11 @@ import basicTemplate from './basic';
 
 const reactTemplate: Template = {
   name: 'react',
-  dependencies: [
-    ...basicTemplate.dependencies,
+  dependencies: [...basicTemplate.dependencies, 'react', 'react-dom'],
+  devDependencies: [
+    ...basicTemplate.devDependencies,
     '@types/react',
     '@types/react-dom',
-    'react',
-    'react-dom',
   ],
   packageJson: {
     ...basicTemplate.packageJson,

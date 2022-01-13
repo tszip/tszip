@@ -2,12 +2,14 @@ import { Template } from './template';
 
 const basicTemplate: Template = {
   name: 'basic',
-  dependencies: [
-    '@tszip/tszip',
-    'typescript',
+  dependencies: [],
+  devDependencies: [
     'tslib',
+    'ts-jest',
     'husky',
     'yarn-deduplicate',
+    'typescript',
+    '@tszip/tszip',
   ],
   packageJson: {
     /**
