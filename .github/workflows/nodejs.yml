@@ -39,9 +39,9 @@ jobs:
       matrix:
         node: ['16.x']
         os: [
+          windows-latest,
           ubuntu-latest,
           macOS-latest,
-          windows-latest,
         ]
 
     steps:
